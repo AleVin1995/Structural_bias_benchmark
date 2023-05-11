@@ -1,0 +1,7 @@
+.Rprofile
+.vscode/
+bowtie/
+data/
+renv/
+renv.lock
+samtools/
