@@ -52,12 +52,12 @@ for (lib in libraries){
         select(Gene, ModelID, meanLogFoldChange) %>%
         rename(LogFoldChange = meanLogFoldChange) %>%
         group_by(Gene, ModelID) %>%
-        mutate(meanLogFoldChange = mean(LogFoldChange, na.rm = TRUE)) %>%
+        mutate(medianLogFoldChange = median(LogFoldChange, na.rm = TRUE)) %>%
         ungroup() %>%
-        select(Gene, ModelID, meanLogFoldChange) %>%
+        select(Gene, ModelID, medianLogFoldChange) %>%
         distinct() %>%
         as_tibble() %>%
-        pivot_wider(names_from = ModelID, values_from = meanLogFoldChange)
+        pivot_wider(names_from = ModelID, values_from = medianLogFoldChange)
     
     print(paste0("Finished to process. Saving ", lib, "..."))
 
