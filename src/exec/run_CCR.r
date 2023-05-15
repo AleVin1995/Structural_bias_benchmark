@@ -74,7 +74,7 @@ main <- function(raw_LFC_path, GuideMap_path, output_dir, lib){
                 full_join(correctedLFC, by = c("sgRNA", "genes"))
         }
 
-        cat(paste0("Finished processing: ", CellLine, ".\nProgress: ", i-2, "/", ncol(raw_LFC)-2))
+        print(paste0("Finished processing: ", CellLine, ". Progress: ", i-2, "/", ncol(raw_LFC)-2))
     }
 
     ## Gene-level LFC
