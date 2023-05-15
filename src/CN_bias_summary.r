@@ -1,5 +1,41 @@
 library(tidyverse)
 
+# Function to merge data
+merge_data <- function(model_info, CN, LFC, y1 = 1.2, y2 = 1.24, min_n_lineage = 10, max_rank = 100){
+    res <- inner_join(LFC, model_info, by = 'ModelID') %>%
+        inner_join(CN, c('Gene', 'CellLineName')) %>%
+        group_by(CellLineName) %>%
+        mutate(rank = rank(-CN_abs, ties.method = 'first')) %>%
+        filter(rank <= max_rank) %>% ## select the top amplified genes
+        mutate(average_CN_abs = mean(CN_abs)) %>%
+        mutate(average_LFC = mean(LFC)) %>%
+        ungroup() %>%
+        mutate(Class = case_when(
+            average_CN_abs < 2 ~ 'CN: 0-2',
+            average_CN_abs < 4 ~ 'CN: 2-4',
+            average_CN_abs < 6 ~ 'CN: 4-6',
+            average_CN_abs < 8 ~ 'CN: 6-8',
+            TRUE ~ 'CN: 8+'
+        ))
+
+    ## filter lineages with >= 10 cell lines
+    res <- res %>%
+        left_join(res %>%  ## count number of cell lines in each lineage
+            distinct(CellLineName, OncotreeLineage) %>% 
+            group_by(OncotreeLineage) %>% 
+            mutate(occurrence_lineage = n()) %>%
+            ungroup()) %>%
+        filter(occurrence_lineage >= min_n_lineage)
+
+    label_pos <- res %>%
+        select(OncotreeLineage, occurrence_lineage) %>%
+        distinct() %>%
+        mutate(y = y1, yend = y2) %>%
+        mutate(x = occurrence_lineage/2, xend = occurrence_lineage/2)
+    
+    return(res)
+}
+
 # Load data
 Model <- read_csv('data/Model.csv') %>%
     group_by(OncotreeLineage) %>%
@@ -32,35 +68,15 @@ avana_gene <- read_csv('data/raw/Avana_gene_raw_LFC.csv') %>%
   pivot_longer(-Gene, names_to = 'ModelID', values_to = 'LFC')
 
 # Merge data
-res <- inner_join(avana_gene, Model, by = 'ModelID') %>%
-    inner_join(CN_abs, c('Gene', 'CellLineName')) %>%
-    group_by(CellLineName) %>%
-    mutate(rank = rank(-CN_abs, ties.method = 'first')) %>%
-    filter(rank <= 100) %>% ## select the top (100) amplified genes
-    mutate(average_CN_abs = mean(CN_abs)) %>%
-    mutate(average_LFC = mean(LFC)) %>%
-    ungroup() %>%
-    mutate(Class = case_when(
-        average_CN_abs < 2 ~ 'CN: 0-2',
-        average_CN_abs < 4 ~ 'CN: 2-4',
-        average_CN_abs < 6 ~ 'CN: 4-6',
-        average_CN_abs < 8 ~ 'CN: 6-8',
-        TRUE ~ 'CN: 8+'
-    )) %>%
-    left_join(res %>%  ## count number of cell lines in each lineage
-        distinct(CellLineName, OncotreeLineage) %>% 
-        group_by(OncotreeLineage) %>% 
-        mutate(occurrence_lineage = n()) %>%
-        ungroup()) 
+res <- merge_data(Model, CN_abs, avana_gene, max_rank = 100)
 
 # Plot
-p <- res %>%
-    filter(occurrence_lineage >= 10) %>%
+p1 <- res %>%
     mutate(CellLineName = factor(CellLineName, levels = unique(CellLineName[order(average_LFC)]))) %>%
     ggplot(aes(x = CellLineName, y = LFC)) +
     geom_point(aes(x = CellLineName, y = average_LFC, color = Class), size = 0.5, alpha = 0.5) +
     geom_errorbar(aes(ymin = average_LFC - sd(LFC), ymax = average_LFC + sd(LFC), color = Class), width = 0.1) +
-    ylim(-3, 1) +
+    coord_cartesian(ylim = c(-3, 1), clip = 'off') +
     theme_bw() +
     theme(
         panel.grid.major = element_blank(),
@@ -80,11 +96,12 @@ p <- res %>%
         y = 'Gene-level LFC',
         color = 'Mean Copy Number',
     ) +
-      scale_color_manual(values = c('yellow', alpha('orange', 0.7), 
+    scale_color_manual(values = c('yellow', alpha('orange', 0.7), 
         alpha('red', 0.7), alpha('brown', 0.7), alpha('black', 0.7))) +
+    geom_segment(data = label_pos, aes(x = x, xend = xend, y = y, yend = yend)) +
     facet_grid(.~OncotreeLineage, scales = 'free_x', space = 'free_x') +
     theme(strip.background = element_blank(),
         strip.text.x = element_text(angle = 45, hjust = 0.5, size = 10, color = 'black'),
         strip.clip = 'off')
 
-ggsave('results/EDA/Summary_CN_bias.pdf', p, width = 16, height = 8, dpi = 300)
+ggsave('results/EDA/Summary_CN_bias.pdf', p1, width = 16, height = 8, dpi = 300)
