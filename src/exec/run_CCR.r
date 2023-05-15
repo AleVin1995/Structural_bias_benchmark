@@ -53,7 +53,7 @@ main <- function(raw_LFC_path, GuideMap_path, output_dir, lib){
             select(sgRNA, gene = GENES, everything())
 
     ## Genome-wide sorting and cleaning of LFC
-    for (i in range(3:ncol(raw_LFC))){
+    for (i in seq(3, ncol(raw_LFC))){
         CellLine <- colnames(raw_LFC)[i]
 
         gwSortedLFC <- GW_sorting_LFC(raw_LFC[, c(1:2, i)], GuideMap)
