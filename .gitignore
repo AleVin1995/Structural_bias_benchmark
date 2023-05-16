@@ -3,6 +3,5 @@
 bowtie/
 data/
 renv/
-renv.lock
 results/
 samtools/
