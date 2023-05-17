@@ -11,6 +11,7 @@ then
 	exit 1
 fi
 
+
 # run CCR
 run_CCR(){
 	conda activate CN_bench_r
@@ -22,7 +23,6 @@ run_CCR(){
 
 	conda deactivate
 }
-
 
 
 # run Chronos
@@ -39,5 +39,5 @@ run_Chronos(){
 
 
 # execute the functions
-run_CCR
+#run_CCR
 run_Chronos

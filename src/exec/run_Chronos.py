@@ -36,7 +36,7 @@ def main():
     corrected, _ = chronos.alternate_CN(gene_effects, cn)
 
     # Save results
-    corrected.to_csv(args.out)
+    corrected.T.to_csv(args.out)
 
 
 if __name__ == '__main__':

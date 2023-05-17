@@ -2,6 +2,7 @@
 .vscode/
 bowtie/
 data/
+exec_hpc/
 renv/
 results/
 samtools/
