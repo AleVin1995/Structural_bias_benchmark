@@ -1,22 +1,13 @@
 #!/usr/bin/env bash
 
-#SBATCH --job-name=$ALGO
 #SBATCH --partition=cpuq
 #SBATCH --mail-type=NONE
-
-if [[ "$ALGO" == "Chronos" ]]
-then
-	#SBATCH --mem-per-cpu=100GB
-else
-	#SBATCH --mem-per-cpu=10GB
-fi
-
 #SBATCH --time=24:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/group/iorio/Alessandro/CN_benchmark
-#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/$ALGO.out
-#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/$ALGO.err
+#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/%x.out
+#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/%x.err
 
 source ~/.bashrc
 
@@ -24,7 +15,7 @@ ROOT=$1
 ALGO=$2
 LIB=$3
 
-if [[ -z "$ROOT" | -z "$ALGO" | -z "$LIB" ]]
+if [[ -z "$ROOT" || -z "$ALGO" || -z "$LIB" ]]
 then
 	echo "One or more arguments are missing"
 	echo "Usage: bash src/exec/run_tools.sh <root_path> <algorithm> <library>"
