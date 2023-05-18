@@ -224,13 +224,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-sgrna_effects = pd.read_csv('/group/iorio/Alessandro/CN_benchmark/data/raw/Avana_sgrna_raw_LFC.csv', index_col=0)
-guide_map = pd.read_csv('/group/iorio/Alessandro/CN_benchmark/data/AvanaGuideMap.csv')
-
-cn = pd.read_csv('/group/iorio/Alessandro/CN_benchmark/data/OmicsCNSegmentsProfile.csv')
-profile = pd.read_csv('/group/iorio/Alessandro/CN_benchmark/data/OmicsProfiles.csv')
-
-
-cell_line = sgrna_effects.columns[1]
-cn_cell_line = cn[cn["sample"] == cell_line]
