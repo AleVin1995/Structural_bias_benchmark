@@ -4,14 +4,45 @@ library(ggsci)
 
 source("src/exec/LDO_and_GAM_func.r")
 
+format_omics <- function(df, values_to){
+  df <- df %>% 
+    pivot_longer(-colnames(.)[1], names_to = 'GENE_NAME', values_to = values_to) %>%
+    rename(SAMPLE_NAME = colnames(.)[1]) %>%
+    separate(col = "GENE_NAME", sep = " \\(", into = c("GENE_NAME", "code")) %>%
+    select(-code)
+}
+
+# Load data
+data <- readRDS("data/lfc_exp_cn.rds")
+# data <- read_csv('data/AvanaGuideMap.csv') %>%
+#   filter(UsedByChronos == TRUE) %>%
+#   separate(col = "Gene", sep = " \\(", into = c("GENE_NAME", "code")) %>%
+#   select(-c(code, nAlignments, DropReason, UsedByChronos)) %>%
+#   separate(col = "GenomeAlignment", sep = '_', into = c("CHROMOSOME", "POSITION", "STRAND")) %>%
+#   select(-STRAND) %>%
+#   mutate(POSITION = as.numeric(POSITION)) %>%
+#   inner_join(read_csv('data/raw/Avana_sgrna_raw_LFC.csv') %>%
+#     pivot_longer(-sgRNA, names_to = 'SAMPLE_NAME', values_to = 'DEPENDENCY_SCORE'), 
+#     by = c("sgRNA")) %>%
+#   left_join(read_csv('data/OmicsCNGene.csv') %>%
+#     format_omics(., values_to = 'CNA'),
+#     by = c("GENE_NAME", "SAMPLE_NAME")) %>%
+#   left_join(read_csv('data/OmicsExpressionProteinCodingGenesTPMLogp1.csv') %>%
+#     format_omics(., values_to = 'EXP'),
+#     by = c("GENE_NAME", "SAMPLE_NAME"))
+
+# Pan-cancer essential genes
+essential_genes <- read_csv("data/AchillesCommonEssentialControls.csv") %>% 
+  separate(col = "Gene", sep = " \\(", into = c("Gene", "code")) %>%
+  pull(Gene)
+
 ######################################
 ########### LDO CORRECTION ###########
 ######################################
 
 # rename columns
 data <- data %>%
-  mutate( ESSENTIAL = GENESYMBOL %in% essential_genes) %>% 
-  dplyr::rename(DEPENDENCY_SCORE = LogFC_org, GENE_NAME = GENESYMBOL, SAMPLE_NAME = CLEANNAME, CHROMOSOME = CHR)
+  mutate(ESSENTIAL = GENE_NAME %in% essential_genes)
 
 # run Local Drop Out correction
 data <- LDO( data,
@@ -38,36 +69,3 @@ data <- LDO( data,
 cat("  Smooth out CNA effect using generalized additive models \n")
 
 data2 <- GAM(data, formula = "DEPENDENCY_SCORE ~ CNA", subunit = "SAMPLE_NAME", verbose = FALSE)
-
-# Run the main function
-## For instance:
-## Rscript src/exec/run_CCR.r data/raw/Avana_sgrna_raw_LFC.csv data/AvanaGuideMap.csv data/corrected/ Avana
-if (!interactive()){
-    sys.args <- commandArgs(trailingOnly = TRUE)
-
-    if (length(sys.args) < 4){
-        stop(cat("Please provide these args in the following order: 
-            \n- raw_LFC_path: path to the raw LFC file
-            \n- GuideMap_path: path to the GuideMap file
-            \n- output_dir: path to the output directory
-            \n- lib: library name of the output files"))
-    }
-
-    raw_LFC_path <- sys.args[1]
-    GuideMap_path <- sys.args[2]
-    output_dir <- sys.args[3]
-    lib <- sys.args[4]
-
-    # Load data
-    data <- read_csv('data/raw/Avana_sgrna_raw_LFC.csv') %>%
-      column_to_rownames('sgRNA')
-    guide_map <- read_csv('data/AvanaGuideMap.csv')
-
-
-    # Pan-cancer essential genes
-    essential_genes <- read_csv("data/AchillesCommonEssentialControls.csv") %>% 
-      separate(col = "Gene", sep = " \\(", into = c("Gene", "code")) %>%
-      pull(Gene)
-
-    main(raw_LFC_path, GuideMap_path, output_dir, lib)
-}
