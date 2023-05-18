@@ -53,7 +53,7 @@ def intersect_guide_cn(guide, cn_cell_line):
                 guide.loc[start_idx:end_idx, 'Start'] = cn_seg_start
                 guide.loc[start_idx:end_idx, 'End'] = cn_seg_end
                 guide.loc[start_idx:end_idx, 'ratio'] = cn_seg_ratio
-        print(f'Finished {i+1} of {cn_cell_line.shape[0]} segments')
+        
     guide = guide.dropna(subset=['Start', 'End', 'ratio']).reset_index(drop=True)
     return guide
 

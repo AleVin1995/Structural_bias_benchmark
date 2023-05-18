@@ -18,7 +18,11 @@ run_CCR(){
 
 	for l in ${libs[@]}
 	do
-		Rscript $ROOT/src/exec/run_CCR.r $ROOT/data/raw/"$l"_sgrna_raw_LFC.csv $ROOT/data/"$l"GuideMap.csv data/corrected/ "$l"
+		Rscript $ROOT/src/exec/run_CCR.r \
+			$ROOT/data/raw/"$l"_sgrna_raw_LFC.csv \
+			$ROOT/data/"$l"GuideMap.csv \
+			data/corrected/ \
+			"$l"
 	done
 
 	conda deactivate
@@ -31,7 +35,10 @@ run_Chronos(){
 
 	for l in ${libs[@]}
 	do
-		python3 $ROOT/src/exec/run_Chronos.py --lfc $ROOT/data/raw/"$l"_gene_raw_LFC.csv --cn $ROOT/data/OmicsCNGene.csv -o $ROOT/data/corrected/"$l"_gene_Chronos.csv
+		python3 $ROOT/src/exec/run_Chronos.py \
+			--lfc $ROOT/data/raw/"$l"_gene_raw_LFC.csv \
+			--cn $ROOT/data/OmicsCNGene.csv \
+			-o $ROOT/data/corrected/"$l"_gene_Chronos.csv
 	done
 
 	conda deactivate
@@ -44,7 +51,12 @@ run_Crispy(){
 
 	for l in ${libs[@]}
 	do
-		python3 $ROOT/src/exec/run_Crispy.py --lfc $ROOT/data/raw/"$l"_sgrna_raw_LFC.csv --cn $ROOT/data/OmicsCNSegmentsProfile.csv --map $ROOT/data/OmicsProfiles.csv --lib $ROOT/data/"$l"GuideMap.csv -o $ROOT/data/corrected/"$l"_gene_Crispy.csv
+		python3 $ROOT/src/exec/run_Crispy.py \
+			--lfc $ROOT/data/raw/"$l"_sgrna_raw_LFC.csv \
+			--cn $ROOT/data/OmicsCNSegmentsProfile.csv \
+			--map $ROOT/data/OmicsProfiles.csv \
+			--lib $ROOT/data/"$l"GuideMap.csv \
+			-o $ROOT/data/corrected/"$l"_gene_Crispy.csv
 	done
 
 	conda deactivate
