@@ -53,7 +53,7 @@ def intersect_guide_cn(guide, cn_cell_line):
                 guide.loc[start_idx:end_idx, 'Start'] = cn_seg_start
                 guide.loc[start_idx:end_idx, 'End'] = cn_seg_end
                 guide.loc[start_idx:end_idx, 'ratio'] = cn_seg_ratio
-        
+        print(f'Finished {i+1} of {cn_cell_line.shape[0]} segments')
     guide = guide.dropna(subset=['Start', 'End', 'ratio']).reset_index(drop=True)
     return guide
 
@@ -208,15 +208,16 @@ def main():
             corrected_fc = correct_lfc(fc_cn)
             corrected_fc = corrected_fc[['sgRNA', 'Gene', 'corrected']]
             corrected_fc = corrected_fc.rename(columns={'corrected': cell_line})
+            corrected_fc = corrected_fc.drop_duplicates()
+
+            ## convert to gene-level LFC
+            corrected_fc = corrected_fc.drop(columns=['sgRNA'])
+            corrected_fc = corrected_fc.groupby('Gene').agg('median')
 
             if i == 0:
                 corrected_fcs = corrected_fc
             else:
-                corrected_fcs = pd.merge(corrected_fcs, corrected_fc, how='outer', on=['sgRNA', 'Gene'])
-
-    # get the gene-level LFC
-    corrected_fcs = corrected_fcs.drop(columns=['sgRNA'])
-    corrected_fcs = corrected_fcs.groupby('Gene').agg('median')
+                corrected_fcs = pd.merge(corrected_fcs, corrected_fc, how='outer', on=['Gene'])
 
     # Save results
     corrected_fcs.to_csv(args.out)
