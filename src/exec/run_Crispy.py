@@ -196,22 +196,23 @@ def main():
         cn_cell_line = cn[cn["sample"] == cell_line]
         cn_cell_line = cn_cell_line.reset_index(drop=True)
 
-        ## Intersect guide map and copy number data
-        guide_cn = intersect_guide_cn(guide_map, cn_cell_line)
+        if cn_cell_line.shape[0] > 0:
+            ## Intersect guide map and copy number data
+            guide_cn = intersect_guide_cn(guide_map, cn_cell_line)
 
-        ## Intersect fold change and copy number data
-        fc_cn = pd.merge(fc, guide_cn, how='left', on='sgRNA')
-        fc_cn = fc_cn.rename(columns={fc_cn.columns.to_list()[1]: 'LFC'})
+            ## Intersect fold change and copy number data
+            fc_cn = pd.merge(fc, guide_cn, how='left', on='sgRNA')
+            fc_cn = fc_cn.rename(columns={fc_cn.columns.to_list()[1]: 'LFC'})
 
-        ## Run Crispy
-        corrected_fc = correct_lfc(fc_cn)
-        corrected_fc = corrected_fc[['sgRNA', 'Gene', 'corrected']]
-        corrected_fc = corrected_fc.rename(columns={'corrected': cell_line})
+            ## Run Crispy
+            corrected_fc = correct_lfc(fc_cn)
+            corrected_fc = corrected_fc[['sgRNA', 'Gene', 'corrected']]
+            corrected_fc = corrected_fc.rename(columns={'corrected': cell_line})
 
-        if i == 0:
-            corrected_fcs = corrected_fc
-        else:
-            corrected_fcs = pd.merge(corrected_fcs, corrected_fc, how='outer', on=['sgRNA', 'Gene'])
+            if i == 0:
+                corrected_fcs = corrected_fc
+            else:
+                corrected_fcs = pd.merge(corrected_fcs, corrected_fc, how='outer', on=['sgRNA', 'Gene'])
 
     # get the gene-level LFC
     corrected_fcs = corrected_fcs.drop(columns=['sgRNA'])
