@@ -85,7 +85,6 @@ main <- function(raw_LFC_path, GuideMap_path, output_dir, lib){
         ungroup()
 
     ## Save the corrected LFCs
-    write_csv(correctedLFCs, paste0(output_dir, '/', lib, '_sgrna_CCR.csv'))
     write_csv(gene_correctedLFCs, paste0(output_dir, '/', lib, '_gene_CCR.csv'))
 }
 
