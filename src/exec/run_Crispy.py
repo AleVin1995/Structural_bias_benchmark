@@ -189,6 +189,8 @@ def main():
     cn["Chr"] = "chr" + cn["Chr"]
 
     # Apply correction cell-wise
+    corrected_fcs = list()
+
     for i, cell_line in enumerate(sgrna_effects.columns):
         print(f'Processing cell line: {cell_line} {i+1}/{sgrna_effects.shape[1]}')
 
@@ -214,10 +216,10 @@ def main():
             corrected_fc = corrected_fc.drop(columns=['sgRNA'])
             corrected_fc = corrected_fc.groupby('Gene').agg('median')
 
-            if i == 0:
-                corrected_fcs = corrected_fc
-            else:
-                corrected_fcs = pd.merge(corrected_fcs, corrected_fc, how='outer', on=['Gene'])
+            corrected_fcs.append(corrected_fc)
+
+    # Concatenate corrected fold changes
+    corrected_fcs = pd.concat(corrected_fcs, axis=1)
 
     # Save results
     corrected_fcs.to_csv(args.out)

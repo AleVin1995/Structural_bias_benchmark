@@ -1,30 +1,3 @@
-#------------------------
-### LogFC Calculation ###
-
-#' Calculate LogFC from sample and reference count
-#'
-#'@param SAMPLE_COUNT A vector of counts at the end of the experiment (e.g. day 14)
-#'@param REFERENCE_COUNT A vector of counts of the reference representation (e.g. library or day 0)
-#'@param prior_per_mil An integer representing the number of prior count per million reads added to the SAMPLE and REFERENCE_COUNT vectors before calculating the log2 fold change
-#'
-#'@examples 
-#'LogFC_org = logfc_org_func(SAMPLE_COUNT, REFERENCE_COUNT, prior_per_mil = 1)
-logfc_org_func <- function(SAMPLE_COUNT, REFERENCE_COUNT_CONSENSUS, prior_per_mil = 1){
-  
-  idx.not.zero <- (SAMPLE_COUNT != 0) & (REFERENCE_COUNT_CONSENSUS != 0)
-  tmp_0 <- log2(SAMPLE_COUNT[idx.not.zero]) - log2(REFERENCE_COUNT_CONSENSUS[idx.not.zero])
-  d <- density(tmp_0)
-  i <- which.max(d$y)
-  REFERENCE_COUNT_MAX_NORM <- REFERENCE_COUNT_CONSENSUS * 2^d$x[i]
-  n_ref_max <- sum(REFERENCE_COUNT_MAX_NORM)
-  LogFC_org <-  log2(SAMPLE_COUNT + prior_per_mil * n_ref_max/1e6) - log2(REFERENCE_COUNT_MAX_NORM + prior_per_mil * n_ref_max/1e6)
-  
-  return(LogFC_org)
-}
-#------------------------
-
-
-#------------------------
 # Calculate weighted mean sensitivity for Local Drop Out correction (LDO) [single sample and single chromosome assumed]
 LDO_weighted_mean_subunit <- function(data,
                               params = list(
@@ -71,13 +44,11 @@ LDO_weighted_mean_subunit <- function(data,
   
   weighted.mean.dependencyScore[is.nan(weighted.mean.dependencyScore)] <- 0
   
-  return( data.frame(data, LDO_weighted_mean = weighted.mean.dependencyScore))
+  return(data.frame(data, LDO_weighted_mean = weighted.mean.dependencyScore))
   
 }
-#------------------------
 
 
-#------------------------
 # Calculate weighted mean sensitivity for Local Drop Out correction (LDO)
 LDO_weighted_mean <- function(data,
                               params = list(
@@ -102,29 +73,20 @@ LDO_weighted_mean <- function(data,
     if( missing_colnames == "SAMPLE_NAME") warning("All data points will be assumed to be coming from a single sample.")
   }
   
-  group_by_var <- c("SAMPLE_NAME", "CHROMOSOME") 
-  data <- data %>% group_by_(.dots = group_by_var)
+  data_split <- data %>% split(., data[, c("SAMPLE_NAME", "CHROMOSOME")])
   
-  data %>% do({
-    
-    xx <- .
-    
-    # print sample and unit information
-    if(verbose){
-      xx[,group_by_var] %>% distinct %>% paste0(collapse = " : ") %>% paste0(" \n") %>% cat
-    }
-    
-    out <- LDO_weighted_mean_subunit(xx, params)
-    
-    return(out)
-    
-  }) %>% as.data.frame %>% return
+  res <- list()
+  idx <- 1:length(data_split)
+  
+  for (i in idx){
+    res[[i]] <- LDO_weighted_mean_subunit(data_split[[i]], params)
+  }
+  
+  return(res)
 
 }
-#------------------------
 
 
-#------------------------
 # Calculate LDO regression tree (subunit, i.e. sample, chromsome)
 LDO_regression_subunit <- function( data,
                             params = list(minbucket = 2, 
@@ -186,10 +148,8 @@ LDO_regression_subunit <- function( data,
   
   return(data)
 }
-#------------------------
 
 
-#------------------------
 # Calculate LDO regression tree
 LDO_regression <- function( data,
                             params = list(minbucket = 2, 
@@ -214,30 +174,16 @@ LDO_regression <- function( data,
     if( missing_colnames == "SAMPLE_NAME") warning("All data points will be assumed to be coming from a single sample.")
   }
   
-  group_by_var <- c("SAMPLE_NAME", "CHROMOSOME") 
-  data <- data %>% group_by_(.dots = group_by_var)
+  group_byvar <- c("SAMPLE_NAME", "CHROMOSOME") 
+  data <- data %>% group_by_at(group_byvar)
   
-  data %>% do({
+  data <- LDO_regression_subunit(data, params) %>%
+    as.data.frame()
     
-    xx <- .
-    
-    # print sample and unit information
-    if(verbose){
-      xx[,group_by_var] %>% distinct %>% paste0(collapse = " : ") %>% paste0(" \n") %>% cat
-    }
-    
-    out <- LDO_regression_subunit(xx, params)
-    
-    return(out)
-    
-  }) %>% as.data.frame %>% return
-  
-
+  return(data)
 }
-#------------------------
 
 
-#------------------------
 #' Calculate LDO copy number correction
 #'
 #'@param data A data frame in which to interpret the variables. Column names must include: DEPENDENCY_SCORE, POSITION, GENE_NAME, SAMPLE_NAME (optional), CHROMOSOME (optional).
@@ -276,6 +222,7 @@ LDO <- function( data,
                             params = params_weigthed_mean,
                             verbose)
   
+  data <- bind_rows(data)
   data <- data %>%
     mutate( DEPENDENCY_SCORE_tmp = DEPENDENCY_SCORE - LDO_weighted_mean ) %>%
     rename(ESSENTIAL1 = ESSENTIAL) %>%
@@ -316,7 +263,7 @@ LDO <- function( data,
 #'
 #'@examples
 #'data2 <- LDO(data, "SCORE", "POSITION", "GENESYMBOL", "ESSENTIAL", params = list( cp = 10^-3, minbucket = 10, minsubunits = 3))
-GAM <- function( data, formula = "DEPENDENCY_SCORE ~ CNA + EXP", subunit = "SAMPLE_NAME", verbose = FALSE){
+GAM <- function(data, formula = "DEPENDENCY_SCORE ~ CNA + EXP", subunit = "SAMPLE_NAME", verbose = FALSE){
   ##########
   require(tidyverse)
   require(mgcv)
@@ -333,35 +280,24 @@ GAM <- function( data, formula = "DEPENDENCY_SCORE ~ CNA + EXP", subunit = "SAMP
     warning( paste0("The following columns are missing from the input data frame: ", paste0(missing_colnames2, collapse = ", "), ". \n",
                     "All data points will be assumed to be coming from the same model.") )
   } else {
-    data <- data %>% group_by_(.dots = subunit)
+    data <- data %>% group_by(.dots = subunit)
   }
   
   gam.formula <- paste0( formula.terms[1], " ~ ", paste0( "s(", formula.terms.right, ")", collapse = " + ")) %>% as.formula
   
-  out <- data %>% do({
-    
-    dat <- .
-    
-    # print sample and unit information
-    if(verbose){
-      dat[,subunit] %>% distinct %>% paste0(collapse = " : ") %>% paste0(" \n") %>% cat
-    }
-    
-    for( k in formula.terms.right ){
-      dat[ is.na(dat[,k]), k] <- median( t( dat[,k]), na.rm = T)
-    }
-    
-    depout <- dat %>% as.data.frame %>% gam( gam.formula, data = .)
-    
-    tmp <- depout %>% coef %>% names
-    right.remove.idx <- formula.terms.right[-1] %>% lapply( function(x){ tmp %>% grep(x,.)}) %>% unlist %>% union(1)
-    
-    GAM_fix <- predict(depout, type = "lpmatrix")[, -right.remove.idx] %*% coef(depout)[-right.remove.idx] %>% as.vector
-    data.frame(., GAM_fix)
-    
-  }) %>% mutate_( .dots = setNames(list( paste0(formula.terms[1], " - GAM_fix")), paste0(formula.terms[1], "_GAM"))) %>% 
-    as.data.frame
+  for( k in formula.terms.right ){
+    data[ is.na(data[,k]), k] <- median( t( data[,k]), na.rm = T)
+  }
   
-  return(out)
+  depout <- data %>% as.data.frame %>% gam( gam.formula, data = .)
   
+  tmp <- depout %>% coef %>% names
+  right.remove.idx <- formula.terms.right[-1] %>% lapply( function(x){ tmp %>% grep(x,.)}) %>% unlist %>% union(1)
+  
+  GAM_fix <- predict(depout, type = "lpmatrix")[, -right.remove.idx] %*% coef(depout)[-right.remove.idx] %>% as.vector
+  data <- data.frame(data, GAM_fix)
+    
+  data <- data %>% mutate(DEPENDENCY_SCORE_GAM = DEPENDENCY_SCORE - GAM_fix) %>% as.data.frame
+  
+  return(data)
 }

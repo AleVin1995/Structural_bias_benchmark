@@ -1,13 +1,33 @@
 #!/usr/bin/env bash
 
+#SBATCH --job-name=$ALGO
+#SBATCH --partition=cpuq
+#SBATCH --mail-type=NONE
+
+if [[ "$ALGO" == "Chronos" ]]
+then
+	#SBATCH --mem-per-cpu=100GB
+else
+	#SBATCH --mem-per-cpu=10GB
+fi
+
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
+#SBATCH --chdir=/group/iorio/Alessandro/CN_benchmark
+#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/$ALGO.out
+#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/$ALGO.err
+
 source ~/.bashrc
 
 ROOT=$1
-libs=("Avana" "KY")
+ALGO=$2
+LIB=$3
 
-if [[ -z "$ROOT" ]]
+if [[ -z "$ROOT" | -z "$ALGO" | -z "$LIB" ]]
 then
-	echo "Empty root path"
+	echo "One or more arguments are missing"
+	echo "Usage: bash src/exec/run_tools.sh <root_path> <algorithm> <library>"
 	exit 1
 fi
 
@@ -16,14 +36,11 @@ fi
 run_CCR(){
 	conda activate CN_bench_r
 
-	for l in ${libs[@]}
-	do
-		Rscript $ROOT/src/exec/run_CCR.r \
-			$ROOT/data/raw/"$l"_sgrna_raw_LFC.csv \
-			$ROOT/data/"$l"GuideMap.csv \
-			data/corrected/ \
-			"$l"
-	done
+	Rscript $ROOT/src/exec/run_CCR.r \
+		$ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
+		$ROOT/data/"$LIB"GuideMap.csv \
+		data/corrected/ \
+		"$LIB"
 
 	conda deactivate
 }
@@ -33,13 +50,10 @@ run_CCR(){
 run_Chronos(){
 	conda activate CN_bench
 
-	for l in ${libs[@]}
-	do
-		python3 $ROOT/src/exec/run_Chronos.py \
-			--lfc $ROOT/data/raw/"$l"_gene_raw_LFC.csv \
-			--cn $ROOT/data/OmicsCNGene.csv \
-			-o $ROOT/data/corrected/"$l"_gene_Chronos.csv
-	done
+	python3 $ROOT/src/exec/run_Chronos.py \
+		--lfc $ROOT/data/raw/"$LIB"_gene_raw_LFC.csv \
+		--cn $ROOT/data/OmicsCNGene.csv \
+		-o $ROOT/data/corrected/"$LIB"_gene_Chronos.csv
 
 	conda deactivate
 }
@@ -49,21 +63,29 @@ run_Chronos(){
 run_Crispy(){
 	conda activate CN_bench
 
-	for l in ${libs[@]}
-	do
-		python3 $ROOT/src/exec/run_Crispy.py \
-			--lfc $ROOT/data/raw/"$l"_sgrna_raw_LFC.csv \
-			--cn $ROOT/data/OmicsCNSegmentsProfile.csv \
-			--map $ROOT/data/OmicsProfiles.csv \
-			--lib $ROOT/data/"$l"GuideMap.csv \
-			-o $ROOT/data/corrected/"$l"_gene_Crispy.csv
-	done
+	python3 $ROOT/src/exec/run_Crispy.py \
+		--lfc $ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
+		--cn $ROOT/data/OmicsCNSegmentsProfile.csv \
+		--map $ROOT/data/OmicsProfiles.csv \
+		--lib $ROOT/data/"$LIB"GuideMap.csv \
+		-o $ROOT/data/corrected/"$LIB"_gene_Crispy.csv
 
 	conda deactivate
 }
 
 
 # execute the functions
-#run_CCR
-#run_Chronos
-run_Crispy
+if [[ "$ALGO" == "CCR" ]]
+then
+	run_CCR
+elif [[ "$ALGO" == "Chronos" ]]
+then
+	run_Chronos
+elif [[ "$ALGO" == "Crispy" ]]
+then
+	run_Crispy
+else
+	echo "Algorithm not found"
+	echo "Usage: bash src/exec/run_tools.sh <root_path> <algorithm> <library>"
+	exit 1
+fi
