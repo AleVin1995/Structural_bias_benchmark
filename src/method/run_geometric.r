@@ -69,7 +69,7 @@ run_geometric <- function(data){
         if (i == 1){
             df <- data_sub
         } else {
-            df <- left_join(df, data_sub, by = "GENE_NAME")
+            df <- left_join(df, data_sub, by = "Gene")
         }
     }
 
