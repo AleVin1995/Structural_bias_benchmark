@@ -269,27 +269,27 @@ GAM <- function(data, formula = "DEPENDENCY_SCORE ~ CNA + EXP", subunit = "SAMPL
   require(mgcv)
   
   formula <- formula %>% as.formula
-  formula.terms <- attr( terms(formula), "factors") %>% rownames
-  formula.terms.right <- attr( terms(formula), "factors") %>% colnames
-  missing_colnames1 <- setdiff( formula.terms, colnames(data))
+  formula.terms <- attr(terms(formula), "factors") %>% rownames
+  formula.terms.right <- attr(terms(formula), "factors") %>% colnames
+  missing_colnames1 <- setdiff(formula.terms, colnames(data))
   if( length(missing_colnames1) > 0) stop( paste0("The following columns are missing from the input data frame: ", paste0(missing_colnames1, collapse = ", "), ". \n",
                                                   "or the format of the formula is faulty.") )
   
-  missing_colnames2 <- setdiff( subunit, colnames(data))
+  missing_colnames2 <- setdiff(subunit, colnames(data))
   if( length(missing_colnames2) > 0){
     warning( paste0("The following columns are missing from the input data frame: ", paste0(missing_colnames2, collapse = ", "), ". \n",
                     "All data points will be assumed to be coming from the same model.") )
   } else {
-    data <- data %>% group_by(.dots = subunit)
+    data <- data %>% group_by(!!subunit)
   }
   
-  gam.formula <- paste0( formula.terms[1], " ~ ", paste0( "s(", formula.terms.right, ")", collapse = " + ")) %>% as.formula
+  gam.formula <- paste0(formula.terms[1], " ~ ", paste0( "s(", formula.terms.right, ")", collapse = " + ")) %>% as.formula
   
   for( k in formula.terms.right ){
     data[ is.na(data[,k]), k] <- median( t( data[,k]), na.rm = T)
   }
   
-  depout <- data %>% as.data.frame %>% gam( gam.formula, data = .)
+  depout <- data %>% as.data.frame %>% gam(gam.formula, data = .)
   
   tmp <- depout %>% coef %>% names
   right.remove.idx <- formula.terms.right[-1] %>% lapply( function(x){ tmp %>% grep(x,.)}) %>% unlist %>% union(1)
