@@ -69,7 +69,7 @@ main <- function(combined_data_path, method, output_dir, lib){
 
 # Run the main function
 ## For instance:
-## Rscript src/exec/run_LDO_and_GAM.r data/Avana_lfc_exp_cn.rds data/corrected/ Avana
+## Rscript src/exec/run_LDO_and_GAM.r data/Avana_lfc_exp_cn.rds LDO data/corrected/ Avana
 if (!interactive()){
     sys.args <- commandArgs(trailingOnly = TRUE)
 

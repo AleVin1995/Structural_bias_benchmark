@@ -65,6 +65,34 @@ run_Crispy(){
 }
 
 
+# run LDO
+run_LDO(){
+	conda activate CN_bench_r
+
+	Rscript $ROOT/src/exec/run_LDO_and_GAM.r \
+		$ROOT/data/raw/"$LIB"_lfc_exp_cn.rds \
+		"LDO" \
+		data/corrected/ \
+		"$LIB"
+
+	conda deactivate
+}
+
+
+# run GAM
+run_GAM(){
+	conda activate CN_bench_r
+
+	Rscript $ROOT/src/exec/run_LDO_and_GAM.r \
+		$ROOT/data/"$LIB"_lfc_exp_cn.rds \
+		"GAM" \
+		data/corrected/ \
+		"$LIB"
+
+	conda deactivate
+}
+
+
 # execute the functions
 if [[ "$ALGO" == "CCR" ]]
 then
@@ -75,6 +103,12 @@ then
 elif [[ "$ALGO" == "Crispy" ]]
 then
 	run_Crispy
+elif [[ "$ALGO" == "LDO" ]]
+then
+	run_LDO
+elif [[ "$ALGO" == "GAM" ]]
+then
+	run_GAM
 else
 	echo "Algorithm not found"
 	echo "Usage: bash src/exec/run_tools.sh <root_path> <algorithm> <library>"
