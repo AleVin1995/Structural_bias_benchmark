@@ -93,6 +93,19 @@ run_GAM(){
 }
 
 
+# run geometric
+run_geometric(){
+	conda activate CN_bench_r
+
+	Rscript $ROOT/src/method/run_geometric.r \
+		$ROOT/data/"$LIB"_lfc_exp_cn.rds \
+		data/corrected/ \
+		"$LIB"
+
+	conda deactivate
+}
+
+
 # execute the functions
 if [[ "$ALGO" == "CCR" ]]
 then
@@ -109,6 +122,9 @@ then
 elif [[ "$ALGO" == "GAM" ]]
 then
 	run_GAM
+elif [[ "$ALGO" == "geometric" ]]
+then
+	run_geometric
 else
 	echo "Algorithm not found"
 	echo "Usage: bash src/method/run_tools.sh <root_path> <algorithm> <library>"

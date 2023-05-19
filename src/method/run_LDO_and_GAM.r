@@ -5,6 +5,7 @@ library(ggsci)
 source("src/method/LDO_and_GAM_func.r")
 
 
+# Run LDO or GAM correction
 run_method <- function(data, method){
   cell_lines <- unique(data$SAMPLE_NAME)
 
