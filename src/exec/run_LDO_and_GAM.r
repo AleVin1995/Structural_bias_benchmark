@@ -16,6 +16,11 @@ run_method <- function(data, method){
     data_sub <- data %>% 
       filter(SAMPLE_NAME == cell_line) %>%
       na.omit()
+    
+    if (nrow(data_sub) == 0){
+      print(paste0("No data for ", cell_line, ", skipping..."))
+      next
+    }
 
     if (method == "LDO"){
       ## LDO correction
