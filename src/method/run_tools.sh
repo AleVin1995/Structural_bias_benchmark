@@ -99,6 +99,7 @@ run_geometric(){
 
 	Rscript $ROOT/src/method/run_geometric.r \
 		$ROOT/data/"$LIB"_lfc_exp_cn.rds \
+		$ROOT/data/cytoband_mapping.csv \
 		data/corrected/ \
 		"$LIB"
 

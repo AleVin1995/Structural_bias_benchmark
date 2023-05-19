@@ -1,16 +1,15 @@
 library(tidyverse)
-library(Organism.dplyr)
+
 
 # add arm information
-arm_info <- function(df){
+arm_info <- function(df, cytoband_path){
     genes <- unique(df$GENE_NAME)
 
     ## initialize human database
-    src <- src_ucsc("Human", verbose = FALSE)
+    src_db <- src_ucsc("Human", verbose = FALSE)
 
     ## get cytoband information
-    cyto_band <- tbl(src, "id") %>% 
-        dplyr::select(map, symbol) %>% 
+    cyto_band <- read_csv(cytoband_path) %>% 
         filter(symbol %in% genes) %>% 
         distinct() %>% 
         as_tibble() %>% 
@@ -82,9 +81,9 @@ run_geometric <- function(data){
 
 
 # main function
-main <- function(combined_data_path, output_dir, lib){
+main <- function(combined_data_path, cytoband_path, output_dir, lib){
     data <- readRDS(combined_data_path)
-    data <- arm_info(data)
+    data <- arm_info(data, cytoband_path)
 
     ## run geometric correction
     df <- run_geometric(data)
@@ -98,16 +97,18 @@ main <- function(combined_data_path, output_dir, lib){
 if (!interactive()){
     sys.args <- commandArgs(trailingOnly = TRUE)
 
-    if (length(sys.args) < 3){
+    if (length(sys.args) < 4){
         stop(cat("Please provide these args in the following order: 
             \n- combined_data_path: LFC + GuideMap + CN + Exp data
+            \n- cytoband_path: path to the cytoband mapping file
             \n- output_dir: path to the output directory
             \n- lib: library name of the output files"))
     }
 
     combined_data_path <- sys.args[1]
-    output_dir <- sys.args[2]
-    lib <- sys.args[3]
+    cytoband_path <- sys.args[2]
+    output_dir <- sys.args[3]
+    lib <- sys.args[4]
 
-    main(combined_data_path, output_dir, lib)
+    main(combined_data_path, cytoband_path, output_dir, lib)
 }
