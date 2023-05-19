@@ -80,3 +80,7 @@ else
 	echo "Usage: bash src/exec/run_tools.sh <root_path> <algorithm> <library>"
 	exit 1
 fi
+
+# clean up
+# rm *.out
+# rm *.err
