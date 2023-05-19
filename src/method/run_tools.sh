@@ -18,7 +18,7 @@ LIB=$3
 if [[ -z "$ROOT" || -z "$ALGO" || -z "$LIB" ]]
 then
 	echo "One or more arguments are missing"
-	echo "Usage: bash src/exec/run_tools.sh <root_path> <algorithm> <library>"
+	echo "Usage: bash src/method/run_tools.sh <root_path> <algorithm> <library>"
 	exit 1
 fi
 
@@ -27,7 +27,7 @@ fi
 run_CCR(){
 	conda activate CN_bench_r
 
-	Rscript $ROOT/src/exec/run_CCR.r \
+	Rscript $ROOT/src/method/run_CCR.r \
 		$ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
 		$ROOT/data/"$LIB"GuideMap.csv \
 		data/corrected/ \
@@ -41,7 +41,7 @@ run_CCR(){
 run_Chronos(){
 	conda activate CN_bench
 
-	python3 $ROOT/src/exec/run_Chronos.py \
+	python3 $ROOT/src/method/run_Chronos.py \
 		--lfc $ROOT/data/raw/"$LIB"_gene_raw_LFC.csv \
 		--cn $ROOT/data/OmicsCNGene.csv \
 		-o $ROOT/data/corrected/"$LIB"_gene_Chronos.csv
@@ -54,7 +54,7 @@ run_Chronos(){
 run_Crispy(){
 	conda activate CN_bench
 
-	python3 $ROOT/src/exec/run_Crispy.py \
+	python3 $ROOT/src/method/run_Crispy.py \
 		--lfc $ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
 		--cn $ROOT/data/OmicsCNSegmentsProfile.csv \
 		--map $ROOT/data/OmicsProfiles.csv \
@@ -69,7 +69,7 @@ run_Crispy(){
 run_LDO(){
 	conda activate CN_bench_r
 
-	Rscript $ROOT/src/exec/run_LDO_and_GAM.r \
+	Rscript $ROOT/src/method/run_LDO_and_GAM.r \
 		$ROOT/data/"$LIB"_lfc_exp_cn.rds \
 		"LDO" \
 		data/corrected/ \
@@ -83,7 +83,7 @@ run_LDO(){
 run_GAM(){
 	conda activate CN_bench_r
 
-	Rscript $ROOT/src/exec/run_LDO_and_GAM.r \
+	Rscript $ROOT/src/method/run_LDO_and_GAM.r \
 		$ROOT/data/"$LIB"_lfc_exp_cn.rds \
 		"GAM" \
 		data/corrected/ \
@@ -111,7 +111,7 @@ then
 	run_GAM
 else
 	echo "Algorithm not found"
-	echo "Usage: bash src/exec/run_tools.sh <root_path> <algorithm> <library>"
+	echo "Usage: bash src/method/run_tools.sh <root_path> <algorithm> <library>"
 	exit 1
 fi
 
