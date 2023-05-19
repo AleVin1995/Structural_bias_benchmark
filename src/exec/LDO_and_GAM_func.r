@@ -272,7 +272,7 @@ GAM <- function(data, formula = "DEPENDENCY_SCORE ~ CNA + EXP", subunit = "SAMPL
   formula.terms <- attr(terms(formula), "factors") %>% rownames
   formula.terms.right <- attr(terms(formula), "factors") %>% colnames
   missing_colnames1 <- setdiff(formula.terms, colnames(data))
-  if( length(missing_colnames1) > 0) stop( paste0("The following columns are missing from the input data frame: ", paste0(missing_colnames1, collapse = ", "), ". \n",
+  if( length(missing_colnames1) > 0) stop(paste0("The following columns are missing from the input data frame: ", paste0(missing_colnames1, collapse = ", "), ". \n",
                                                   "or the format of the formula is faulty.") )
   
   missing_colnames2 <- setdiff(subunit, colnames(data))
@@ -292,7 +292,7 @@ GAM <- function(data, formula = "DEPENDENCY_SCORE ~ CNA + EXP", subunit = "SAMPL
   depout <- data %>% as.data.frame %>% gam(gam.formula, data = .)
   
   tmp <- depout %>% coef %>% names
-  right.remove.idx <- formula.terms.right[-1] %>% lapply( function(x){ tmp %>% grep(x,.)}) %>% unlist %>% union(1)
+  right.remove.idx <- formula.terms.right[-1] %>% lapply(function(x){ tmp %>% grep(x,.)}) %>% unlist %>% union(1)
   
   GAM_fix <- predict(depout, type = "lpmatrix")[, -right.remove.idx] %*% coef(depout)[-right.remove.idx] %>% as.vector
   data <- data.frame(data, GAM_fix)

@@ -31,19 +31,25 @@ run_method <- function(data, method){
                           cp_init = -3, 
                           cp_iteration = 0.1),
                       verbose = FALSE)
+
+      data_sub <- data_sub %>% 
+        select(GENE_NAME, DEPENDENCY_SCORE_LDO) %>%
+        group_by(GENE_NAME) %>%
+        summarise(DEPENDENCY_SCORE_LDO = median(DEPENDENCY_SCORE_LDO, na.rm = TRUE)) %>%
+        ungroup() %>%
+        rename(Gene = GENE_NAME, !!cell_line := DEPENDENCY_SCORE_LDO)
     } else if (method == "GAM"){
       ## GAM correction
       data_sub <- GAM(data_sub, formula = "DEPENDENCY_SCORE ~ CNA", subunit = "SAMPLE_NAME", verbose = FALSE)
+      data_sub <- data_sub %>% 
+        select(GENE_NAME, DEPENDENCY_SCORE_GAM) %>%
+        group_by(GENE_NAME) %>%
+        summarise(DEPENDENCY_SCORE_GAM = median(DEPENDENCY_SCORE_GAM, na.rm = TRUE)) %>%
+        ungroup() %>%
+        rename(Gene = GENE_NAME, !!cell_line := DEPENDENCY_SCORE_GAM)
     } else {
       stop("Please provide a valid method")
     }
-    
-    data_sub <- data_sub %>% 
-      select(GENE_NAME, DEPENDENCY_SCORE_LDO) %>%
-      group_by(GENE_NAME) %>%
-      summarise(DEPENDENCY_SCORE_LDO = median(DEPENDENCY_SCORE_LDO, na.rm = TRUE)) %>%
-      ungroup() %>%
-      rename(Gene = GENE_NAME, !!cell_line := DEPENDENCY_SCORE_LDO)
     
     if (i == 1){
       df <- data_sub

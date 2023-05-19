@@ -70,7 +70,7 @@ run_LDO(){
 	conda activate CN_bench_r
 
 	Rscript $ROOT/src/exec/run_LDO_and_GAM.r \
-		$ROOT/data/raw/"$LIB"_lfc_exp_cn.rds \
+		$ROOT/data/"$LIB"_lfc_exp_cn.rds \
 		"LDO" \
 		data/corrected/ \
 		"$LIB"
