@@ -2,7 +2,7 @@ library(tidyverse)
 library(magrittr)
 library(ggsci)
 
-source("src/exec/LDO_and_GAM_func.r")
+source("src/method/LDO_and_GAM_func.r")
 
 
 run_method <- function(data, method){
@@ -70,17 +70,17 @@ run_method <- function(data, method){
 
 # main function
 main <- function(combined_data_path, method, output_dir, lib){
-  lib <- readRDS(combined_data_path)
+  data <- readRDS(combined_data_path)
 
   ## Run method
-  df <- run_method(data = lib, method = method)
+  df <- run_method(data = data, method = method)
   write_csv(df, paste0(output_dir, "/", lib, "_gene_", method, ".csv"))
 }
 
 
 # Run the main function
 ## For instance:
-## Rscript src/exec/run_LDO_and_GAM.r data/Avana_lfc_exp_cn.rds LDO data/corrected/ Avana
+## Rscript src/method/run_LDO_and_GAM.r data/Avana_lfc_exp_cn.rds LDO data/corrected/ Avana
 if (!interactive()){
     sys.args <- commandArgs(trailingOnly = TRUE)
 

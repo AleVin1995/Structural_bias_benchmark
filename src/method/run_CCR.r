@@ -90,7 +90,7 @@ main <- function(raw_LFC_path, GuideMap_path, output_dir, lib){
 
 # Run the main function
 ## For instance:
-## Rscript src/exec/run_CCR.r data/raw/Avana_sgrna_raw_LFC.csv data/AvanaGuideMap.csv data/corrected/ Avana
+## Rscript src/method/run_CCR.r data/raw/Avana_sgrna_raw_LFC.csv data/AvanaGuideMap.csv data/corrected/ Avana
 if (!interactive()){
     sys.args <- commandArgs(trailingOnly = TRUE)
 
