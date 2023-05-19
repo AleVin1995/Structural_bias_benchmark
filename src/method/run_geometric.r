@@ -88,7 +88,7 @@ main <- function(combined_data_path, output_dir, lib){
 
     ## run geometric correction
     df <- run_geometric(data)
-    write_csv(df, paste0(output_dir, "/", lib, "_gene_Geometric.csv")))
+    write_csv(df, paste0(output_dir, "/", lib, "_gene_Geometric.csv"))
 }
 
 
@@ -108,6 +108,6 @@ if (!interactive()){
     combined_data_path <- args[1]
     output_dir <- args[2]
     lib <- args[3]
-    
+
     main(combined_data_path, output_dir, lib)
 }
