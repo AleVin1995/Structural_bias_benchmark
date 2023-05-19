@@ -105,9 +105,9 @@ if (!interactive()){
             \n- lib: library name of the output files"))
     }
 
-    combined_data_path <- args[1]
-    output_dir <- args[2]
-    lib <- args[3]
+    combined_data_path <- sys.args[1]
+    output_dir <- sys.args[2]
+    lib <- sys.args[3]
 
     main(combined_data_path, output_dir, lib)
 }
