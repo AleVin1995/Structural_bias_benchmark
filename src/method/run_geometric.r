@@ -20,7 +20,7 @@ arm_info <- function(df, cytoband_path){
         dplyr::select(GENE_NAME, ARM) %>%
         distinct()
     
-    df <- inner_join(df, gene_loc, by = "GENE_NAME")
+    df <- inner_join(df, cyto_band, by = "GENE_NAME")
 
     return(df)
 }
