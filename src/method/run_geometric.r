@@ -5,9 +5,6 @@ library(tidyverse)
 arm_info <- function(df, cytoband_path){
     genes <- unique(df$GENE_NAME)
 
-    ## initialize human database
-    src_db <- src_ucsc("Human", verbose = FALSE)
-
     ## get cytoband information
     cyto_band <- read_csv(cytoband_path) %>% 
         filter(symbol %in% genes) %>% 
