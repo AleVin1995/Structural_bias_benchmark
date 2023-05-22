@@ -107,6 +107,22 @@ run_geometric(){
 }
 
 
+# run CERES
+run_CERES(){
+	conda activate CN_bench_r
+
+	Rscript $ROOT/src/method/run_CERES.r \
+		$ROOT/data/raw/"$LIB"_gene_raw_LFC.csv \
+		$ROOT/data/"$LIB"GuideMap.csv \
+		$ROOT/data/OmicsCNSegmentsProfile.csv \
+		$ROOT/data/OmicsProfiles.csv \
+		$ROOT/data/corrected/ \
+		"$LIB"
+
+	conda deactivate
+}
+
+
 # execute the functions
 if [[ "$ALGO" == "CCR" ]]
 then
@@ -126,6 +142,9 @@ then
 elif [[ "$ALGO" == "geometric" ]]
 then
 	run_geometric
+elif [[ "$ALGO" == "CERES" ]]
+then
+	run_CERES
 else
 	echo "Algorithm not found"
 	echo "Usage: bash src/method/run_tools.sh <root_path> <algorithm> <library>"
