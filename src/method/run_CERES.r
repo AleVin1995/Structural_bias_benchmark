@@ -101,7 +101,8 @@ main <- function(raw_LFC_path, GuideMap_path, CN_seg_path,
     res <- wrap_ceres(sg=sg, cn=guide_cn, guide_locus=guide_locus,
         locus_gene=locus_gene, replicate_map=replicate_map)
     
-    gene_correctedLFCs <- res$gene_essentiality_results$ge_fit
+    gene_correctedLFCs <- res$gene_essentiality_results$ge_fit %>%
+        as.data.frame()
 
     ## Save results
     write_csv(gene_correctedLFCs, paste0(output_dir, '/', paste0(lib, "_gene_CERES.csv")))
