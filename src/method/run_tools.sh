@@ -2,7 +2,7 @@
 
 #SBATCH --partition=cpuq
 #SBATCH --mail-type=NONE
-#SBATCH --time=24:00:00
+#SBATCH --time=100:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/group/iorio/Alessandro/CN_benchmark

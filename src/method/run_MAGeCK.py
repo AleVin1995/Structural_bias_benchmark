@@ -117,15 +117,11 @@ def crisprseq_parseargs():
                             '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
                             '--no-permutation-by-group'])
     
-    if args.subcmd == None:
-        parser.print_help()
-        sys.exit(0)
-    
     if args.subcmd == 'mle':
         mageckmle_main(parsedargs=args); # ignoring the script path, and the sub command
+    else:
+        parser.print_help()
         sys.exit(0)
-    
-    return args
 
 
 if __name__ == '__main__':
