@@ -24,7 +24,7 @@ for (lib in libraries){
     print(paste0("Processing ", lib, "..."))
 
     # Format the data
-    df <- df %>% 
+    df_long <- df %>% 
         as.data.table() %>% ## speed up the process pt 1
         lazy_dt() %>% ## speed up the process pt 2
         pivot_longer(cols = -sgRNA, names_to = "SequenceID", values_to = "Readcounts") %>% 
@@ -38,5 +38,5 @@ for (lib in libraries){
     print(paste0("Finished to process. Saving ", lib, "..."))
 
     # Save the data
-    write_csv(df_sgRNA, paste0("data/raw/", lib, "_sgrna_raw_readcounts.csv"), col_names = TRUE)
+    write_csv(df_long, paste0("data/raw/", lib, "_sgrna_raw_readcounts_long.csv"), col_names = TRUE)
 }
