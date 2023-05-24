@@ -1,19 +1,11 @@
-"""MAGeCK argument parser
-Copyright (c) 2014 Wei Li, Han Xu, Xiaole Liu lab 
-This code is free software; you can redistribute it and/or modify it
-under the terms of the BSD License (see the file COPYING included with
-the distribution).
-@status:    experimental
-@version: $Revision$
-@author:    Wei Li 
-@contact: li.david.wei AT gmail.com
 """
-
+MAGeCK argument parser
+"""
 
 from __future__ import print_function
 import sys
 import argparse
-from mlemageck import *
+from src.method.mlemageck import *
 
 
 def arg_count(subparser):
