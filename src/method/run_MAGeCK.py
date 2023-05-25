@@ -5,7 +5,7 @@ MAGeCK argument parser
 from __future__ import print_function
 import sys
 import argparse
-from src.method.mlemageck import *
+from mlemageck import *
 
 
 def arg_count(subparser):
