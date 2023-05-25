@@ -3,6 +3,9 @@ MAGeCK MLE main entry
 '''
 
 from __future__ import print_function
+from mageck.mleclassdef import *
+import numpy as np
+import pandas as pd
 import sys
 
 def mageckmle_postargs(args):
@@ -32,6 +35,77 @@ def mageckmle_postargs(args):
     return args
 
 
+def read_gene_from_file(filename,includesamples=None):
+    '''
+    Reading gene models 
+    Parameters
+    ----------
+    filename
+        file name of the read count table 
+    includesamples
+        If not None, only samples in the includesampels are included
+    '''
+    # first, read count table
+    allgenedict={}
+    nline=0
+    nsamples=0
+    ngene=0
+    
+    sampleids=[]
+    sampleindex=[]
+    sampleids_toindex={}
+    
+    df=pd.read_csv(filename, header=None)
+        
+    for line in range(len(df)):
+        nline+=1
+        field=df.iloc[line]
+
+        if nline==1:
+            # The first line: check sample columns
+            nsamples=len(field)-2
+            sampleids=list(field[2:])
+            for i in range(nsamples):
+                sampleids_toindex[sampleids[i]]=i
+            if includesamples != None:
+                for si in includesamples:
+                    if si not in sampleids_toindex:
+                        sys.exit(-1)
+                sampleindex=[sampleids_toindex[si] for si in includesamples]
+            else:
+                sampleindex=[i for i in range(nsamples)]
+            continue
+        
+        sgid=str(field[0])
+        gid=str(field[1])
+
+        if gid not in allgenedict:
+            sks=SimCaseSimple()
+            sks.prefix=gid
+            sks.nb_count=[]
+            sks.sgrnaid=[]
+            ngene+=1
+            for i in sampleindex:
+                sks.nb_count+=[[]]
+            allgenedict[gid]=sks
+        else:
+            sks=allgenedict[gid]
+        sks.sgrnaid+=[sgid]
+        for i in range(len(sampleindex)): 
+            ni=sampleindex[i]
+            try:
+                nrt=float(field[ni+2])+1 # add 1 pseudocount
+                sks.nb_count[i]+=[nrt]
+            except ValueError:
+                print('Error loading line '+str(nline))
+
+    # convert nb_count to matrix
+    for (gene,ginst) in allgenedict.items():
+        ginst.nb_count=np.matrix(ginst.nb_count)
+
+    return allgenedict
+
+
 def mageckmle_main(parsedargs=None,returndict=False):
     '''
     Main entry for MAGeCK MLE
@@ -46,20 +120,15 @@ def mageckmle_main(parsedargs=None,returndict=False):
     # parsing arguments
     args=mageckmle_postargs(parsedargs)
         
-    import scipy
-    from scipy.stats import nbinom
     import numpy as np
-    import numpy.linalg as linalg
-    from mageck.mleinstanceio import read_gene_from_file,write_gene_to_file,write_sgrna_to_file
+    from mageck.mleinstanceio import write_gene_to_file
     from mageck.mleem import iteratenbem
     from mageck.mlemeanvar import MeanVarModel
     from mageck.mageckCount import normalizeCounts
-    from mageck.mlesgeff import read_sgrna_eff,sgrna_eff_initial_guess
-    from mageck.dispersion_characterization import sgrna_wide_dispersion_estimation_MAP_v2
+    from mageck.mlesgeff import read_sgrna_eff
     from mageck.mlemultiprocessing import runem_multiproc,iteratenbem_permutation,iteratenbem_permutation_by_nsg
-    from mageck.cnv_normalization import read_CNVdata,match_sgrnaCN,betascore_piecewisenorm,betascore_piecewisenorm,highestCNVgenes
+    from mageck.cnv_normalization import read_CNVdata,betascore_piecewisenorm,betascore_piecewisenorm,highestCNVgenes
     from mageck.cnv_estimation import mageckmleCNVestimation
-    from mageck.mageckCount import mageckcount_checkcontrolsgrna
 
     # main process
     maxfittinggene=args.genes_varmodeling
@@ -91,7 +160,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
     else:
         size_f=normalizeCounts(cttab_sel,returnfactor=True,reversefactor=True)
 
-    # desmat=np.matrix([[1,1,1,1],[0,0,1,0],[0,0,0,1]]).getT()
     desmat=args.design_matrix
     ngene=0
     for (tgid,tginst) in allgenedict.items():
@@ -172,7 +240,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
             ngene+=1
             if ngene>maxgene:
                 break
-            
+
     # set up the w vector
     for (tgid,tginst) in allgenedict.items():
         if len(tginst.w_estimate)==0:
