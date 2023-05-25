@@ -7,8 +7,6 @@ libraries <- c("Avana", "KY")
 # Filter screens/sequences that passed QC
 ScreenSequenceMap <- read_csv("data/ScreenSequenceMap.csv") %>% 
     filter(PassesQC == TRUE)
-ScreenQCReport <- read_csv("data/AchillesScreenQCReport.csv") %>% 
-    filter(PassesQC == TRUE & QCStatus == "PASS")
 SequenceQCReport <- read_csv("data/AchillesSequenceQCReport.csv") %>% 
     filter(PassesQC == TRUE & QCStatus == "PASS" & ScreenPassesQC == TRUE)
 

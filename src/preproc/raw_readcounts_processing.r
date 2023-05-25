@@ -7,8 +7,6 @@ libraries <- c("Avana", "KY")
 # Filter screens/sequences that passed QC
 ScreenSequenceMap <- read_csv("data/ScreenSequenceMap.csv") %>% 
     filter(PassesQC == TRUE)
-ScreenQCReport <- read_csv("data/AchillesScreenQCReport.csv") %>% 
-    filter(PassesQC == TRUE & QCStatus == "PASS")
 SequenceQCReport <- read_csv("data/AchillesSequenceQCReport.csv") %>% 
     filter(PassesQC == TRUE & QCStatus == "PASS" & ScreenPassesQC == TRUE)
 
@@ -24,19 +22,21 @@ for (lib in libraries){
     print(paste0("Processing ", lib, "..."))
 
     # Format the data
-    df_long <- df %>% 
+    df <- df %>% 
         as.data.table() %>% ## speed up the process pt 1
         lazy_dt() %>% ## speed up the process pt 2
-        pivot_longer(cols = -sgRNA, names_to = "SequenceID", values_to = "Readcounts") %>% 
-        filter(sgRNA %in% GuideMap$sgRNA) %>% ## Filter out sgRNAs that did not pass QC
+        pivot_longer(cols = -sgRNA, names_to = "SequenceID", values_to = "Readcounts") %>%
+        inner_join(GuideMap, by = "sgRNA") %>% ## Filter out sgRNAs that did not pass QC
+        separate(col = "Gene", sep = " \\(", into = c("Gene", "code")) %>%
+        select(-code) %>%
         filter(SequenceID %in% SequenceQCReport$SequenceID) %>% ## Filter out sequences that did not pass QC
-        left_join(ScreenSequenceMap, by = "SequenceID") %>%
-        select(sgRNA, SequenceID, ModelID, pDNABatch, Replicate, ScreenType, Readcounts) %>%
+        select(sgRNA, Gene, SequenceID, Readcounts) %>%
         distinct() %>%
-        as_tibble()
+        as_tibble() %>%
+        pivot_wider(names_from = SequenceID, values_from = Readcounts)
     
     print(paste0("Finished to process. Saving ", lib, "..."))
 
     # Save the data
-    write_csv(df_long, paste0("data/raw/", lib, "_sgrna_raw_readcounts_long.csv"), col_names = TRUE)
+    write_csv(df, paste0("data/raw/", lib, "_sgrna_raw_readcounts.csv"), col_names = TRUE)
 }

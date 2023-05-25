@@ -76,12 +76,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
         for sg_i in sgid:
             sgrna2genelist[sg_i]=geneid
 
-    mageckcount_checkcontrolsgrna(args,sgrna2genelist)
-    # 
-    sgrna_eff_initial_guess(args,allgenedict)
-    #
-    #
-    #
     # calculate the size factor
     cttab_sel={}
     for (geneid,gk) in allgenedict.items():
@@ -102,10 +96,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
     ngene=0
     for (tgid,tginst) in allgenedict.items():
         tginst.design_mat=desmat
-    #
-    #
-    #
-    #
+    
     # perform copy number estimation if option selected
     CN_arr = None
     CN_celldict = None
@@ -131,11 +122,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
             (CN_arr,CN_celldict,CN_genedict) = read_CNVdata(str(args.output_prefix)+'.CNVestimates.txt',CN_celllabel)
             genes2correct = highestCNVgenes(CN_arr,CN_genedict,percentile=98)
         # if no match was found
-
-    #
-    #
-    #
-    #
+    
     # run the EM for a few genes to perform gene fitting process
     meanvardict={}
     for (tgid,tginst) in allgenedict.items():
@@ -146,14 +133,13 @@ def mageckmle_main(parsedargs=None,returndict=False):
         meanvardict[tgid]=tginst
         if ngene>maxfittinggene:
             break
+
     argsdict={'debug':False, 'alpha_val':0.01, 'estimateeff':False,'size_factor':size_f}
     runem_multiproc(meanvardict,args,nproc=args.threads,argsdict=argsdict)
+
     for (tgid,tginst) in meanvardict.items():
         allgenedict[tgid]=tginst
-    #
-    #
-    #
-    #
+
     # model the mean and variance
     if maxfittinggene>0:
         mrm=MeanVarModel()
@@ -167,6 +153,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
     
     if returndict:
         return (allgenedict,mrm,size_f)
+    
     # run the test again...
     if hasattr(args,'threads') and args.threads>0:
         # multipel threads
@@ -185,9 +172,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
             ngene+=1
             if ngene>maxgene:
                 break
-            #except:
-            #    print('Error occurs while calculating beta values of gene '+tgid+'.')
-            #    sys.exit(-1)
+            
     # set up the w vector
     for (tgid,tginst) in allgenedict.items():
         if len(tginst.w_estimate)==0:
