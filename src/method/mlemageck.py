@@ -8,34 +8,66 @@ import numpy as np
 import pandas as pd
 import sys
 
-def mageckmle_postargs(args):
+def create_design_matrix(args, df):
     '''
     post-processing of argument parsing
     '''
- 
-    from mageck.mledesignmat import parse_designmat
     
-    # parsing design matrix
-    if args.design_matrix != None:
-        (desmat,sampleid,betalabel)=parse_designmat(args.design_matrix)
+    # read screen to sequence map file
+    screen_sequence_map=pd.read_csv(args.screen_sequence_map)
 
-    args.design_matrix=desmat
+    # create replicate to model dictionary
+    replicate_model_dict={}
+
+    for i in range(len(screen_sequence_map)):
+        row=screen_sequence_map.iloc[i]
+
+        if row['SequenceID'] not in replicate_model_dict.keys():
+            if row['ModelID'] != 'pDNA': # exclude pDNA (control)
+                replicate_model_dict[row['SequenceID']]=row['ModelID']
+
+    # create design matrix
+    sequence_id = np.unique(df.columns[2:])
+    sequence_id = np.intersect1d(sequence_id, screen_sequence_map['SequenceID'])
+    
+    ## get model id from sequence id
+    model_id = []
+
+    for i in range(len(sequence_id)):
+        if sequence_id[i] not in model_id:
+            model_id.append(replicate_model_dict[sequence_id[i]])
+    model_id = np.unique(model_id)
+    model_id = np.append('baseline', model_id)
+
+    ## initialize pandas dataframe
+    desmat=pd.DataFrame(0, index=sequence_id,columns=model_id)
+
+    ## fill in the design matrix
+    for i in range(len(desmat.columns)):
+        col_id = desmat.columns[i]
+        
+        if col_id == 'baseline':
+            desmat.loc[:, col_id] = 1
+        else:
+            seq_id = screen_sequence_map.loc[screen_sequence_map['ModelID'] == col_id, 'SequenceID']
+            seq_id = np.intersect1d(seq_id, desmat.index)
+
+            if len(seq_id) == 0:
+                print('No sequence id found for model id: ' + col_id)
+                sys.exit(-1)
+            
+            desmat.loc[seq_id, col_id] = 1
+
+    args.design_matrix=desmat.to_numpy()
     
     # parsing sample label
-    args.include_samples=sampleid
-    args.beta_labels=betalabel
-
-    if len(args.include_samples) != desmat.shape[0]:
-        print('The number of samples in the --include-samples option do not match rows in design matrix.')
-        sys.exit(-1)
-    if len(args.beta_labels) != desmat.shape[1]:
-        print('The number of labels in the --beta-labels option do not match columns in design matrix.')
-        sys.exit(-1)
+    args.include_samples=list(desmat.index)
+    args.beta_labels=list(desmat.columns)
     
     return args
 
 
-def read_gene_from_file(filename,includesamples=None):
+def read_gene_from_file(df,includesamples=None):
     '''
     Reading gene models 
     Parameters
@@ -54,17 +86,15 @@ def read_gene_from_file(filename,includesamples=None):
     sampleids=[]
     sampleindex=[]
     sampleids_toindex={}
-    
-    df=pd.read_csv(filename, header=None)
         
     for line in range(len(df)):
-        nline+=1
         field=df.iloc[line]
 
-        if nline==1:
+        if nline == 0:
             # The first line: check sample columns
-            nsamples=len(field)-2
-            sampleids=list(field[2:])
+            header=list(df.columns)
+            nsamples=len(header)-2
+            sampleids=list(header[2:])
             for i in range(nsamples):
                 sampleids_toindex[sampleids[i]]=i
             if includesamples != None:
@@ -74,8 +104,7 @@ def read_gene_from_file(filename,includesamples=None):
                 sampleindex=[sampleids_toindex[si] for si in includesamples]
             else:
                 sampleindex=[i for i in range(nsamples)]
-            continue
-        
+
         sgid=str(field[0])
         gid=str(field[1])
 
@@ -99,6 +128,8 @@ def read_gene_from_file(filename,includesamples=None):
             except ValueError:
                 print('Error loading line '+str(nline))
 
+        nline+=1
+
     # convert nb_count to matrix
     for (gene,ginst) in allgenedict.items():
         ginst.nb_count=np.matrix(ginst.nb_count)
@@ -117,8 +148,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
     returndict
         If set true, will not try to run the whole prediction process, but will return after mean variance modeling
     '''
-    # parsing arguments
-    args=mageckmle_postargs(parsedargs)
         
     import numpy as np
     from mageck.mleinstanceio import write_gene_to_file
@@ -131,13 +160,22 @@ def mageckmle_main(parsedargs=None,returndict=False):
     from mageck.cnv_estimation import mageckmleCNVestimation
 
     # main process
+    args=parsedargs
     maxfittinggene=args.genes_varmodeling
     maxgene=np.inf
+
     # reading sgRNA efficiency
     read_sgrna_eff(args)
+
     # reading read count table
-    allgenedict=read_gene_from_file(args.count_table,includesamples=args.include_samples)
-    #
+    count_table=pd.read_csv(args.count_table)
+
+    # parsing arguments
+    args=create_design_matrix(args, count_table)
+
+    # create gene dictionary
+    allgenedict=read_gene_from_file(count_table,includesamples=args.include_samples)
+    
     # check the consistency of negative control sgRNAs
     sgrna2genelist={}
     for (geneid,gk) in allgenedict.items():
