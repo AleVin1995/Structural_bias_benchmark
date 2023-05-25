@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import sys
 
-def create_design_matrix(args, df):
+def create_design_matrix(args, df, control_name='pDNA'):
     '''
     post-processing of argument parsing
     '''
@@ -23,7 +23,7 @@ def create_design_matrix(args, df):
         row=screen_sequence_map.iloc[i]
 
         if row['SequenceID'] not in replicate_model_dict.keys():
-            if row['ModelID'] != 'pDNA': # exclude pDNA (control)
+            if row['ModelID'] != control_name: # exclude pDNA (control)
                 replicate_model_dict[row['SequenceID']]=row['ModelID']
 
     # create design matrix
@@ -35,7 +35,8 @@ def create_design_matrix(args, df):
 
     for i in range(len(sequence_id)):
         if sequence_id[i] not in model_id:
-            model_id.append(replicate_model_dict[sequence_id[i]])
+            if control_name not in sequence_id[i]:
+                model_id.append(replicate_model_dict[sequence_id[i]])
     model_id = np.unique(model_id)
     model_id = np.append('baseline', model_id)
 
