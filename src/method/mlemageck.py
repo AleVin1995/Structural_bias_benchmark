@@ -10,59 +10,24 @@ def mageckmle_postargs(args):
     post-processing of argument parsing
     '''
  
-    from mageck.mledesignmat import parse_designmat,parse_designmat_from_day0
+    from mageck.mledesignmat import parse_designmat
     
-    try:
-        import scipy
-        from scipy.stats import nbinom
-    except ImportError:
-        print('Cannot find scipy (required for mle approach). Please check your scipy installation.')
-        sys.exit(-1)
-    try:
-        import numpy as np
-        import numpy.linalg as linalg
-    except ImportError:
-        print('Cannot find numpy (required for mle approach). Please check your numpy installation.')
-        sys.exit(-1)
     # parsing design matrix
     if args.design_matrix != None:
         (desmat,sampleid,betalabel)=parse_designmat(args.design_matrix)
-    else:
-        (desmat,sampleid,betalabel)=parse_designmat_from_day0(args)
 
     args.design_matrix=desmat
     
     # parsing sample label
-    if sampleid ==None:
-        # design matrix is provided as a string
-        if args.include_samples !=None:
-            args.include_samples=args.include_samples.split(',')
-            if len(args.include_samples) != desmat.shape[0]:
-                print('The number of samples in the --include-samples option do not match rows in design matrix.')
-                sys.exit(-1)
-        if args.beta_labels!=None:
-            args.beta_labels=args.beta_labels.split(',')
-            if len(args.beta_labels) != desmat.shape[1]:
-                print('The number of labels in the --beta-labels option do not match columns in design matrix.')
-                sys.exit(-1)
-    else:
-        # design matrix is provided as file
-        if args.include_samples !=None:
-            print('Sample labels are included in the design matrix file '+args.design_matrix+'. The --include-samples option should not be used.')
-            sys.exit(0)
-        if args.beta_labels!=None:
-            print('Beta labels are included in the design matrix file '+args.design_matrix+'. The --beta-labels option should not be used.')
-            sys.exit(0)
+    args.include_samples=sampleid
+    args.beta_labels=betalabel
 
-        args.include_samples=sampleid
-        args.beta_labels=betalabel
-
-        if len(args.include_samples) != desmat.shape[0]:
-            print('The number of samples in the --include-samples option do not match rows in design matrix.')
-            sys.exit(-1)
-        if len(args.beta_labels) != desmat.shape[1]:
-            print('The number of labels in the --beta-labels option do not match columns in design matrix.')
-            sys.exit(-1)
+    if len(args.include_samples) != desmat.shape[0]:
+        print('The number of samples in the --include-samples option do not match rows in design matrix.')
+        sys.exit(-1)
+    if len(args.beta_labels) != desmat.shape[1]:
+        print('The number of labels in the --beta-labels option do not match columns in design matrix.')
+        sys.exit(-1)
     
     return args
 
