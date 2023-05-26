@@ -113,7 +113,7 @@ def crisprseq_parseargs():
                             '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
                             '-n', 'avana_test_supervised',
                             #'-n', 'avana_test_unsupervised',
-                            '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
+                            #'--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
                             #'--cnv-est',
                             '--no-permutation-by-group'])
     

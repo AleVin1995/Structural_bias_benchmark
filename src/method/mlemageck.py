@@ -59,6 +59,7 @@ def create_design_matrix(args, df, control_name='pDNA'):
             
             desmat.loc[seq_id, col_id] = 1
 
+    args.replicate_model=replicate_model_dict
     args.design_matrix=desmat.to_numpy()
     
     # parsing sample label
@@ -277,9 +278,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
         # read into the data structures
         (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(str(args.output_prefix)+'.CNVestimates.txt',CN_celllabel)
         genes2correct = highestCNVgenes(CN_arr,CN_genedict,percentile=98)
-    else:
-        print('Error: must specify either --cnv-norm or --cnv-est')
-        sys.exit(0)
 
     # create gene dictionary
     allgenedict=read_gene_from_file(count_table,includesamples=args.include_samples)
