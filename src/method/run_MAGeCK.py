@@ -111,8 +111,10 @@ def crisprseq_parseargs():
     args=parser.parse_args(['mle', 
                             '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv', #data/raw/Avana_sgrna_raw_readcounts.csv,
                             '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
-                            '-n', 'avana_test',
+                            '-n', 'avana_test_supervised',
+                            #'-n', 'avana_test_unsupervised',
                             '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
+                            #'--cnv-est',
                             '--no-permutation-by-group'])
     
     if args.subcmd == 'mle':
