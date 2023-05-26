@@ -174,7 +174,7 @@ def read_CNVdata(args):
     # change beta_labels and design matrix to match common cell lines
     args.beta_labels = ['baseline'] + cell_list
     args.design_matrix = args.design_matrix[:,[0] + [args.beta_labels.index(x) for x in cell_list]]
-    
+
     return CN_df
 
 
@@ -260,11 +260,14 @@ def mageckmle_main(parsedargs=None,returndict=False):
         # get copy number data from external copy number dataset
         # here is used just check the cnv files
         CN_df = read_CNVdata(args)
-        CN_celllabel = list(CN_df.columns)
+        CN_celllabel = args.beta_labels[1:]
 
         gene_list = np.unique(count_table['Gene'])
         (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(CN_df,CN_celllabel,gene_list)
         genes2correct = False # do not select only subset of genes to correct (i.e. correct all genes)
+
+        ## filter out genes with no copy number data from count table
+        count_table = count_table[count_table['Gene'].isin(CN_genedict.keys())]
     elif args.cnv_est is not None:
         # estimating CNVS
         # organize sgRNA-gene pairing into dictionary
