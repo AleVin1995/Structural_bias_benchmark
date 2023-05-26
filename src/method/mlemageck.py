@@ -158,29 +158,20 @@ def header_cleanup(df, index=True):
     return(df)
 
 
-def format_datasets(read_file, CN_file):
+def read_CNVdata(args):
     '''
     formats read count and copy number dataframes
     '''
-    # read count data
-    read_df = pd.read_csv(read_file, index_col=0).fillna(0) ## set NaN to 0
-    read_df = header_cleanup(read_df, index=True)
 
     # copy number data
-    CN_df = pd.read_csv(CN_file, index_col=0).T.fillna(0) ## set NaN to 0
+    CN_df = pd.read_csv(args.cnv_norm, index_col=0).T.fillna(0) ## set NaN to 0
     CN_df = header_cleanup(CN_df, index=True)
 
     # common cell lines
-    cell_list = list(set(read_df.columns).intersection(set(CN_df.columns)))
-    read_df = read_df.loc[:,cell_list]
+    cell_list = list(set(args.beta_labels[1:]).intersection(set(CN_df.columns)))
     CN_df = CN_df.loc[:,cell_list]
 
-    # common genes
-    gene_list = list(set(read_df.index).intersection(set(CN_df.index)))
-    read_df = read_df.loc[gene_list,:]
-    CN_df = CN_df.loc[gene_list,:]
-
-    return(read_df, CN_df)
+    return CN_df
 
 
 def format_CNVdata(CN_df,cell_list,gene_list):
@@ -248,20 +239,24 @@ def mageckmle_main(parsedargs=None,returndict=False):
     # reading sgRNA efficiency
     read_sgrna_eff(args)
 
+    # reading count table
+    count_table = pd.read_csv(args.count_table)
+
+    # parsing arguments
+    args=create_design_matrix(args, count_table)
+    
     # perform copy number estimation if option selected
     CN_arr = None
     CN_celldict = None
     CN_genedict = None
     genes2correct = False
+    CN_celllabel = args.beta_labels[1:]
     
     if args.cnv_norm is not None: 
         # get copy number data from external copy number dataset
         # here is used just check the cnv files
-        count_table, CN_df = format_datasets(args.count_table, args.cnv_norm)
-
-        ## parsing arguments
-        args=create_design_matrix(args, count_table)
-        CN_celllabel = args.beta_labels[1:]
+        CN_df = read_CNVdata(args)
+        CN_celllabel = list(CN_df.columns)
 
         gene_list = np.unique(count_table['Gene'])
         (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(CN_df,CN_celllabel,gene_list)
@@ -269,12 +264,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
     elif args.cnv_est is not None:
         # estimating CNVS
         # organize sgRNA-gene pairing into dictionary
-        count_table = pd.read_csv(args.count_table)
-
-        ## parsing arguments
-        args=create_design_matrix(args, count_table)
-        CN_celllabel = args.beta_labels[1:]
-        
         sgrna2genelist = {sgrna: gene for gene in allgenedict for sgrna in allgenedict[gene].sgrnaid}
         # estimate CNV and write results to file
         mageckmleCNVestimation(args.cnv_est,cttab_sel,desmat,sgrna2genelist,CN_celllabel,args.output_prefix)
