@@ -138,6 +138,66 @@ def read_gene_from_file(df,includesamples=None):
     return allgenedict
 
 
+# Remove ID from genes
+def header_cleanup(df, index=True):
+    if index:
+        df_header = list(df.index)
+    else:
+        df_header = list(df.columns)
+
+    for gene_idx in range(0, len(df_header)):
+        gene = df_header[gene_idx]
+        gene = gene.split(' (')[0]
+        df_header[gene_idx] = gene
+
+    if index:
+        df.index = df_header
+    else:
+        df.columns = df_header
+
+    return(df)
+
+
+def read_CNVdata(CN_file,cell_list,transpose=True,cleanup=True):
+    '''
+    reads a file contaning a matrix of copy number data and filters out
+    copy number data for inputted set of desired cell lines
+    '''
+
+    if transpose:
+        CN_df = pd.read_csv(CN_file, index_col=0).T.fillna(0) ## set NaN to 0
+    else:
+        CN_df = pd.read_csv(CN_file, index_col=0).fillna(0) ## set NaN to 0
+    
+    if cleanup:
+        CN_df = header_cleanup(CN_df, index=True)
+
+    # dictionary of cell line from copy number data matrix
+    cell_dict = {key:val for (val,key) in enumerate(CN_df.columns)}
+    # dictionary of gene symbol indices from copy number data matrix
+    gene_dict = {str(key):val for (val,key) in enumerate(CN_df.index)}
+
+    # identify matches in list of desired cell lines and cell lines in CN data
+    inds = [] 
+    matches = []
+    for cell in cell_list:
+        for name in cell_dict:
+            if cell.upper() == name.upper():
+                inds.append(cell_dict[name])
+                matches.append(cell)
+
+    # convert ndarray into array with float values (instead of string)
+    # NOTE: also adjusting log2(CN+1) to CN by exponentiating and subtracting 1
+    arr = CN_df.to_numpy()[:,inds]
+    arr = arr.astype(np.float)
+    arr = 2**arr-1
+
+    # dictionary of cell line indices from filtered array of CN data
+    new_cell_dict = {key:val for (val,key) in enumerate(matches)}
+
+    return (arr,new_cell_dict,gene_dict)
+
+
 def mageckmle_main(parsedargs=None,returndict=False):
     '''
     Main entry for MAGeCK MLE
@@ -157,7 +217,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
     from mageck.mageckCount import normalizeCounts
     from mageck.mlesgeff import read_sgrna_eff
     from mageck.mlemultiprocessing import runem_multiproc,iteratenbem_permutation,iteratenbem_permutation_by_nsg
-    from mageck.cnv_normalization import read_CNVdata,betascore_piecewisenorm,betascore_piecewisenorm,highestCNVgenes
+    from mageck.cnv_normalization import betascore_piecewisenorm,betascore_piecewisenorm,highestCNVgenes
     from mageck.cnv_estimation import mageckmleCNVestimation
 
     # main process
