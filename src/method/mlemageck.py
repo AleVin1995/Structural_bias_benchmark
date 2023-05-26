@@ -253,12 +253,16 @@ def mageckmle_main(parsedargs=None,returndict=False):
     CN_celldict = None
     CN_genedict = None
     genes2correct = False
-    CN_celllabel=args.beta_labels[1:]
     
     if args.cnv_norm is not None: 
         # get copy number data from external copy number dataset
         # here is used just check the cnv files
         count_table, CN_df = format_datasets(args.count_table, args.cnv_norm)
+
+        ## parsing arguments
+        args=create_design_matrix(args, count_table)
+        CN_celllabel = args.beta_labels[1:]
+
         gene_list = np.unique(count_table['Gene'])
         (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(CN_df,CN_celllabel,gene_list)
         genes2correct = False # do not select only subset of genes to correct (i.e. correct all genes)
@@ -266,6 +270,11 @@ def mageckmle_main(parsedargs=None,returndict=False):
         # estimating CNVS
         # organize sgRNA-gene pairing into dictionary
         count_table = pd.read_csv(args.count_table)
+
+        ## parsing arguments
+        args=create_design_matrix(args, count_table)
+        CN_celllabel = args.beta_labels[1:]
+        
         sgrna2genelist = {sgrna: gene for gene in allgenedict for sgrna in allgenedict[gene].sgrnaid}
         # estimate CNV and write results to file
         mageckmleCNVestimation(args.cnv_est,cttab_sel,desmat,sgrna2genelist,CN_celllabel,args.output_prefix)
@@ -275,9 +284,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
     else:
         print('Error: must specify either --cnv-norm or --cnv-est')
         sys.exit(0)
-
-    # parsing arguments
-    args=create_design_matrix(args, count_table)
 
     # create gene dictionary
     allgenedict=read_gene_from_file(count_table,includesamples=args.include_samples)
