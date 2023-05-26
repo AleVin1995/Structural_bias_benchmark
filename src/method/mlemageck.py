@@ -171,6 +171,10 @@ def read_CNVdata(args):
     cell_list = list(set(args.beta_labels[1:]).intersection(set(CN_df.columns)))
     CN_df = CN_df.loc[:,cell_list]
 
+    # change beta_labels and design matrix to match common cell lines
+    args.beta_labels = ['baseline'] + cell_list
+    args.design_matrix = args.design_matrix[:,[0] + [args.beta_labels.index(x) for x in cell_list]]
+    
     return CN_df
 
 
