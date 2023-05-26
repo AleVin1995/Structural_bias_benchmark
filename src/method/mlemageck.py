@@ -158,19 +158,36 @@ def header_cleanup(df, index=True):
     return(df)
 
 
-def read_CNVdata(CN_file,cell_list,gene_list,transpose=True,cleanup=True):
+def format_datasets(read_file, CN_file):
+    '''
+    formats read count and copy number dataframes
+    '''
+    # read count data
+    read_df = pd.read_csv(read_file, index_col=0).fillna(0) ## set NaN to 0
+    read_df = header_cleanup(read_df, index=True)
+
+    # copy number data
+    CN_df = pd.read_csv(CN_file, index_col=0).T.fillna(0) ## set NaN to 0
+    CN_df = header_cleanup(CN_df, index=True)
+
+    # common cell lines
+    cell_list = list(set(read_df.columns).intersection(set(CN_df.columns)))
+    read_df = read_df.loc[:,cell_list]
+    CN_df = CN_df.loc[:,cell_list]
+
+    # common genes
+    gene_list = list(set(read_df.index).intersection(set(CN_df.index)))
+    read_df = read_df.loc[gene_list,:]
+    CN_df = CN_df.loc[gene_list,:]
+
+    return(read_df, CN_df)
+
+
+def format_CNVdata(CN_df,cell_list,gene_list):
     '''
     reads a file contaning a matrix of copy number data and filters out
     copy number data for inputted set of desired cell lines
     '''
-
-    if transpose:
-        CN_df = pd.read_csv(CN_file, index_col=0).T.fillna(0) ## set NaN to 0
-    else:
-        CN_df = pd.read_csv(CN_file, index_col=0).fillna(0) ## set NaN to 0
-    
-    if cleanup:
-        CN_df = header_cleanup(CN_df, index=True)
 
     # dictionary of cell line from copy number data matrix
     cell_dict = {key:val for (val,key) in enumerate(CN_df.columns)}
@@ -231,8 +248,33 @@ def mageckmle_main(parsedargs=None,returndict=False):
     # reading sgRNA efficiency
     read_sgrna_eff(args)
 
-    # reading read count table
-    count_table=pd.read_csv(args.count_table)
+    # perform copy number estimation if option selected
+    CN_arr = None
+    CN_celldict = None
+    CN_genedict = None
+    genes2correct = False
+    CN_celllabel=args.beta_labels[1:]
+    
+    if args.cnv_norm is not None: 
+        # get copy number data from external copy number dataset
+        # here is used just check the cnv files
+        count_table, CN_df = format_datasets(args.count_table, args.cnv_norm)
+        gene_list = np.unique(count_table['Gene'])
+        (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(CN_df,CN_celllabel,gene_list)
+        genes2correct = False # do not select only subset of genes to correct (i.e. correct all genes)
+    elif args.cnv_est is not None:
+        # estimating CNVS
+        # organize sgRNA-gene pairing into dictionary
+        count_table = pd.read_csv(args.count_table)
+        sgrna2genelist = {sgrna: gene for gene in allgenedict for sgrna in allgenedict[gene].sgrnaid}
+        # estimate CNV and write results to file
+        mageckmleCNVestimation(args.cnv_est,cttab_sel,desmat,sgrna2genelist,CN_celllabel,args.output_prefix)
+        # read into the data structures
+        (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(str(args.output_prefix)+'.CNVestimates.txt',CN_celllabel)
+        genes2correct = highestCNVgenes(CN_arr,CN_genedict,percentile=98)
+    else:
+        print('Error: must specify either --cnv-norm or --cnv-est')
+        sys.exit(0)
 
     # parsing arguments
     args=create_design_matrix(args, count_table)
@@ -266,33 +308,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
     ngene=0
     for (tgid,tginst) in allgenedict.items():
         tginst.design_mat=desmat
-    
-    # perform copy number estimation if option selected
-    CN_arr = None
-    CN_celldict = None
-    CN_genedict = None
-    genes2correct = False
-    CN_celllabel=args.beta_labels[1:]
-    if args.cnv_norm is not None or args.cnv_est is not None: 
-        # check if --cell-line option is set
-        if args.cell_line is not None:
-            CN_celllabel=[args.cell_line]*len(args.beta_labels[1:]) # replace it with all cell lines provided
-        if args.cnv_norm is not None: 
-            # get copy number data from external copy number dataset
-            # here is used just check the cnv files
-            gene_list = np.unique(count_table['Gene'])
-            (CN_arr,CN_celldict,CN_genedict) = read_CNVdata(args.cnv_norm,CN_celllabel,gene_list)
-            genes2correct = False # do not select only subset of genes to correct (i.e. correct all genes)
-        elif args.cnv_est is not None:
-            # estimating CNVS
-            # organize sgRNA-gene pairing into dictionary
-            sgrna2genelist = {sgrna: gene for gene in allgenedict for sgrna in allgenedict[gene].sgrnaid}
-            # estimate CNV and write results to file
-            mageckmleCNVestimation(args.cnv_est,cttab_sel,desmat,sgrna2genelist,CN_celllabel,args.output_prefix)
-            # read into the data structures
-            (CN_arr,CN_celldict,CN_genedict) = read_CNVdata(str(args.output_prefix)+'.CNVestimates.txt',CN_celllabel)
-            genes2correct = highestCNVgenes(CN_arr,CN_genedict,percentile=98)
-        # if no match was found
     
     # run the EM for a few genes to perform gene fitting process
     meanvardict={}
