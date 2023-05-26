@@ -178,25 +178,19 @@ def read_CNVdata(CN_file,cell_list,gene_list,transpose=True,cleanup=True):
     gene_dict = {str(key):val for (val,key) in enumerate(CN_df.index)}
 
     # identify matches in list of desired cell lines/genes and cell lines/genes in CN data
-    c_inds = [] 
-    c_matches = []
-    for cell in cell_list:
-        for name in cell_dict:
-            if cell.upper() == name.upper():
-                c_inds.append(cell_dict[name])
-                c_matches.append(cell)
+    set_cell_list = set(cell_list)
+    common_c = [(idx, item) for (idx, item) in enumerate(cell_dict.keys()) if item in set_cell_list]
+    c_inds = [x[0] for x in common_c] 
+    c_matches = [x[1] for x in common_c]
     
-    g_inds = []
-    g_matches = []
-    for gene in gene_list:
-        for name in gene_dict:
-            if gene.upper() == name.upper():
-                g_inds.append(gene_dict[name])
-                g_matches.append(gene)
+    set_gene_list = set(gene_list)
+    common_g = [(idx, item) for (idx, item) in enumerate(gene_dict.keys()) if item in set_gene_list]
+    g_inds = [x[0] for x in common_g]
+    g_matches = [x[1] for x in common_g]
 
     # convert ndarray into array with float values (instead of string)
     # NOTE: also adjusting log2(CN+1) to CN by exponentiating and subtracting 1
-    arr = CN_df.to_numpy()[g_inds,c_inds]
+    arr = CN_df.iloc[g_inds,c_inds].to_numpy()
     arr = arr.astype(np.float)
     arr = 2**arr-1
 
@@ -286,7 +280,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
         if args.cnv_norm is not None: 
             # get copy number data from external copy number dataset
             # here is used just check the cnv files
-            gene_list = list(count_table['Gene'])
+            gene_list = np.unique(count_table['Gene'])
             (CN_arr,CN_celldict,CN_genedict) = read_CNVdata(args.cnv_norm,CN_celllabel,gene_list)
             genes2correct = False # do not select only subset of genes to correct (i.e. correct all genes)
         elif args.cnv_est is not None:
