@@ -87,7 +87,7 @@ def arg_mle(subparser):
     mlegroup.add_argument('--debug-gene',help='Debug mode to only run one gene with specified ID.')
     mlegroup.add_argument('--norm-method',choices=['none','median','total','control'],default='median',help='Method for normalization, including "none" (no normalization), "median" (median normalization, default), "total" (normalization by total read counts), "control" (normalization by control sgRNAs specified by the --control-sgrna option).')
     mlegroup.add_argument('--genes-varmodeling',type=int,default=0,help='The number of genes for mean-variance modeling. Default 0.')
-    mlegroup.add_argument('--permutation-round',type=int,default=2,help='The rounds for permutation (interger). The permutation time is (# genes)*x for x rounds of permutation. Suggested value: 10 (may take longer time). Default 2.')
+    mlegroup.add_argument('--permutation-round',type=int,default=0,help='The rounds for permutation (interger). The permutation time is (# genes)*x for x rounds of permutation. Suggested value: 10 (may take longer time). Default 2.')
     mlegroup.add_argument('--no-permutation-by-group', action='store_true',help='By default, gene permutation is performed separately, by their number of sgRNAs. Turning this option will perform permutation on all genes together. This makes the program faster, but the p value estimation is accurate only if the number of sgRNAs per gene is approximately the same.')
     mlegroup.add_argument('--max-sgrnapergene-permutation',type=int,default=40,help='Do not calculate beta scores or p vales if the number of sgRNAs per gene is greater than this number. This will save a lot of time if some isolated regions are targeted by a large number of sgRNAs (usually hundreds). Must be an integer. Default 40.')
     mlegroup.add_argument('--remove-outliers', action='store_true', help='Try to remove outliers. Turning this option on will slow the algorithm.')
@@ -178,13 +178,18 @@ def crisprseq_parseargs():
     arg_mle(subparser)
     
     args=parser.parse_args(['mle', 
-                            '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
-                            '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
-                            #'-d', 'None',
+                            '-k', '/group/iorio/Alessandro/CN_benchmark/leukemia.new.csv',
                             '-d', '/group/iorio/Alessandro/CN_benchmark/designmat.txt',
-                            '-n', 'avana_supervised',
-                            #'--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
+                            '-n', 'beta_leukemia',
                             '--no-permutation-by-group'])
+    
+    # args=parser.parse_args(['mle', 
+    #                         '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
+    #                         '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
+    #                         '-d', 'None',
+    #                         '-n', 'avana_supervised',
+    #                         #'--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
+    #                         '--no-permutation-by-group'])
     
     if args.design_matrix == 'None' and args.screen_sequence_map is not None:
         args = create_design_matrix(args)
@@ -201,7 +206,8 @@ def crisprseq_parseargs():
         sys.exit(0)
     
     # delete temporary files
-    os.remove(design_matrix_path)
+    if 'tmp' in design_matrix_path:
+        os.remove(design_matrix_path)
 
 
 if __name__ == '__main__':
