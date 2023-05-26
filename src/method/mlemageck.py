@@ -55,16 +55,16 @@ def read_gene_from_file(filename,includesamples=None):
     sampleindex=[]
     sampleids_toindex={}
     
-    df=pd.read_csv(filename, header=None)
+    df=pd.read_csv(filename).fillna(0)
         
     for line in range(len(df)):
-        nline+=1
         field=df.iloc[line]
 
-        if nline==1:
+        if nline==0:
             # The first line: check sample columns
-            nsamples=len(field)-2
-            sampleids=list(field[2:])
+            header=list(df.columns)
+            nsamples=len(header)-2
+            sampleids=list(header[2:])
             for i in range(nsamples):
                 sampleids_toindex[sampleids[i]]=i
             if includesamples != None:
@@ -74,7 +74,6 @@ def read_gene_from_file(filename,includesamples=None):
                 sampleindex=[sampleids_toindex[si] for si in includesamples]
             else:
                 sampleindex=[i for i in range(nsamples)]
-            continue
         
         sgid=str(field[0])
         gid=str(field[1])
@@ -98,6 +97,8 @@ def read_gene_from_file(filename,includesamples=None):
                 sks.nb_count[i]+=[nrt]
             except ValueError:
                 print('Error loading line '+str(nline))
+
+        nline+=1
 
     # convert nb_count to matrix
     for (gene,ginst) in allgenedict.items():
