@@ -60,9 +60,7 @@ def arg_mle(subparser):
     reqgroup=subm_mle.add_argument_group(title='Required arguments',description='')
     reqgroup.add_argument('-k','--count-table',required=True,help='Provide a tab-separated count table. Each line in the table should include sgRNA name (1st column), target gene (2nd column) and read counts in each sample.')
     reqgroup.add_argument('-s', '--screen-sequence-map',help='Sequence to screen map file.')
-    subp_mle_mg=reqgroup.add_mutually_exclusive_group(required=True)
-    subp_mle_mg.add_argument('-d','--design-matrix',help='Provide a design matrix, either a file name or a quoted string of the design matrix. For example, "1,1;1,0". The row of the design matrix must match the order of the samples in the count table (if --include-samples is not specified), or the order of the samples by the --include-samples option.')
-    subp_mle_mg.add_argument('--day0-label',help='Specify the label for control sample (usually day 0 or plasmid). For every other sample label, the MLE module will treat it as a single condition and generate an corresponding design matrix.')
+    reqgroup.add_argument('-d','--design-matrix',help='Provide a design matrix, either a file name or a quoted string of the design matrix. For example, "1,1;1,0". The row of the design matrix must match the order of the samples in the count table (if --include-samples is not specified), or the order of the samples by the --include-samples option.')
     # optional arguments
     #opgroup=subm_mle.add_argument_group(title='Optional arguments',description='Optional arguments')
     ## input and output
@@ -87,7 +85,7 @@ def arg_mle(subparser):
     mlegroup.add_argument('--debug-gene',help='Debug mode to only run one gene with specified ID.')
     mlegroup.add_argument('--norm-method',choices=['none','median','total','control'],default='median',help='Method for normalization, including "none" (no normalization), "median" (median normalization, default), "total" (normalization by total read counts), "control" (normalization by control sgRNAs specified by the --control-sgrna option).')
     mlegroup.add_argument('--genes-varmodeling',type=int,default=0,help='The number of genes for mean-variance modeling. Default 0.')
-    mlegroup.add_argument('--permutation-round',type=int,default=0,help='The rounds for permutation (interger). The permutation time is (# genes)*x for x rounds of permutation. Suggested value: 10 (may take longer time). Default 2.')
+    mlegroup.add_argument('--permutation-round',type=int,default=2,help='The rounds for permutation (interger). The permutation time is (# genes)*x for x rounds of permutation. Suggested value: 10 (may take longer time). Default 2.')
     mlegroup.add_argument('--no-permutation-by-group', action='store_true',help='By default, gene permutation is performed separately, by their number of sgRNAs. Turning this option will perform permutation on all genes together. This makes the program faster, but the p value estimation is accurate only if the number of sgRNAs per gene is approximately the same.')
     mlegroup.add_argument('--max-sgrnapergene-permutation',type=int,default=40,help='Do not calculate beta scores or p vales if the number of sgRNAs per gene is greater than this number. This will save a lot of time if some isolated regions are targeted by a large number of sgRNAs (usually hundreds). Must be an integer. Default 40.')
     mlegroup.add_argument('--remove-outliers', action='store_true', help='Try to remove outliers. Turning this option on will slow the algorithm.')
@@ -177,23 +175,24 @@ def crisprseq_parseargs():
     # MLE
     arg_mle(subparser)
     
-    args=parser.parse_args(['mle', 
-                            '-k', '/group/iorio/Alessandro/CN_benchmark/leukemia.new.csv',
-                            '-d', '/group/iorio/Alessandro/CN_benchmark/designmat.txt',
-                            '-n', 'beta_leukemia',
-                            '--no-permutation-by-group'])
-    
     # args=parser.parse_args(['mle', 
-    #                         '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
-    #                         '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
-    #                         '-d', 'None',
-    #                         '-n', 'avana_supervised',
-    #                         #'--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
+    #                         '-k', '/group/iorio/Alessandro/CN_benchmark/leukemia.new.csv',
+    #                         '-d', '/group/iorio/Alessandro/CN_benchmark/designmat.txt',
+    #                         '-n', 'beta_leukemia',
     #                         '--no-permutation-by-group'])
     
-    if args.design_matrix == 'None' and args.screen_sequence_map is not None:
+    args=parser.parse_args(['mle', 
+                            '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
+                            '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
+                            '-d', None,
+                            '-n', 'avana_supervised',
+                            #'--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
+                            #'--permutation-round', '10',
+                            '--no-permutation-by-group'])
+    
+    if args.design_matrix == None and args.screen_sequence_map is not None:
         args = create_design_matrix(args)
-    elif args.design_matrix == 'None' and args.screen_sequence_map is None:
+    elif args.design_matrix == None and args.screen_sequence_map is None:
         print('Please specify a design matrix if a screen to sequence map file is not provided.')
         sys.exit(-1)
     
