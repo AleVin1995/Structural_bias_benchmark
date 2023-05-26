@@ -179,6 +179,7 @@ def crisprseq_parseargs():
     #                         '-k', '/group/iorio/Alessandro/CN_benchmark/leukemia.new.csv',
     #                         '-d', '/group/iorio/Alessandro/CN_benchmark/designmat.txt',
     #                         '-n', 'beta_leukemia',
+    #                         '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
     #                         '--no-permutation-by-group'])
     
     args=parser.parse_args(['mle', 
@@ -186,8 +187,8 @@ def crisprseq_parseargs():
                             '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
                             '-d', None,
                             '-n', 'avana_supervised',
-                            #'--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
-                            #'--permutation-round', '10',
+                            '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
+                            '--permutation-round', '10',
                             '--no-permutation-by-group'])
     
     if args.design_matrix == None and args.screen_sequence_map is not None:
@@ -197,6 +198,7 @@ def crisprseq_parseargs():
         sys.exit(-1)
     
     design_matrix_path = args.design_matrix
+    cnv_norm_path = args.cnv_norm
 
     if args.subcmd == 'mle':
         mageckmle_main(parsedargs=args); # ignoring the script path, and the sub command
@@ -207,6 +209,9 @@ def crisprseq_parseargs():
     # delete temporary files
     if 'tmp' in design_matrix_path:
         os.remove(design_matrix_path)
+    
+    if 'tmp' in cnv_norm_path:
+        os.remove(cnv_norm_path)
 
 
 if __name__ == '__main__':
