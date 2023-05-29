@@ -130,8 +130,8 @@ def write_gene_to_file(allgenedict,outfile,betalabels=None):
     if len(betalabels)-1!=nbeta or betalabels is None:
         raise ValueError('Beta labels do not match to columns of the design matrix.')
         
-    reportlabels='\t'.join(betalabels[1:])
-    print('\t'.join(['Gene',reportlabels]),file=ofid)
+    reportlabels=','.join(betalabels[1:])
+    print(','.join(['Gene',reportlabels]),file=ofid)
         
     # print for each gene 
     controlsglist=[]
@@ -146,7 +146,7 @@ def write_gene_to_file(allgenedict,outfile,betalabels=None):
             continue
         wfield=tginst.gene_to_printfield()
         wfield=[tgid]+wfield[2::6]
-        print('\t'.join(wfield),file=ofid)
+        print(','.join(wfield),file=ofid)
     # end
     ofid.close()
 
