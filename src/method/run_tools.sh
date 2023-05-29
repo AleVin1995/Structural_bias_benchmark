@@ -127,7 +127,8 @@ run_CERES(){
 run_MAGeCK(){
 	conda activate CN_bench
 
-	python3 $ROOT/src/method/run_MAGeCK.py mle \
+	python3 $ROOT/src/method/run_MAGeCK.py \
+		mle \
 		-k $ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
 		-s $ROOT/data/ScreenSequenceMap.csv \
 		-n $ROOT/data/corrected/"$LIB"_gene_MAGeCK \
