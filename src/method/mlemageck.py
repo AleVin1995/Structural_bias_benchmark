@@ -117,6 +117,40 @@ def read_gene_from_file(args,includesamples=None):
     return allgenedict
 
 
+def write_gene_to_file(allgenedict,outfile,args,betalabels=None):
+    '''
+    Write gene to file
+    '''
+    ofid=open(outfile,'w')
+    
+    tmpinst=list(allgenedict.values())[0] 
+    nbeta=len(tmpinst.beta_estimate)-(tmpinst.nb_count.shape[1])
+    #headerterms=['|beta','|z','|p-value','|fdr','|wald-p-value','|wald-fdr' ] # two-sided,using permutation test for p value
+
+    if len(betalabels)-1!=nbeta or betalabels is None:
+        raise ValueError('Beta labels do not match to columns of the design matrix.')
+        
+    reportlabels='\t'.join(betalabels[1:])
+    print('\t'.join(['Gene',reportlabels]),file=ofid)
+        
+    # print for each gene 
+    controlsglist=[]
+
+    for (tgid,tginst) in allgenedict.items():
+        # skip genes if it consists of all control sgRNAs
+        notskip=False
+        for sgid in tginst.sgrnaid:
+            if sgid not in controlsglist:
+                notskip=True
+        if notskip==False:
+            continue
+        wfield=tginst.gene_to_printfield()
+        wfield=[tgid]+wfield[2::6]
+        print('\t'.join(wfield),file=ofid)
+    # end
+    ofid.close()
+
+
 def mageckmle_main(parsedargs=None,returndict=False):
     '''
     Main entry for MAGeCK MLE
@@ -132,7 +166,6 @@ def mageckmle_main(parsedargs=None,returndict=False):
     args=mageckmle_postargs(parsedargs)
         
     import numpy as np
-    from mageck.mleinstanceio import write_gene_to_file
     from mageck.mleem import iteratenbem
     from mageck.mlemeanvar import MeanVarModel
     from mageck.mageckCount import normalizeCounts
@@ -270,7 +303,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
         betascore_piecewisenorm(allgenedict,CN_celllabel,CN_arr,CN_celldict,CN_genedict,selectGenes=genes2correct)
 
     # write to file
-    genefile=args.output_prefix+'.gene_summary.txt'
+    genefile=args.output_prefix+'.csv'
     # sgrnafile=args.output_prefix+'.sgrna_summary.txt'
     write_gene_to_file(allgenedict,genefile,args,betalabels=args.beta_labels)
     # write_sgrna_to_file(allgenedict,sgrnafile)
