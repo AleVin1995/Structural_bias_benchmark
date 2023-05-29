@@ -222,13 +222,13 @@ def crisprseq_parseargs():
     #                         '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
     #                         '--no-permutation-by-group'])
     
-    args=parser.parse_args(['mle', 
-                            '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
-                            '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
-                            '-n', 'avana_supervised',
-                            '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
-                            '--permutation-round', '1',
-                            '--no-permutation-by-group'])
+    # args=parser.parse_args(['mle', 
+    #                         '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
+    #                         '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
+    #                         '-n', 'data/corrected/avana_supervised',
+    #                         '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
+    #                         '--permutation-round', '10',
+    #                         '--no-permutation-by-group'])
     
     # create design matrix if not provided
     if args.design_matrix == None and args.screen_sequence_map is not None:

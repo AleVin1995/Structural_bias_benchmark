@@ -117,7 +117,7 @@ def read_gene_from_file(args,includesamples=None):
     return allgenedict
 
 
-def write_gene_to_file(allgenedict,outfile,args,betalabels=None):
+def write_gene_to_file(allgenedict,outfile,betalabels=None):
     '''
     Write gene to file
     '''
@@ -305,7 +305,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
     # write to file
     genefile=args.output_prefix+'.csv'
     # sgrnafile=args.output_prefix+'.sgrna_summary.txt'
-    write_gene_to_file(allgenedict,genefile,args,betalabels=args.beta_labels)
+    write_gene_to_file(allgenedict,genefile,betalabels=args.beta_labels)
     # write_sgrna_to_file(allgenedict,sgrnafile)
     return (allgenedict,mrm)
 
