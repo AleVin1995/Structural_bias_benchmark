@@ -225,10 +225,9 @@ def crisprseq_parseargs():
     args=parser.parse_args(['mle', 
                             '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
                             '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
-                            '-d', None,
                             '-n', 'avana_supervised',
                             '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
-                            '--permutation-round', '10',
+                            '--permutation-round', '1',
                             '--no-permutation-by-group'])
     
     # create design matrix if not provided

@@ -123,6 +123,22 @@ run_CERES(){
 }
 
 
+# run MAGeCK
+run_MAGeCK(){
+	conda activate CN_bench
+
+	python3 $ROOT/src/method/run_MAGeCK.py mle \
+		-k $ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
+		-s $ROOT/data/ScreenSequenceMap.csv \
+		-n $ROOT/data/corrected/"$LIB"_gene_MAGeCK \
+		--cnv-norm $ROOT/data/OmicsCNGene.csv \
+		--permutation-round 10 \
+		--no-permutation-by-group
+
+	conda deactivate
+}
+
+
 # execute the functions
 if [[ "$ALGO" == "CCR" ]]
 then
@@ -145,6 +161,9 @@ then
 elif [[ "$ALGO" == "CERES" ]]
 then
 	run_CERES
+elif [[ "$ALGO" == "MAGeCK" ]]
+then
+	run_MAGeCK
 else
 	echo "Algorithm not found"
 	echo "Usage: bash src/method/run_tools.sh <root_path> <algorithm> <library>"
