@@ -35,7 +35,7 @@ def mageckmle_postargs(args):
     return args
 
 
-def read_gene_from_file(filename,includesamples=None):
+def read_gene_from_file(args,includesamples=None):
     '''
     Reading gene models 
     Parameters
@@ -55,7 +55,17 @@ def read_gene_from_file(filename,includesamples=None):
     sampleindex=[]
     sampleids_toindex={}
     
-    df=pd.read_csv(filename).fillna(0)
+    df=pd.read_csv(args.count_table).fillna(0)
+
+    if args.cnv_norm is not None:
+        cnv_data = pd.read_csv(args.cnv_norm,sep='\t',index_col=0)
+
+        ## get common genes
+        common_genes = list(set(df['Gene']).intersection(set(cnv_data.index)))
+
+        df = df[df['Gene'].isin(common_genes)]
+        cnv_data = cnv_data.loc[common_genes]
+        cnv_data.to_csv(args.cnv_norm, sep='\t')
         
     for line in range(len(df)):
         field=df.iloc[line]
@@ -137,7 +147,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
     # reading sgRNA efficiency
     read_sgrna_eff(args)
     # reading read count table
-    allgenedict=read_gene_from_file(args.count_table,includesamples=args.include_samples)
+    allgenedict=read_gene_from_file(args,includesamples=args.include_samples)
     #
     # check the consistency of negative control sgRNAs
     sgrna2genelist={}
