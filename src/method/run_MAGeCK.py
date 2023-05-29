@@ -215,20 +215,15 @@ def crisprseq_parseargs():
     # MLE
     arg_mle(subparser)
     
-    # args=parser.parse_args(['mle', 
-    #                         '-k', '/group/iorio/Alessandro/CN_benchmark/leukemia.new.csv',
-    #                         '-d', '/group/iorio/Alessandro/CN_benchmark/designmat.txt',
-    #                         '-n', 'beta_leukemia',
-    #                         '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/cnv_data.txt',
-    #                         '--no-permutation-by-group'])
-    
-    # args=parser.parse_args(['mle', 
-    #                         '-k', '/group/iorio/Alessandro/CN_benchmark/test_readcounts.csv',
-    #                         '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
-    #                         '-n', 'data/corrected/avana_supervised',
-    #                         '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
-    #                         '--permutation-round', '10',
-    #                         '--no-permutation-by-group'])
+    args=parser.parse_args(['mle', 
+                            '-k', '/group/iorio/Alessandro/CN_benchmark/data/raw/Avana_sgrna_raw_readcounts.csv',
+                            '-s', '/group/iorio/Alessandro/CN_benchmark/data/ScreenSequenceMap.csv',
+                            '-n', 'data/corrected/avana_supervised',
+                            '--cnv-norm', '/group/iorio/Alessandro/CN_benchmark/data/OmicsCNGene.csv',
+                            '--permutation-round', '10',
+                            '--no-permutation-by-group'])
+
+    #args = parser.parse_args()
     
     # create design matrix if not provided
     if args.design_matrix == None and args.screen_sequence_map is not None:
