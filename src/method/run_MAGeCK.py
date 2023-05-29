@@ -161,6 +161,46 @@ def create_design_matrix(args, control_name='pDNA'):
     
     return args
 
+# Remove ID from genes
+def header_cleanup(df, index=True):
+    if index:
+        df_header = list(df.index)
+    else:
+        df_header = list(df.columns)
+
+    for gene_idx in range(0, len(df_header)):
+        gene = df_header[gene_idx]
+        gene = gene.split(' (')[0]
+        df_header[gene_idx] = gene
+
+    if index:
+        df.index = df_header
+    else:
+        df.columns = df_header
+
+    return(df)
+
+def format_CNV_data(args):
+    '''
+    post-processing of argument parsing
+    '''
+    # read CNV data
+    cnv_data = pd.read_csv(args.cnv_norm, index_col=0).T
+
+    # remove ID from genes
+    cnv_data = header_cleanup(cnv_data)
+    cnv_data = cnv_data.fillna(0)
+    cnv_data.index.name = 'SYMBOL'
+    
+    # Create a temporary file
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    cnv_data.to_csv(temp_file.name, sep='\t')
+    
+    # update CNV data argument
+    args.cnv_norm = temp_file.name
+    
+    return args
+
 def crisprseq_parseargs():
     """
     Parsing mageck arguments.
@@ -191,11 +231,16 @@ def crisprseq_parseargs():
                             '--permutation-round', '10',
                             '--no-permutation-by-group'])
     
+    # create design matrix if not provided
     if args.design_matrix == None and args.screen_sequence_map is not None:
         args = create_design_matrix(args)
     elif args.design_matrix == None and args.screen_sequence_map is None:
         print('Please specify a design matrix if a screen to sequence map file is not provided.')
         sys.exit(-1)
+
+    # format CNV data if provided
+    if args.cnv_norm is not None:
+        args = format_CNV_data(args)
     
     design_matrix_path = args.design_matrix
     cnv_norm_path = args.cnv_norm
@@ -207,10 +252,10 @@ def crisprseq_parseargs():
         sys.exit(0)
     
     # delete temporary files
-    if 'tmp' in design_matrix_path:
+    if design_matrix_path is not None and 'tmp' in design_matrix_path:
         os.remove(design_matrix_path)
     
-    if 'tmp' in cnv_norm_path:
+    if cnv_norm_path is not None and 'tmp' in cnv_norm_path:
         os.remove(cnv_norm_path)
 
 
