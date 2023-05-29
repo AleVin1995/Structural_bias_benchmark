@@ -129,7 +129,7 @@ run_MAGeCK(){
 
 	python3 $ROOT/src/method/run_MAGeCK.py \
 		mle \
-		-k $ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
+		-k $ROOT/data/raw/"$LIB"_sgrna_raw_readcounts.csv \
 		-s $ROOT/data/ScreenSequenceMap.csv \
 		-n $ROOT/data/corrected/"$LIB"_gene_MAGeCK \
 		--cnv-norm $ROOT/data/OmicsCNGene.csv \
