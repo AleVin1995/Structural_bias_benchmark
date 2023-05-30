@@ -8,68 +8,34 @@ import numpy as np
 import pandas as pd
 import sys
 
-def create_design_matrix(args, df, control_name='pDNA'):
+def mageckmle_postargs(args):
     '''
     post-processing of argument parsing
     '''
+ 
+    from mageck.mledesignmat import parse_designmat
     
-    # read screen to sequence map file
-    screen_sequence_map=pd.read_csv(args.screen_sequence_map)
+    # parsing design matrix
+    if args.design_matrix != None:
+        (desmat,sampleid,betalabel)=parse_designmat(args.design_matrix)
 
-    # create replicate to model dictionary
-    replicate_model_dict={}
-
-    for i in range(len(screen_sequence_map)):
-        row=screen_sequence_map.iloc[i]
-
-        if row['SequenceID'] not in replicate_model_dict.keys():
-            if row['ModelID'] != control_name: # exclude pDNA (control)
-                replicate_model_dict[row['SequenceID']]=row['ModelID']
-
-    # create design matrix
-    sequence_id = np.unique(df.columns[2:])
-    sequence_id = np.intersect1d(sequence_id, screen_sequence_map['SequenceID'])
-    
-    ## get model id from sequence id
-    model_id = []
-
-    for i in range(len(sequence_id)):
-        if sequence_id[i] not in model_id:
-            if control_name not in sequence_id[i]:
-                model_id.append(replicate_model_dict[sequence_id[i]])
-    model_id = np.unique(model_id)
-    model_id = np.append('baseline', model_id)
-
-    ## initialize pandas dataframe
-    desmat=pd.DataFrame(0, index=sequence_id,columns=model_id)
-
-    ## fill in the design matrix
-    for i in range(len(desmat.columns)):
-        col_id = desmat.columns[i]
-        
-        if col_id == 'baseline':
-            desmat.loc[:, col_id] = 1
-        else:
-            seq_id = screen_sequence_map.loc[screen_sequence_map['ModelID'] == col_id, 'SequenceID']
-            seq_id = np.intersect1d(seq_id, desmat.index)
-
-            if len(seq_id) == 0:
-                print('No sequence id found for model id: ' + col_id)
-                sys.exit(-1)
-            
-            desmat.loc[seq_id, col_id] = 1
-
-    args.replicate_model=replicate_model_dict
-    args.design_matrix=desmat.to_numpy()
+    args.design_matrix=desmat
     
     # parsing sample label
-    args.include_samples=list(desmat.index)
-    args.beta_labels=list(desmat.columns)
+    args.include_samples=sampleid
+    args.beta_labels=betalabel
+
+    if len(args.include_samples) != desmat.shape[0]:
+        print('The number of samples in the --include-samples option do not match rows in design matrix.')
+        sys.exit(-1)
+    if len(args.beta_labels) != desmat.shape[1]:
+        print('The number of labels in the --beta-labels option do not match columns in design matrix.')
+        sys.exit(-1)
     
     return args
 
 
-def read_gene_from_file(df,includesamples=None):
+def read_gene_from_file(args,includesamples=None):
     '''
     Reading gene models 
     Parameters
@@ -88,11 +54,23 @@ def read_gene_from_file(df,includesamples=None):
     sampleids=[]
     sampleindex=[]
     sampleids_toindex={}
+    
+    df=pd.read_csv(args.count_table).fillna(0)
+
+    if args.cnv_norm is not None:
+        cnv_data = pd.read_csv(args.cnv_norm,sep='\t',index_col=0)
+
+        ## get common genes
+        common_genes = list(set(df['Gene']).intersection(set(cnv_data.index)))
+
+        df = df[df['Gene'].isin(common_genes)]
+        cnv_data = cnv_data.loc[common_genes]
+        cnv_data.to_csv(args.cnv_norm, sep='\t')
         
     for line in range(len(df)):
         field=df.iloc[line]
 
-        if nline == 0:
+        if nline==0:
             # The first line: check sample columns
             header=list(df.columns)
             nsamples=len(header)-2
@@ -106,7 +84,7 @@ def read_gene_from_file(df,includesamples=None):
                 sampleindex=[sampleids_toindex[si] for si in includesamples]
             else:
                 sampleindex=[i for i in range(nsamples)]
-
+        
         sgid=str(field[0])
         gid=str(field[1])
 
@@ -139,79 +117,38 @@ def read_gene_from_file(df,includesamples=None):
     return allgenedict
 
 
-# Remove ID from genes
-def header_cleanup(df, index=True):
-    if index:
-        df_header = list(df.index)
-    else:
-        df_header = list(df.columns)
-
-    for gene_idx in range(0, len(df_header)):
-        gene = df_header[gene_idx]
-        gene = gene.split(' (')[0]
-        df_header[gene_idx] = gene
-
-    if index:
-        df.index = df_header
-    else:
-        df.columns = df_header
-
-    return(df)
-
-
-def read_CNVdata(args):
+def write_gene_to_file(allgenedict,outfile,betalabels=None):
     '''
-    formats read count and copy number dataframes
+    Write gene to file
     '''
-
-    # copy number data
-    CN_df = pd.read_csv(args.cnv_norm, index_col=0).T.fillna(0) ## set NaN to 0
-    CN_df = header_cleanup(CN_df, index=True)
-
-    # common cell lines
-    cell_list = list(set(args.beta_labels[1:]).intersection(set(CN_df.columns)))
-    CN_df = CN_df.loc[:,cell_list]
-
-    # change beta_labels and design matrix to match common cell lines
-    args.beta_labels = ['baseline'] + cell_list
-    args.design_matrix = args.design_matrix[:,[0] + [args.beta_labels.index(x) for x in cell_list]]
-
-    return CN_df
-
-
-def format_CNVdata(CN_df,cell_list,gene_list):
-    '''
-    reads a file contaning a matrix of copy number data and filters out
-    copy number data for inputted set of desired cell lines
-    '''
-
-    # dictionary of cell line from copy number data matrix
-    cell_dict = {key:val for (val,key) in enumerate(CN_df.columns)}
-    # dictionary of gene symbol indices from copy number data matrix
-    gene_dict = {str(key):val for (val,key) in enumerate(CN_df.index)}
-
-    # identify matches in list of desired cell lines/genes and cell lines/genes in CN data
-    set_cell_list = set(cell_list)
-    common_c = [(idx, item) for (idx, item) in enumerate(cell_dict.keys()) if item in set_cell_list]
-    c_inds = [x[0] for x in common_c] 
-    c_matches = [x[1] for x in common_c]
+    ofid=open(outfile,'w')
     
-    set_gene_list = set(gene_list)
-    common_g = [(idx, item) for (idx, item) in enumerate(gene_dict.keys()) if item in set_gene_list]
-    g_inds = [x[0] for x in common_g]
-    g_matches = [x[1] for x in common_g]
+    tmpinst=list(allgenedict.values())[0] 
+    nbeta=len(tmpinst.beta_estimate)-(tmpinst.nb_count.shape[1])
+    #headerterms=['|beta','|z','|p-value','|fdr','|wald-p-value','|wald-fdr' ] # two-sided,using permutation test for p value
 
-    # convert ndarray into array with float values (instead of string)
-    # NOTE: also adjusting log2(CN+1) to CN by exponentiating and subtracting 1
-    arr = CN_df.iloc[g_inds,c_inds].to_numpy()
-    arr = arr.astype(np.float)
-    arr = 2**arr-1
+    if len(betalabels)-1!=nbeta or betalabels is None:
+        raise ValueError('Beta labels do not match to columns of the design matrix.')
+        
+    reportlabels=','.join(betalabels[1:])
+    print(','.join(['Gene',reportlabels]),file=ofid)
+        
+    # print for each gene 
+    controlsglist=[]
 
-    # dictionary of cell line/gene indices from filtered array of CN data
-    new_cell_dict = {key:val for (val,key) in enumerate(c_matches)}
-    new_gene_dict = {key:val for (val,key) in enumerate(g_matches)}
-
-    return (arr,new_cell_dict,new_gene_dict)
+    for (tgid,tginst) in allgenedict.items():
+        # skip genes if it consists of all control sgRNAs
+        notskip=False
+        for sgid in tginst.sgrnaid:
+            if sgid not in controlsglist:
+                notskip=True
+        if notskip==False:
+            continue
+        wfield=tginst.gene_to_printfield()
+        wfield=[tgid]+wfield[2::6]
+        print(','.join(wfield),file=ofid)
+    # end
+    ofid.close()
 
 
 def mageckmle_main(parsedargs=None,returndict=False):
@@ -225,63 +162,26 @@ def mageckmle_main(parsedargs=None,returndict=False):
     returndict
         If set true, will not try to run the whole prediction process, but will return after mean variance modeling
     '''
+    # parsing arguments
+    args=mageckmle_postargs(parsedargs)
         
     import numpy as np
-    from mageck.mleinstanceio import write_gene_to_file
     from mageck.mleem import iteratenbem
     from mageck.mlemeanvar import MeanVarModel
     from mageck.mageckCount import normalizeCounts
     from mageck.mlesgeff import read_sgrna_eff
     from mageck.mlemultiprocessing import runem_multiproc,iteratenbem_permutation,iteratenbem_permutation_by_nsg
-    from mageck.cnv_normalization import betascore_piecewisenorm,betascore_piecewisenorm,highestCNVgenes
+    from mageck.cnv_normalization import read_CNVdata,betascore_piecewisenorm,betascore_piecewisenorm,highestCNVgenes
     from mageck.cnv_estimation import mageckmleCNVestimation
 
     # main process
-    args=parsedargs
     maxfittinggene=args.genes_varmodeling
     maxgene=np.inf
-
     # reading sgRNA efficiency
     read_sgrna_eff(args)
-
-    # reading count table
-    count_table = pd.read_csv(args.count_table)
-
-    # parsing arguments
-    args=create_design_matrix(args, count_table)
-    
-    # perform copy number estimation if option selected
-    CN_arr = None
-    CN_celldict = None
-    CN_genedict = None
-    genes2correct = False
-    CN_celllabel = args.beta_labels[1:]
-    
-    if args.cnv_norm is not None: 
-        # get copy number data from external copy number dataset
-        # here is used just check the cnv files
-        CN_df = read_CNVdata(args)
-        CN_celllabel = args.beta_labels[1:]
-
-        gene_list = np.unique(count_table['Gene'])
-        (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(CN_df,CN_celllabel,gene_list)
-        genes2correct = False # do not select only subset of genes to correct (i.e. correct all genes)
-
-        ## filter out genes with no copy number data from count table
-        count_table = count_table[count_table['Gene'].isin(CN_genedict.keys())]
-    elif args.cnv_est is not None:
-        # estimating CNVS
-        # organize sgRNA-gene pairing into dictionary
-        sgrna2genelist = {sgrna: gene for gene in allgenedict for sgrna in allgenedict[gene].sgrnaid}
-        # estimate CNV and write results to file
-        mageckmleCNVestimation(args.cnv_est,cttab_sel,desmat,sgrna2genelist,CN_celllabel,args.output_prefix)
-        # read into the data structures
-        (CN_arr,CN_celldict,CN_genedict) = format_CNVdata(str(args.output_prefix)+'.CNVestimates.txt',CN_celllabel)
-        genes2correct = highestCNVgenes(CN_arr,CN_genedict,percentile=98)
-
-    # create gene dictionary
-    allgenedict=read_gene_from_file(count_table,includesamples=args.include_samples)
-    
+    # reading read count table
+    allgenedict=read_gene_from_file(args,includesamples=args.include_samples)
+    #
     # check the consistency of negative control sgRNAs
     sgrna2genelist={}
     for (geneid,gk) in allgenedict.items():
@@ -308,6 +208,32 @@ def mageckmle_main(parsedargs=None,returndict=False):
     ngene=0
     for (tgid,tginst) in allgenedict.items():
         tginst.design_mat=desmat
+    
+    # perform copy number estimation if option selected
+    CN_arr = None
+    CN_celldict = None
+    CN_genedict = None
+    genes2correct = False
+    CN_celllabel=args.beta_labels[1:]
+    if args.cnv_norm is not None or args.cnv_est is not None: 
+        # check if --cell-line option is set
+        if args.cell_line is not None:
+            CN_celllabel=[args.cell_line]*len(args.beta_labels[1:]) # replace it with all cell lines provided
+        if args.cnv_norm is not None: 
+            # get copy number data from external copy number dataset
+            # here is used just check the cnv files
+            (CN_arr,CN_celldict,CN_genedict) = read_CNVdata(args.cnv_norm,CN_celllabel)
+            genes2correct = False # do not select only subset of genes to correct (i.e. correct all genes)
+        elif args.cnv_est is not None:
+            # estimating CNVS
+            # organize sgRNA-gene pairing into dictionary
+            sgrna2genelist = {sgrna: gene for gene in allgenedict for sgrna in allgenedict[gene].sgrnaid}
+            # estimate CNV and write results to file
+            mageckmleCNVestimation(args.cnv_est,cttab_sel,desmat,sgrna2genelist,CN_celllabel,args.output_prefix)
+            # read into the data structures
+            (CN_arr,CN_celldict,CN_genedict) = read_CNVdata(str(args.output_prefix)+'.CNVestimates.txt',CN_celllabel)
+            genes2correct = highestCNVgenes(CN_arr,CN_genedict,percentile=98)
+        # if no match was found
     
     # run the EM for a few genes to perform gene fitting process
     meanvardict={}
@@ -377,9 +303,9 @@ def mageckmle_main(parsedargs=None,returndict=False):
         betascore_piecewisenorm(allgenedict,CN_celllabel,CN_arr,CN_celldict,CN_genedict,selectGenes=genes2correct)
 
     # write to file
-    genefile=args.output_prefix+'.gene_summary.txt'
+    genefile=args.output_prefix+'.csv'
     # sgrnafile=args.output_prefix+'.sgrna_summary.txt'
-    write_gene_to_file(allgenedict,genefile,args,betalabels=args.beta_labels)
+    write_gene_to_file(allgenedict,genefile,betalabels=args.beta_labels)
     # write_sgrna_to_file(allgenedict,sgrnafile)
     return (allgenedict,mrm)
 
