@@ -133,7 +133,7 @@ run_MAGeCK(){
 		-s $ROOT/data/ScreenSequenceMap.csv \
 		-n $ROOT/data/corrected/"$LIB"_gene_MAGeCK \
 		--cnv-norm $ROOT/data/OmicsCNGene.csv \
-		--permutation-round 10 \
+		--permutation-round 0 \
 		--no-permutation-by-group
 
 	conda deactivate
