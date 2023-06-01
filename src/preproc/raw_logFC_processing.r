@@ -35,7 +35,8 @@ for (lib in libraries){
         ungroup() %>%
         select(sgRNA, ModelID, meanLogFoldChange) %>%
         distinct() %>%
-        as_tibble()
+        as_tibble() %>%
+        mutate(meanLogFoldChange = replace_na(meanLogFoldChange, 0)) ## replace NA with 0
     
     ## sgRNA-level LFC data
     df_sgRNA <- df %>%
