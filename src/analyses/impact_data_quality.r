@@ -16,17 +16,22 @@ ess_genes <- read_csv("data/AchillesCommonEssentialControls.csv") %>%
     separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
     pull(Gene) %>%
     unique()
+
 noness_genes <- read_csv("data/AchillesNonessentialControls.csv") %>%
     separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
     pull(Gene) %>%
     unique()
-msigdb_genes <- c(EssGenes.DNA_REPLICATION_cons,
+
+msigdb_genes <- c(
+        EssGenes.DNA_REPLICATION_cons,
         EssGenes.HISTONES,
         EssGenes.KEGG_rna_polymerase,
         EssGenes.PROTEASOME_cons,
         EssGenes.SPLICEOSOME_cons,
-        EssGenes.ribosomalProteins) %>%
+        EssGenes.ribosomalProteins
+        ) %>%
     unique()
+
 cn_ampl_genes <- read_csv("data/OmicsCNGene.csv") %>%
     rename(ModelID = colnames(.)[1]) %>%
     pivot_longer(-ModelID, names_to = "Gene", values_to = "CN_ratio") %>%
@@ -40,6 +45,7 @@ cn_ampl_genes <- read_csv("data/OmicsCNGene.csv") %>%
     separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
     pull(Gene) %>%
     unique()
+    
 cn_ampl_noexpr_genes <- read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
     rename(ModelID = colnames(.)[1]) %>%
     pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM") %>%
