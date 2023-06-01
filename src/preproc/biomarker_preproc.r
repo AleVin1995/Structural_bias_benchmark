@@ -69,4 +69,4 @@ biomarkers <- MoBEM %>%
     ungroup()
 
 # save reference
-write_csv(biomarkers, "data/biomarkers/biomarkers.csv")
+saveRDS(biomarkers, "data/biomarkers/biomarkers.rds")
