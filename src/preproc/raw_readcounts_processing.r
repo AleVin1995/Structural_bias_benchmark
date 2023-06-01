@@ -33,6 +33,7 @@ for (lib in libraries){
         select(sgRNA, Gene, SequenceID, Readcounts) %>%
         distinct() %>%
         as_tibble() %>%
+        mutate(Readcounts = replace_na(Readcounts, 0)) ## replace NA with 0
         pivot_wider(names_from = SequenceID, values_from = Readcounts)
     
     print(paste0("Finished to process. Saving ", lib, "..."))
