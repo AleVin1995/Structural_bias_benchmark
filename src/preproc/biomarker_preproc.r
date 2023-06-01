@@ -42,7 +42,7 @@ hypmet_reference <- CELLector.CFEs.HMSid_decode %>%
 biomarkers <- MoBEM %>%
     as.data.frame() %>%
     rownames_to_column("CFE") %>%
-    pivot_longer(-CFE, names_to = "COSMICID", values_to = "Present") %>%
+    pivot_longer(-CFE, names_to = "COSMICID", values_to = "Status") %>%
     mutate(COSMICID = as.numeric(COSMICID)) %>%
     ## assign model type
     inner_join(., read_csv('data/Model.csv') %>%
@@ -66,7 +66,17 @@ biomarkers <- MoBEM %>%
     mutate(ContainedGenes = ifelse(is.na(ContainedGenes), CFE_stripped, ContainedGenes)) %>%
     group_by(CFE_stripped, DepmapModelType) %>%
     nest(ContainedGenes = ContainedGenes) %>%
-    ungroup()
+    ungroup() %>%
+    ## at least 5 samples per CFE with present/absent status
+    group_by(CFE, DepmapModelType, Status) %>%
+    mutate(sample_size = n()) %>%
+    ungroup() %>%
+    group_by(CFE, DepmapModelType) %>%
+    mutate(Occurrence = n()) %>%
+    filter(Occurrence-sample_size >= 5 & sample_size >= 5) %>%
+    ungroup() %>%
+    select(-sample_size, -Occurrence)
+
 
 # save reference
 saveRDS(biomarkers, "data/biomarkers/biomarkers.rds")
