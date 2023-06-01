@@ -101,7 +101,7 @@ for (lib in libs){
     common_cells <- Reduce(intersect, map(dfs, ~colnames(.)[2:length(colnames(.))]))
 
     ## select only common cell lines and first columns
-    dfs <- map(dfs, ~select(., colnames(.)[1], common_cells))
+    dfs <- map(dfs, ~select(., colnames(.)[1], all_of(common_cells)))
 
     ## compute significant threshold at 5% FDR for each algorithm across cell lines
     sigthreshold <- map(dfs, ~.x %>%
