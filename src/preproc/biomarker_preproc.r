@@ -1,41 +1,6 @@
 library(tidyverse)
 
-load('data/biomarkers/CELLector.CFEs.CNAid_decode.RData')
-load('data/biomarkers/CELLector.CFEs.CNAid_mapping.RData')
-load('data/biomarkers/CELLector.CFEs.HMSid_decode.RData')
 load('data/biomarkers/MoBEM.RData')
-
-
-# create RACS reference
-racs_reference <- CELLector.CFEs.CNAid_mapping %>%
-    pivot_longer(-Identifier, names_to = "DepmapModelType", values_to = "TissueID") %>%
-    filter(TissueID != "") %>%
-    inner_join(., CELLector.CFEs.CNAid_decode %>% 
-        select(Identifier, ContainedGenes) %>%
-        rename(TissueID = Identifier), by = "TissueID") %>%
-    filter(ContainedGenes != "") %>%
-    ## split column ContainedGenes into multiple rows
-    separate_rows(ContainedGenes, sep = ",") %>%
-    ## nest ContainedGenes into a list
-    group_by(Identifier, DepmapModelType) %>%
-    nest(ContainedGenes = ContainedGenes) %>%
-    ungroup() %>%
-    select(-TissueID) %>%
-    rename(CFE_stripped = Identifier)
-
-
-# create hypermethylation reference
-hypmet_reference <- CELLector.CFEs.HMSid_decode %>%
-    select(Genomic.Coordinates, Cancer.Types, GN) %>%
-    rename(Identifier = Genomic.Coordinates, ContainedGenes = GN, DepmapModelType = Cancer.Types) %>%
-    filter(ContainedGenes != "") %>%
-    ## split column ContainedGenes into multiple rows
-    separate_rows(ContainedGenes, sep = "; ") %>%
-    ## nest ContainedGenes into a list
-    group_by(Identifier, DepmapModelType) %>%
-    nest(ContainedGenes = ContainedGenes) %>%
-    ungroup() %>%
-    rename(CFE_stripped = Identifier)
 
 
 # create biomarker reference
@@ -58,15 +23,7 @@ biomarkers <- MoBEM %>%
     separate(CFE_stripped, into = c("CFE_stripped", "code"), sep = " \\(") %>%
     select(-code) %>%
     separate(CFE_stripped, into = c("CFE_stripped", "code"), sep = "\\(") %>%
-    select(-code) %>%
-    ## add RACS and hypermethylation references
-    left_join(., bind_rows(racs_reference, hypmet_reference), by = c("CFE_stripped", "DepmapModelType")) %>%
-    ## add CFEs of sumatic mutations
-    unnest(cols = c(ContainedGenes), keep_empty = TRUE) %>%
-    mutate(ContainedGenes = ifelse(is.na(ContainedGenes), CFE_stripped, ContainedGenes)) %>%
-    group_by(CFE_stripped, DepmapModelType) %>%
-    nest(ContainedGenes = ContainedGenes) %>%
-    ungroup()
+    select(-code)
 
 
 # save reference
