@@ -66,16 +66,7 @@ biomarkers <- MoBEM %>%
     mutate(ContainedGenes = ifelse(is.na(ContainedGenes), CFE_stripped, ContainedGenes)) %>%
     group_by(CFE_stripped, DepmapModelType) %>%
     nest(ContainedGenes = ContainedGenes) %>%
-    ungroup() %>%
-    ## at least 5 samples per CFE with present/absent status
-    group_by(CFE, DepmapModelType, Status) %>%
-    mutate(sample_size = n()) %>%
-    ungroup() %>%
-    group_by(CFE, DepmapModelType) %>%
-    mutate(Occurrence = n()) %>%
-    filter(Occurrence-sample_size >= 5 & sample_size >= 5) %>%
-    ungroup() %>%
-    select(-sample_size, -Occurrence)
+    ungroup()
 
 
 # save reference
