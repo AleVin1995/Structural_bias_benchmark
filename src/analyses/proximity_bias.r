@@ -50,11 +50,19 @@ perform_brunnermunzel <- function(df, cytoband_info){
                 print(paste0("No data for ", chrm, ", skipping..."))
                 next
             }
+
+            if (length(unique(df_sub$Class)) != 2){
+                print(paste0("Not two classes for chromosome ", chrm, " and arm ", arm, ", skipping..."))
+                next
+            }
             
             res[res$Chromosome == chrm & res$Arm == arm, "est"] <- brunnermunzel.test(Cor ~ Class, data = df_sub)$estimate %>%
                 as.numeric()
         }
     }
+
+    res <- res %>%
+        na.omit()
 
     return(res)
 }
