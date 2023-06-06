@@ -1241,6 +1241,13 @@
       ],
       "Hash": "f62b2504021369a2449c54bbda362d30"
     },
+    "brunnermunzel": {
+      "Package": "brunnermunzel",
+      "Version": "2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "b7d39d9dcbe68c6b85b5e50ebbc84b80"
+    },
     "bslib": {
       "Package": "bslib",
       "Version": "0.4.2",
