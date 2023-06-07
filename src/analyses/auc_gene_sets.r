@@ -94,7 +94,8 @@ for (lib in libs){
         c(paste0("data/raw/", lib, "_gene_raw_LFC.csv"), .) %>%
         map(~.x %>%
             read_csv %>%
-            mutate(across(where(is.numeric), ~replace_na(., 0)))) %>% ## fill na with 0
+            mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
+            dplyr::rename(Gene = colnames(.)[1])) %>% ## fill na with 0
         set_names(dfs_names)
     
     ## common cell lines
