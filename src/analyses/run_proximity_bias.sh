@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+#SBATCH --job-name=proximity_bias 
+#SBATCH --mem-per-cpu=150GB
+#SBATCH --partition=cpuq
+#SBATCH --mail-type=NONE
+#SBATCH --time=50:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=1
+#SBATCH --chdir=/group/iorio/Alessandro/CN_benchmark
+#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/%x.out
+#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/%x.err
+
+source ~/.bashrc
+conda activate CN_bench_r
+
+Rscript src/analyses/proximity_bias_bw_test.r
