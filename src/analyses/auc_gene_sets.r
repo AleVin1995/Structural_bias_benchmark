@@ -100,8 +100,13 @@ for (lib in libs){
     ## common cell lines
     common_cells <- Reduce(intersect, map(dfs, ~colnames(.)[2:length(colnames(.))]))
 
+    common_genes <- Reduce(intersect, map(dfs, ~.$Gene))
+
+    no_ampl_genes <- setdiff(common_genes, cn_ampl_genes)
+
     ## select only common cell lines and first columns
-    dfs <- map(dfs, ~select(., colnames(.)[1], all_of(common_cells)))
+    dfs <- map(dfs, ~select(., colnames(.)[1], all_of(common_cells))) %>%
+        map(~filter(., Gene %in% common_genes))
 
     ## compute significant threshold at 5% FDR for each algorithm across cell lines
     sigthreshold <- map(dfs, ~.x %>%
@@ -136,7 +141,7 @@ for (lib in libs){
         select(-Sig_Threshold) %>%
         pivot_longer(-c(Algorithm, ModelID), names_to = "Gene_Set", values_to = "Recall")
 
-    ## compute AUROC for each algorithm across cell lines
+    ## compute AUROC for each algorithm across cell lines (ess/noness genes)
     aurocs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 rename(Gene = colnames(.)[1]) %>%
@@ -154,7 +159,25 @@ for (lib in libs){
         mutate(AUROC = replace_na(AUROC, 0)) %>%
         mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
     
-    ## compute AUPRC for each algorithm across cell lines
+    ## compute AUROC for each algorithm across cell lines (ampl/non ampl genes)
+    aurocs_ampl <- map(dfs, ~.x %>%
+                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                rename(Gene = colnames(.)[1]) %>%
+                split(.$ModelID) %>%
+                map(~.x %>% 
+                    pull(LFC, name = "Gene") %>% 
+                    ccr.ROC_Curve(., cn_ampl_genes, no_ampl_genes, display = FALSE) %>% 
+                    .$AUC %>% 
+                    as.numeric()) %>%
+                bind_rows() %>%
+                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUROC")) %>%
+        set_names(dfs_names) %>%
+        bind_rows(.id = "Algorithm") %>%
+        ### replace NA or Inf with 0
+        mutate(AUROC = replace_na(AUROC, 0)) %>%
+        mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
+    
+    ## compute AUPRC for each algorithm across cell lines (ess/noness genes)
     auprcs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 rename(Gene = colnames(.)[1]) %>%
@@ -162,6 +185,24 @@ for (lib in libs){
                 map(~.x %>% 
                     pull(LFC, name = "Gene") %>% 
                     ccr.PrRc_Curve(., ess_genes, noness_genes, display = FALSE) %>%
+                    .$AUC %>% 
+                    as.numeric()) %>%
+                bind_rows() %>%
+                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUPRC")) %>%
+        set_names(dfs_names) %>%
+        bind_rows(.id = "Algorithm") %>%
+        ### replace NA or Inf with 0
+        mutate(AUPRC = replace_na(AUPRC, 0)) %>%
+        mutate(AUPRC = replace(AUPRC, is.infinite(AUPRC), 0))
+    
+    ## compute AUPRC for each algorithm across cell lines (ampl/non ampl genes)
+    auprcs_ampl <- map(dfs, ~.x %>%
+                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                rename(Gene = colnames(.)[1]) %>%
+                split(.$ModelID) %>%
+                map(~.x %>% 
+                    pull(LFC, name = "Gene") %>% 
+                    ccr.PrRc_Curve(., cn_ampl_genes, no_ampl_genes, display = FALSE) %>%
                     .$AUC %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
@@ -194,7 +235,7 @@ for (lib in libs){
 
     p_aurocs <- ggplot(aurocs, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
         geom_boxplot() +
-        labs(x = "Method", y = "AUROC", title = "AUROC") +
+        labs(x = "Method", y = "AUROC", title = "AUROC ess vs noness genes") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
@@ -206,10 +247,25 @@ for (lib in libs){
             aspect.ratio = 1)
     ggsave(p_aurocs, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUROC.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(aurocs, paste0("results/analyses/impact_data_quality/", lib, "_AUROC.rds"))
+
+    p_aurocs_ampl <- ggplot(aurocs_ampl, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
+        geom_boxplot() +
+        labs(x = "Method", y = "AUROC", title = "AUROC ampl vs non-ampl genes") +
+        theme_bw() +
+        theme(
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 10, color = 'black'),
+            axis.title = element_text(size = 12),
+            plot.title = element_text(size = 14, hjust = 0.5),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            aspect.ratio = 1)
+    ggsave(p_aurocs_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.pdf"), width = 10, height = 10, dpi = 300)
+    saveRDS(aurocs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.rds"))
     
     p_auprcs <- ggplot(auprcs, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
         geom_boxplot() +
-        labs(x = "Method", y = "AUPRC", title = "AUPRC") +
+        labs(x = "Method", y = "AUPRC", title = "AUPRC ess vs noness genes") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
@@ -221,4 +277,19 @@ for (lib in libs){
             aspect.ratio = 1)
     ggsave(p_auprcs, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(auprcs, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
+
+    p_auprcs_ampl <- ggplot(auprcs_ampl, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
+        geom_boxplot() +
+        labs(x = "Method", y = "AUPRC", title = "AUPRC ampl vs non-ampl genes") +
+        theme_bw() +
+        theme(
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 10, color = 'black'),
+            axis.title = element_text(size = 12),
+            plot.title = element_text(size = 14, hjust = 0.5),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            aspect.ratio = 1)
+    ggsave(p_auprcs_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.pdf"), width = 10, height = 10, dpi = 300)
+    saveRDS(auprcs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.rds"))
 }
