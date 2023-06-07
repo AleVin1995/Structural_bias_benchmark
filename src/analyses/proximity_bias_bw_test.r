@@ -128,6 +128,7 @@ if (length(args) == 0){
     libs <- c("Avana", "KY")
 } else {
     libs <- args[[1]]
+    print(paste0("Running for ", libs))
 }
 
 # iterate over algorithms and libraries
