@@ -8,8 +8,8 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/group/iorio/Alessandro/CN_benchmark
-#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/%x.out
-#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/%x.err
+#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/%j.out
+#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/%j.err
 
 source ~/.bashrc
 conda activate CN_bench_r
