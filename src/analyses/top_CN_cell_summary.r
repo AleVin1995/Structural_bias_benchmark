@@ -20,9 +20,9 @@ CN_abs <- read_csv('data/cnv_abs_copy_number_picnic_20191101.csv') %>%
     mutate(Model_sd = sd(CN_abs)) %>%
     ungroup() %>%
     arrange(desc(Model_sd)) %>%
-    ## select top 10 models
+    ## select top 25 models
     nest(data = c(Gene, CN_abs)) %>% 
-    slice(1:11) %>% ## one is missing in the model file
+    slice(1:25) %>%
     unnest(data) %>%
     select(-Model_sd) %>%
     ## convert cell line names to model IDs
