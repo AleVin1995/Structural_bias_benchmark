@@ -14,4 +14,14 @@
 source ~/.bashrc
 conda activate CN_bench_r
 
-Rscript src/analyses/proximity_bias_bw_test.r
+LIB=$1
+
+if [[ -z "$LIB" ]]
+then
+	echo "No library argument provided"
+	echo "Processing all libraries"
+
+    Rscript src/analyses/proximity_bias_bw_test.r
+else
+    Rscript src/analyses/proximity_bias_bw_test.r $LIB
+fi
