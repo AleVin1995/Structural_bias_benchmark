@@ -144,12 +144,14 @@ for (lib in libs){
         map(~filter(., Gene %in% common_genes))
     
     ## perform brunner-munzel test
+    print(paste0("Performing brunner-munzel test for ", lib, " on pooled...")
     bm_pool <- dfs %>%
         map(~.x %>%
             perform_brunnermunzel(., cytoband)) %>%
         bind_rows(.id = "Algorithm")
 
     ## perform brunner-munzel test for repair genes
+    print(paste0("Performing brunner-munzel test for ", lib, " on TP53..."))
     bm_TP53 <- dfs %>%
         map(~.x %>%
             mut_stat_split(., 
@@ -158,6 +160,7 @@ for (lib in libs){
                 cytoband)) %>%
         bind_rows(.id = "Algorithm")
     
+    print(paste0("Performing brunner-munzel test for ", lib, " on CDKN2A...")
     bm_CDKN2A <- dfs %>%
         map(~.x %>%
             mut_stat_split(., 
@@ -166,6 +169,7 @@ for (lib in libs){
                 cytoband)) %>%
         bind_rows(.id = "Algorithm")
     
+    print(paste0("Performing brunner-munzel test for ", lib, " on CDKN2B...")
     bm_CDKN2B <- dfs %>%
         map(~.x %>%
             mut_stat_split(., 
@@ -174,6 +178,7 @@ for (lib in libs){
                 cytoband)) %>%
         bind_rows(.id = "Algorithm")
     
+    print(paste0("Performing brunner-munzel test for ", lib, " on CDKN2C...")
     bm_CDKN2C <- dfs %>%
         map(~.x %>%
             mut_stat_split(., 
@@ -182,6 +187,7 @@ for (lib in libs){
                 cytoband)) %>%
         bind_rows(.id = "Algorithm")
     
+    print(paste0("Performing brunner-munzel test for ", lib, " on BTG2...")
     bm_BTG2 <- dfs %>%
         map(~.x %>%
             mut_stat_split(., 
