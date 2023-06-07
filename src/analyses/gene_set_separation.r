@@ -78,5 +78,5 @@ for (lib in libs){
             axis.text.x = element_text(angle = 45, hjust = 1),
             aspect.ratio = 1)
     ggsave(p_gene_sep, filename = paste0("results/analyses/impact_data_quality/", lib, "_gene_sets_separation.pdf"), width = 10, height = 10, dpi = 300)
-    saveRDS(p_gene_sep, paste0("results/analyses/impact_data_quality/", lib, "_gene_sets_separation.rds"))
+    saveRDS(gene_sep, paste0("results/analyses/impact_data_quality/", lib, "_gene_sets_separation.rds"))
 }
