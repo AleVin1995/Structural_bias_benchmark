@@ -242,6 +242,7 @@ def crisprseq_parseargs():
     
     design_matrix_path = args.design_matrix
     cnv_norm_path = args.cnv_norm
+    count_table_path = tempfile.NamedTemporaryFile(delete=False).name
 
     # format CNV data if provided
     if args.cnv_norm is not None:
@@ -249,13 +250,41 @@ def crisprseq_parseargs():
 
     if args.subcmd == 'mle':
         if args.n_cells is not None:
+            tot_count_table = pd.read_csv(args.count_table)
+
             desmat = pd.read_csv(args.design_matrix, sep='\t', index_col=0)
             chunks = get_chunks(args)
             count = 0
 
+            ## model to replicate dictionary
+            model_replicate_dict = {}
+
+            for model in desmat.columns[1:]:
+                replicates = desmat.loc[desmat[model] == 1, :].index
+                model_replicate_dict[model] = list(replicates)
+            
+            ## add pDNA to model replicate dictionary
+            all_replicates = list(desmat.index)
+            all_replicates_in_dict = [item for sublist in model_replicate_dict.values() for item in sublist]
+            pDNAs = list(np.setdiff1d(all_replicates, all_replicates_in_dict))
+            model_replicate_dict['pDNA'] = pDNAs
+
             for chunk in chunks:
                 desmat_chunk = desmat[['baseline'] + chunk]
+                chunk_replicates = model_replicate_dict['pDNA']
+
+                for model in chunk:
+                    chunk_replicates += model_replicate_dict[model]
+
+                ## update the design matrix
+                desmat_chunk = desmat_chunk.loc[chunk_replicates, :]
                 desmat_chunk.to_csv(args.design_matrix, sep='\t')
+
+                ## update the count table
+                count_table_chunk = tot_count_table.loc[:, ['sgRNA', 'Gene'] + chunk_replicates]
+                count_table_chunk.to_csv(count_table_path)
+
+                args.count_table = count_table_path
                 mageckmle_main(parsedargs=args)
 
                 count += 1
@@ -272,6 +301,9 @@ def crisprseq_parseargs():
     
     if cnv_norm_path is not None and 'tmp' in cnv_norm_path:
         os.remove(cnv_norm_path)
+    
+    if count_table_path is not None and 'tmp' in count_table_path:
+        os.remove(count_table_path)
 
 
 if __name__ == '__main__':
