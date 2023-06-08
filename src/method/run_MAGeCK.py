@@ -298,7 +298,7 @@ def crisprseq_parseargs():
             res = res_list[0]
             
             for i in range(1, len(res_list)):
-                res = res.merge(res_list[i], on='sgRNA', how='outer')
+                res = res.merge(res_list[i], on='Gene', how='outer')
             
             res.to_csv(args.output_prefix + '.csv', index=False)
         else:
