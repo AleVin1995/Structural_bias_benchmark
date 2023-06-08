@@ -3,7 +3,6 @@ MAGeCK argument parser
 """
 
 from __future__ import print_function
-from sklearn.model_selection import StratifiedKFold
 import sys
 import argparse
 import os
@@ -205,6 +204,8 @@ def format_CNV_data(args):
     return args
 
 def get_chunks(args):
+    np.random.seed(1234)
+
     chunk_size = int(args.n_cells)
     model = pd.read_csv(args.ref_model)
     desmat = pd.read_csv(args.design_matrix, sep='\t', index_col=0)
@@ -213,24 +214,11 @@ def get_chunks(args):
     cell_lines = np.unique(desmat.columns[1:])
 
     ## keep only models in cell lines
-    model = model.loc[model['ModelID'].isin(cell_lines), :]
+    model = model.loc[model['ModelID'].isin(cell_lines), 'ModelID'].to_list()
+    np.random.shuffle(model)
 
     # Split the dataframe into chunks
-    chunks = []
-
-    while len(model) > 0:
-        if len(model) > chunk_size:
-            chunk = model.groupby('OncotreeLineage', group_keys=False).apply(lambda x: x.sample(frac=chunk_size/len(model)))
-            idxs = chunk.index
-
-            chunk = chunk['ModelID'].to_list()
-            chunks.append(chunk)
-
-            model = model.drop(idxs)
-        else:
-            chunk = model['ModelID'].to_list()
-            chunks.append(chunk)
-            model = pd.DataFrame()
+    chunks = [model[x:x+chunk_size] for x in range(0, len(model), chunk_size)]
 
     return chunks
 
