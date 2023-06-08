@@ -128,7 +128,7 @@ def gene_to_dataframe(allgenedict,betalabels=None):
     if len(betalabels)-1!=nbeta or betalabels is None:
         raise ValueError('Beta labels do not match to columns of the design matrix.')
         
-    header = ['sgRNA'] + betalabels[1:]
+    header = ['Gene'] + betalabels[1:]
         
     # Iterate over each gene
     wfield_tot=[]
@@ -315,7 +315,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
     # write to file
     print('formatting results to dataframe ...')
     df = gene_to_dataframe(allgenedict,betalabels=args.beta_labels)
-    
+
     return df
 
 
