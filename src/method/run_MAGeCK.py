@@ -254,7 +254,6 @@ def crisprseq_parseargs():
 
             desmat = pd.read_csv(args.design_matrix, sep='\t', index_col=0)
             chunks = get_chunks(args)
-            count = 0
 
             ## model to replicate dictionary
             model_replicate_dict = {}
@@ -266,10 +265,13 @@ def crisprseq_parseargs():
             ## add pDNA to model replicate dictionary
             all_replicates = list(desmat.index)
             all_replicates_in_dict = [item for sublist in model_replicate_dict.values() for item in sublist]
+
             pDNAs = list(np.setdiff1d(all_replicates, all_replicates_in_dict))
             model_replicate_dict['pDNA'] = pDNAs
 
-            for chunk in chunks:
+            res_list = []
+
+            for _, chunk in enumerate(chunks):
                 desmat_chunk = desmat[['baseline'] + chunk]
                 chunk_replicates = model_replicate_dict['pDNA']
 
@@ -285,12 +287,22 @@ def crisprseq_parseargs():
                 count_table_chunk.to_csv(count_table_path)
 
                 args.count_table = count_table_path
-                mageckmle_main(parsedargs=args)
+                res_sub = mageckmle_main(parsedargs=args)
 
-                count += 1
-                print('Finished processing chunk: ' + str(count))
+                res_list.append(res_sub)
+                print('Finished processing chunk: ' + str(_ + 1) + '/' + str(len(chunks)))
+            
+            ## merge results
+            res = res_list[0]
+            
+            for i in range(1, len(res_list)):
+                res = res.merge(res_list[i], on='sgRNA', how='outer')
+            
+            res.to_csv(args.output_prefix + '.csv')
         else:
-            mageckmle_main(parsedargs=args); # ignoring the script path, and the sub command
+            res = mageckmle_main(parsedargs=args); # ignoring the script path, and the sub command
+            res.to_csv(args.output_prefix + '.csv')
+
     else:
         parser.print_help()
         sys.exit(0)

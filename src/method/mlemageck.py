@@ -117,12 +117,10 @@ def read_gene_from_file(args,includesamples=None):
     return allgenedict
 
 
-def write_gene_to_file(allgenedict,outfile,betalabels=None):
+def gene_to_dataframe(allgenedict,betalabels=None):
     '''
-    Write gene to file
+    Convert to a dataframe
     '''
-    ofid=open(outfile,'w')
-    
     tmpinst=list(allgenedict.values())[0] 
     nbeta=len(tmpinst.beta_estimate)-(tmpinst.nb_count.shape[1])
     #headerterms=['|beta','|z','|p-value','|fdr','|wald-p-value','|wald-fdr' ] # two-sided,using permutation test for p value
@@ -130,10 +128,10 @@ def write_gene_to_file(allgenedict,outfile,betalabels=None):
     if len(betalabels)-1!=nbeta or betalabels is None:
         raise ValueError('Beta labels do not match to columns of the design matrix.')
         
-    reportlabels=','.join(betalabels[1:])
-    print(','.join(['Gene',reportlabels]),file=ofid)
+    header = ['sgRNA'] + betalabels[1:]
         
-    # print for each gene 
+    # Iterate over each gene
+    wfield_tot=[]
     controlsglist=[]
 
     for (tgid,tginst) in allgenedict.items():
@@ -146,9 +144,12 @@ def write_gene_to_file(allgenedict,outfile,betalabels=None):
             continue
         wfield=tginst.gene_to_printfield()
         wfield=[tgid]+wfield[2::6]
-        print(','.join(wfield),file=ofid)
-    # end
-    ofid.close()
+
+        wfield_tot.append(wfield)
+    
+    df = pd.DataFrame(wfield_tot, columns=header)
+
+    return df
 
 
 def mageckmle_main(parsedargs=None,returndict=False):
@@ -312,12 +313,10 @@ def mageckmle_main(parsedargs=None,returndict=False):
         betascore_piecewisenorm(allgenedict,CN_celllabel,CN_arr,CN_celldict,CN_genedict,selectGenes=genes2correct)
 
     # write to file
-    print('writing results to file ...')
-    genefile=args.output_prefix+'.csv'
-    # sgrnafile=args.output_prefix+'.sgrna_summary.txt'
-    write_gene_to_file(allgenedict,genefile,betalabels=args.beta_labels)
-    # write_sgrna_to_file(allgenedict,sgrnafile)
-    return (allgenedict,mrm)
+    print('formatting results to dataframe ...')
+    df = gene_to_dataframe(allgenedict,betalabels=args.beta_labels)
+    
+    return df
 
 
 if __name__ == '__main__':
