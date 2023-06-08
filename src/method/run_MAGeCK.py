@@ -273,10 +273,15 @@ def crisprseq_parseargs():
 
             for _, chunk in enumerate(chunks):
                 desmat_chunk = desmat[['baseline'] + chunk]
-                chunk_replicates = model_replicate_dict['pDNA']
+
+                chunk_replicates = []
+                chunk_replicates.append(model_replicate_dict['pDNA'])
 
                 for model in chunk:
-                    chunk_replicates += model_replicate_dict[model]
+                    chunk_replicates.append(model_replicate_dict[model])
+                
+                ## flatten list
+                chunk_replicates = [item for sublist in chunk_replicates for item in sublist]
 
                 ## update the design matrix
                 desmat_chunk = desmat_chunk.loc[chunk_replicates, :]
@@ -289,7 +294,12 @@ def crisprseq_parseargs():
                 count_table_chunk.to_csv(count_table_path, index=False)
 
                 args.count_table = count_table_path
+                import time
+                start = time.time()
                 res_sub = mageckmle_main(parsedargs=args)
+                end = time.time()
+                ## print time elapsed in minutes
+                print('Time elapsed: ' + str((end - start)/60) + ' minutes for ' + str(len(chunk)) + ' cells')
 
                 res_list.append(res_sub)
                 print('Finished processing chunk: ' + str(_ + 1) + '/' + str(len(chunks)))
