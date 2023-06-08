@@ -300,10 +300,10 @@ def crisprseq_parseargs():
             for i in range(1, len(res_list)):
                 res = res.merge(res_list[i], on='sgRNA', how='outer')
             
-            res.to_csv(args.output_prefix + '.csv')
+            res.to_csv(args.output_prefix + '.csv', index=False)
         else:
             res = mageckmle_main(parsedargs=args); # ignoring the script path, and the sub command
-            res.to_csv(args.output_prefix + '.csv')
+            res.to_csv(args.output_prefix + '.csv', index=False)
 
     else:
         parser.print_help()
