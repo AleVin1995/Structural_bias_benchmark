@@ -3,6 +3,7 @@ MAGeCK argument parser
 """
 
 from __future__ import print_function
+from sklearn.model_selection import StratifiedKFold
 import sys
 import argparse
 import os
@@ -65,6 +66,8 @@ def arg_mle(subparser):
     #opgroup=subm_mle.add_argument_group(title='Optional arguments',description='Optional arguments')
     ## input and output
     iogroup=subm_mle.add_argument_group(title='Optional arguments for input and output',description='')
+    iogroup.add_argument('--n-cells',default=None,help='The number of cells to batch the design matrix. Default None.')
+    iogroup.add_argument('--ref-model',default=None,help='The reference model file. Default None.')
     iogroup.add_argument('-n','--output-prefix',default='sample1',help='The prefix of the output file(s). Default sample1.')
     iogroup.add_argument('-i', '--include-samples', help='Specify the sample labels if the design matrix is not given by file in the --design-matrix option. Sample labels are separated by ",", and must match the labels in the count table.')
     iogroup.add_argument('-b', '--beta-labels', help='Specify the labels of the variables (i.e., beta), if the design matrix is not given by file in the --design-matrix option. Should be separated by ",", and the number of labels must equal to (# columns of design matrix), including baseline labels. Default value: "bata_0,beta_1,beta_2,...".')
@@ -201,6 +204,36 @@ def format_CNV_data(args):
     
     return args
 
+def get_chunks(args):
+    chunk_size = int(args.n_cells)
+    model = pd.read_csv(args.ref_model)
+    desmat = pd.read_csv(args.design_matrix, sep='\t', index_col=0)
+
+    model = model[['ModelID', 'OncotreeLineage']]
+    cell_lines = np.unique(desmat.columns[1:])
+
+    ## keep only models in cell lines
+    model = model.loc[model['ModelID'].isin(cell_lines), :]
+
+    # Split the dataframe into chunks
+    chunks = []
+
+    while len(model) > 0:
+        if len(model) > chunk_size:
+            chunk = model.groupby('OncotreeLineage', group_keys=False).apply(lambda x: x.sample(frac=chunk_size/len(model)))
+            idxs = chunk.index
+
+            chunk = chunk['ModelID'].to_list()
+            chunks.append(chunk)
+
+            model = model.drop(idxs)
+        else:
+            chunk = model['ModelID'].to_list()
+            chunks.append(chunk)
+            model = pd.DataFrame()
+
+    return chunks
+
 def crisprseq_parseargs():
     """
     Parsing mageck arguments.
@@ -224,16 +257,33 @@ def crisprseq_parseargs():
     elif args.design_matrix == None and args.screen_sequence_map is None:
         print('Please specify a design matrix if a screen to sequence map file is not provided.')
         sys.exit(-1)
-
-    # format CNV data if provided
-    if args.cnv_norm is not None:
-        args = format_CNV_data(args)
     
     design_matrix_path = args.design_matrix
     cnv_norm_path = args.cnv_norm
 
+    # format CNV data if provided
+    if args.cnv_norm is not None:
+        args = format_CNV_data(args)
+
     if args.subcmd == 'mle':
-        mageckmle_main(parsedargs=args); # ignoring the script path, and the sub command
+        if args.n_cells is not None and args.ref_model is not None:
+            desmat = pd.read_csv(args.design_matrix, sep='\t', index_col=0)
+            chunks = get_chunks(args)
+            count = 0
+
+            for chunk in chunks:
+                desmat_chunk = desmat[['baseline'] + chunk]
+                desmat_chunk.to_csv(args.design_matrix, sep='\t')
+                mageckmle_main(parsedargs=args)
+
+                count += 1
+                print('Finished processing chunk: ' + str(count))
+
+        elif args.n_cells is not None and args.ref_model is None:
+            print('Please specify a reference model file if the number of cells to batch the design matrix is provided.')
+            sys.exit(-1)
+        else:
+            mageckmle_main(parsedargs=args); # ignoring the script path, and the sub command
     else:
         parser.print_help()
         sys.exit(0)
