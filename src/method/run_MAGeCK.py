@@ -284,7 +284,7 @@ def crisprseq_parseargs():
 
                 ## update the count table
                 count_table_chunk = tot_count_table.loc[:, ['sgRNA', 'Gene'] + chunk_replicates]
-                count_table_chunk.to_csv(count_table_path)
+                count_table_chunk.to_csv(count_table_path, index=False)
 
                 args.count_table = count_table_path
                 res_sub = mageckmle_main(parsedargs=args)
