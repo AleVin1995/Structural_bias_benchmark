@@ -280,7 +280,9 @@ def crisprseq_parseargs():
 
                 ## update the design matrix
                 desmat_chunk = desmat_chunk.loc[chunk_replicates, :]
-                desmat_chunk.to_csv(args.design_matrix, sep='\t')
+                desmat_chunk.to_csv(design_matrix_path, sep='\t')
+
+                args.design_matrix = design_matrix_path
 
                 ## update the count table
                 count_table_chunk = tot_count_table.loc[:, ['sgRNA', 'Gene'] + chunk_replicates]
