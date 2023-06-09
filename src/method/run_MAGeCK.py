@@ -294,14 +294,10 @@ def crisprseq_parseargs():
                 count_table_chunk.to_csv(count_table_path, index=False)
 
                 args.count_table = count_table_path
-                import time
-                start = time.time()
-                res_sub = mageckmle_main(parsedargs=args)
-                end = time.time()
-                ## print time elapsed in minutes
-                print('Time elapsed: ' + str((end - start)/60) + ' minutes for ' + str(len(chunk)) + ' cells')
 
+                res_sub = mageckmle_main(parsedargs=args)
                 res_list.append(res_sub)
+                
                 print('Finished processing chunk: ' + str(_ + 1) + '/' + str(len(chunks)))
             
             ## merge results
