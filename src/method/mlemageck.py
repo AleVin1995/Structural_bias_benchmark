@@ -164,7 +164,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
         If set true, will not try to run the whole prediction process, but will return after mean variance modeling
     '''
     # parsing arguments
-    print('parsing arguments ...')
+    # print('parsing arguments ...')
     args=mageckmle_postargs(parsedargs)
         
     import numpy as np
@@ -192,7 +192,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
             sgrna2genelist[sg_i]=geneid
 
     # calculate the size factor
-    print('normalizing read counts ...')
+    # print('normalizing read counts ...')
     cttab_sel={}
     for (geneid,gk) in allgenedict.items():
         sgid=gk.sgrnaid
@@ -213,7 +213,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
         tginst.design_mat=desmat
     
     # perform copy number estimation if option selected
-    print('copy number estimation ...')
+    # print('copy number estimation ...')
     CN_arr = None
     CN_celldict = None
     CN_genedict = None
@@ -240,7 +240,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
         # if no match was found
     
     # run the EM for a few genes to perform gene fitting process
-    print('fitting gene models ...')
+    # print('fitting gene models ...')
     meanvardict={}
     for (tgid,tginst) in allgenedict.items():
         #iteratenbem(tginst,debug=False,alpha_val=0.01,estimateeff=False,size_factor=size_f)
@@ -258,7 +258,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
         allgenedict[tgid]=tginst
 
     # model the mean and variance
-    print('modeling mean and variance ...')
+    # print('modeling mean and variance ...')
     if maxfittinggene>0:
         mrm=MeanVarModel()
         # old: linear model
@@ -271,7 +271,7 @@ def mageckmle_main(parsedargs=None,returndict=False):
         return (allgenedict,mrm,size_f)
     
     # run the test again...
-    print('performing tests ...')
+    # print('performing tests ...')
     if hasattr(args,'threads') and args.threads>0:
         # multipel threads
         argsdict={'debug':False,'estimateeff':True,'meanvarmodel':mrm,'restart':False,'removeoutliers':args.remove_outliers,'size_factor':size_f,'updateeff':args.update_efficiency,'logem':False}
@@ -296,24 +296,24 @@ def mageckmle_main(parsedargs=None,returndict=False):
             tginst.w_estimate=np.ones(len(tginst.sgrnaid))
     
     # permutation, either by group or together
-    print('performing permutation ...')
+    # print('performing permutation ...')
     if args.no_permutation_by_group:
         iteratenbem_permutation(allgenedict,args,nround=args.permutation_round,removeoutliers=args.remove_outliers,size_factor=size_f)
     else:
         iteratenbem_permutation_by_nsg(allgenedict,args,size_f=size_f)
 
     # correct for FDR
-    print('correcting for multiple testing ...')
+    # print('correcting for multiple testing ...')
     from mageck.mleclassdef import gene_fdr_correction;
     gene_fdr_correction(allgenedict,args.adjust_method);
 
     # correct for CNV
-    print('correcting for copy number variation ...')
+    # print('correcting for copy number variation ...')
     if args.cnv_norm is not None or args.cnv_est is not None:
         betascore_piecewisenorm(allgenedict,CN_celllabel,CN_arr,CN_celldict,CN_genedict,selectGenes=genes2correct)
 
     # write to file
-    print('formatting results to dataframe ...')
+    # print('formatting results to dataframe ...')
     df = gene_to_dataframe(allgenedict,betalabels=args.beta_labels)
 
     return df
