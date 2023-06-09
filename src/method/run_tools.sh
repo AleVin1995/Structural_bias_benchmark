@@ -132,7 +132,7 @@ run_MAGeCK(){
 		-k $ROOT/data/raw/"$LIB"_sgrna_raw_readcounts.csv \
 		-s $ROOT/data/ScreenSequenceMap.csv \
 		-n $ROOT/data/corrected/"$LIB"_gene_MAGeCK \
-		--n-cells 5 \
+		--n-cells 50 \
 		--cnv-norm $ROOT/data/OmicsCNGene.csv \
 		--permutation-round 0 \
 		--no-permutation-by-group
