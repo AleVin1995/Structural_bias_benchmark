@@ -104,8 +104,8 @@ mut_stat_split <- function(df, mut, cytoband_info){
             filter(Status == 1) %>% 
             pull(ModelID)))
     
-    ## perform brunner-munzel test (at least one cell line per group)
-    if (ncol(df_wt) >= 2 & ncol(df_mut) >= 2){
+    ## perform brunner-munzel test (at least 10 cell lines per group)
+    if (ncol(df_wt) >= 11 & ncol(df_mut) >= 11){
         res_wt <- perform_brunnermunzel(df_wt, cytoband_info) %>%
             mutate(Status = "WT")
         res_mut <- perform_brunnermunzel(df_mut, cytoband_info) %>%
@@ -115,7 +115,7 @@ mut_stat_split <- function(df, mut, cytoband_info){
 
         return(res)
     } else {
-        print(paste0("No data for ", goi, ", skipping..."))
+        print(paste0("No data enough for ", goi, ", skipping..."))
     }
 }
 
