@@ -175,10 +175,9 @@ for (lib in libs){
             axis.title = element_text(size = 12),
             plot.title = element_text(size = 14, hjust = 0.5),
             plot.subtitle = element_text(size = 12, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1) +
+            axis.text.x = element_text(angle = 45, hjust = 1)) +
         facet_wrap(~Coord, scales = "free_x")
-    ggsave(p_pool, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_pool.pdf"), width = 10, height = 10, dpi = 300)
+    ggsave(p_pool, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_pool.pdf"), width = 15, height = 15, dpi = 300)
     saveRDS(bm_pool, paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
 
     ## perform brunner-munzel test for repair genes
@@ -211,10 +210,9 @@ for (lib in libs){
                     axis.title = element_text(size = 12),
                     plot.title = element_text(size = 14, hjust = 0.5),
                     plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    aspect.ratio = 1) +
+                    axis.text.x = element_text(angle = 45, hjust = 1)) +
                 facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_TP53, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.pdf"), width = 10, height = 10, dpi = 300)
+            ggsave(p_TP53, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_TP53, paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.rds"))
         } else {
             print(paste0("No data for TP53, skipping..."))
@@ -250,10 +248,9 @@ for (lib in libs){
                     axis.title = element_text(size = 12),
                     plot.title = element_text(size = 14, hjust = 0.5),
                     plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    aspect.ratio = 1) +
+                    axis.text.x = element_text(angle = 45, hjust = 1)) +
                 facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_CDKN2A, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2A.pdf"), width = 10, height = 10, dpi = 300)
+            ggsave(p_CDKN2A, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2A.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_CDKN2A, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2A.rds"))
         } else {
             print(paste0("No data for CDKN2A, skipping..."))
@@ -289,10 +286,9 @@ for (lib in libs){
                     axis.title = element_text(size = 12),
                     plot.title = element_text(size = 14, hjust = 0.5),
                     plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    aspect.ratio = 1) +
+                    axis.text.x = element_text(angle = 45, hjust = 1)) +
                 facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_CDKN2B, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2B.pdf"), width = 10, height = 10, dpi = 300)
+            ggsave(p_CDKN2B, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2B.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_CDKN2B, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2B.rds"))
         } else {
             print(paste0("No data for CDKN2B, skipping..."))
@@ -328,10 +324,9 @@ for (lib in libs){
                     axis.title = element_text(size = 12),
                     plot.title = element_text(size = 14, hjust = 0.5),
                     plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    aspect.ratio = 1) +
+                    axis.text.x = element_text(angle = 45, hjust = 1)) +
                 facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_CDKN2C, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2C.pdf"), width = 10, height = 10, dpi = 300)
+            ggsave(p_CDKN2C, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2C.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_CDKN2C, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2C.rds"))
         } else {
             print(paste0("No data for CDKN2C, skipping..."))
@@ -367,10 +362,9 @@ for (lib in libs){
                     axis.title = element_text(size = 12),
                     plot.title = element_text(size = 14, hjust = 0.5),
                     plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1),
-                    aspect.ratio = 1) +
+                    axis.text.x = element_text(angle = 45, hjust = 1)) +
                 facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_BTG2, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_BTG2.pdf"), width = 10, height = 10, dpi = 300)
+            ggsave(p_BTG2, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_BTG2.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_BTG2, paste0("results/analyses/proximity_bias/", lib, "_bm_BTG2.rds"))
         } else {
             print(paste0("No data for BTG2, skipping..."))
