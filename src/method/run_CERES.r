@@ -88,6 +88,7 @@ main <- function(raw_LFC_path, GuideMap_path, CN_seg_path,
     guide_cn <- read_csv(CN_seg_path) %>%
         full_join(read_csv(profile_path), by = "ProfileID") %>%
         select(ModelID, Chromosome, Start, End, SegmentMean) %>%
+        mutate(SegmentMean = log2(SegmentMean)) %>%
         mutate(Chromosome = paste0("chr", Chromosome)) %>%
         intersect_guide_cn(guide_locus %>% 
             separate(col = "Locus", sep = "_", into = c("Chromosome", "Start", "Strand")) %>%
