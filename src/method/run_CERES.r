@@ -33,9 +33,14 @@ wrap_ceres <- function(sg, cn, guide_locus,
                        locus_gene, replicate_map, 
                        run_id = "CERES",
                        fit_efficacy=TRUE){
-  
+    
+    ## normalize sgRNA LFCs
     sg_data <- sg %>%
-        as.matrix()
+        as.matrix() %>%
+        apply(., 2, function(cl){
+            (cl - median(cl, na.rm = TRUE)) / mad(cl, na.rm = TRUE)
+        })
+        
     cn_data <- cn %>%
         as.matrix()
 
@@ -48,7 +53,7 @@ wrap_ceres <- function(sg, cn, guide_locus,
         filter(CellLine %in% common_cell_lines)
 
     ## set default parameters
-    params <- list(lambda_g=0.5,
+    params <- list(lambda_g=0.68129207,
         lambda_o=0.01,
         lambda_s=0.001,
         n_segments=25,
