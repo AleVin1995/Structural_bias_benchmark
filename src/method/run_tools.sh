@@ -2,18 +2,20 @@
 
 #SBATCH --partition=cpuq
 #SBATCH --mail-type=NONE
-#SBATCH --time=100:00:00
+#SBATCH --time=240:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
 #SBATCH --chdir=/group/iorio/Alessandro/CN_benchmark
-#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/%x.out
-#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/%x.err
+#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/output/%j.out
+#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/error/%j.err
 
 source ~/.bashrc
 
 ROOT=$1
 ALGO=$2
 LIB=$3
+JOB=${SLURM_ARRAY_JOB_ID}
+ID=${SLURM_ARRAY_TASK_ID}
 
 if [[ -z "$ROOT" || -z "$ALGO" || -z "$LIB" ]]
 then
@@ -131,7 +133,8 @@ run_MAGeCK(){
 		mle \
 		-k $ROOT/data/raw/"$LIB"_sgrna_raw_readcounts.csv \
 		-s $ROOT/data/ScreenSequenceMap.csv \
-		-n $ROOT/data/corrected/"$LIB"_gene_MAGeCK \
+		-n $ROOT/data/corrected/MAGeCK/"$LIB"_gene_MAGeCK_"$ID" \
+		--seed $ID \
 		--n-cells 50 \
 		--cnv-norm $ROOT/data/OmicsCNGene.csv \
 		--permutation-round 0 \
@@ -172,6 +175,14 @@ else
 	exit 1
 fi
 
-# clean up
-# rm *.out
-# rm *.err
+# clean up output and error files/directories
+rm "output/"$JOB".out"
+rm "error/"$JOB".err"
+
+n_jobs=$(squeue -u alessandro.vinceti | grep -w R | wc -l)
+
+if [[ $n_jobs -eq 1 ]]
+then
+	rm -r output
+	rm -r error
+fi

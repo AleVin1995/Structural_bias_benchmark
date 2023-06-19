@@ -66,6 +66,7 @@ def arg_mle(subparser):
     ## input and output
     iogroup=subm_mle.add_argument_group(title='Optional arguments for input and output',description='')
     iogroup.add_argument('--n-cells',default=None,help='The number of cells to batch the design matrix. Default None.')
+    iogroup.add_argument('--seed',default=1234,type=int,help='The random seed for permutation. Default 1234.')
     iogroup.add_argument('-n','--output-prefix',default='sample1',help='The prefix of the output file(s). Default sample1.')
     iogroup.add_argument('-i', '--include-samples', help='Specify the sample labels if the design matrix is not given by file in the --design-matrix option. Sample labels are separated by ",", and must match the labels in the count table.')
     iogroup.add_argument('-b', '--beta-labels', help='Specify the labels of the variables (i.e., beta), if the design matrix is not given by file in the --design-matrix option. Should be separated by ",", and the number of labels must equal to (# columns of design matrix), including baseline labels. Default value: "bata_0,beta_1,beta_2,...".')
@@ -203,7 +204,7 @@ def format_CNV_data(args):
     return args
 
 def get_chunks(args):
-    np.random.seed(1234)
+    np.random.seed(args.seed)
 
     chunk_size = int(args.n_cells)
     desmat = pd.read_csv(args.design_matrix, sep='\t', index_col=0)
