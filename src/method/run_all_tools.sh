@@ -24,7 +24,7 @@ do
     # sbatch --job-name=GAM_"$LIB" --mem-per-cpu=10GB src/method/run_tools.sh /group/iorio/Alessandro/CN_benchmark/ GAM $LIB
     # sbatch --job-name=geom_"$LIB" --mem-per-cpu=50GB src/method/run_tools.sh /group/iorio/Alessandro/CN_benchmark/ geometric $LIB
     # sbatch --job-name=CERES_"$LIB" --mem-per-cpu=100GB src/method/run_tools.sh /group/iorio/Alessandro/CN_benchmark/ CERES $LIB
-    sbatch --job-name=MAGeCK_"$LIB" --mem-per-cpu=100GB --array=1-5 src/method/run_tools.sh /group/iorio/Alessandro/CN_benchmark/ MAGeCK $LIB
+    sbatch --job-name=MAGeCK_"$LIB" --mem-per-cpu=100GB --array=1-100 src/method/run_tools.sh /group/iorio/Alessandro/CN_benchmark/ MAGeCK $LIB
 done
 
 
