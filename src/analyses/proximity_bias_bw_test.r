@@ -163,21 +163,6 @@ for (lib in libs){
         unite("Coord", c("Chromosome", "Arm"), sep = "")
     
     ## save results
-    p_pool <- ggplot(bm_pool, aes(x = Algorithm, y = est, fill = Algorithm)) +
-        geom_bar(stat = "identity") +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "Method", y = "P(intra-arm cosine > inter)", title = "Genome-wide") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            plot.subtitle = element_text(size = 12, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1)) +
-        facet_wrap(~Coord, scales = "free_x")
-    ggsave(p_pool, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_pool.pdf"), width = 15, height = 15, dpi = 300)
     saveRDS(bm_pool, paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
 
     ## perform brunner-munzel test for repair genes
@@ -198,21 +183,6 @@ for (lib in libs){
         
         ### save results
         if (!is.null(bm_TP53)){
-            p_TP53 <- ggplot(bm_TP53, aes(x = Algorithm, y = est, fill = Status)) +
-                geom_bar(stat = "identity", position=position_dodge()) +
-                geom_hline(yintercept = 0.5, linetype = "dashed") +
-                labs(x = "Method", y = "P(intra-arm cosine > inter)", title = "TP53 mutational status") +
-                theme_bw() +
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    axis.text = element_text(size = 10, color = 'black'),
-                    axis.title = element_text(size = 12),
-                    plot.title = element_text(size = 14, hjust = 0.5),
-                    plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1)) +
-                facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_TP53, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_TP53, paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.rds"))
         } else {
             print(paste0("No data for TP53, skipping..."))
@@ -236,21 +206,6 @@ for (lib in libs){
         
         ### save results
         if (!is.null(bm_CDKN2A)){
-            p_CDKN2A <- ggplot(bm_CDKN2A, aes(x = Algorithm, y = est, fill = Status)) +
-                geom_bar(stat = "identity", position=position_dodge()) +
-                geom_hline(yintercept = 0.5, linetype = "dashed") +
-                labs(x = "Method", y = "P(intra-arm cosine > inter)", title = "CDKN2A mutational status") +
-                theme_bw() +
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    axis.text = element_text(size = 10, color = 'black'),
-                    axis.title = element_text(size = 12),
-                    plot.title = element_text(size = 14, hjust = 0.5),
-                    plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1)) +
-                facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_CDKN2A, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2A.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_CDKN2A, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2A.rds"))
         } else {
             print(paste0("No data for CDKN2A, skipping..."))
@@ -274,21 +229,6 @@ for (lib in libs){
         
         ### save results
         if (!is.null(bm_CDKN2B)){
-            p_CDKN2B <- ggplot(bm_CDKN2B, aes(x = Algorithm, y = est, fill = Status)) +
-                geom_bar(stat = "identity", position=position_dodge()) +
-                geom_hline(yintercept = 0.5, linetype = "dashed") +
-                labs(x = "Method", y = "P(intra-arm cosine > inter)", title = "CDKN2B mutational status") +
-                theme_bw() +
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    axis.text = element_text(size = 10, color = 'black'),
-                    axis.title = element_text(size = 12),
-                    plot.title = element_text(size = 14, hjust = 0.5),
-                    plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1)) +
-                facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_CDKN2B, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2B.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_CDKN2B, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2B.rds"))
         } else {
             print(paste0("No data for CDKN2B, skipping..."))
@@ -312,21 +252,6 @@ for (lib in libs){
         
         ### save results
         if (!is.null(bm_CDKN2C)){
-            p_CDKN2C <- ggplot(bm_CDKN2C, aes(x = Algorithm, y = est, fill = Status)) +
-                geom_bar(stat = "identity", position=position_dodge()) +
-                geom_hline(yintercept = 0.5, linetype = "dashed") +
-                labs(x = "Method", y = "P(intra-arm cosine > inter)", title = "CDKN2C mutational status") +
-                theme_bw() +
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    axis.text = element_text(size = 10, color = 'black'),
-                    axis.title = element_text(size = 12),
-                    plot.title = element_text(size = 14, hjust = 0.5),
-                    plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1)) +
-                facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_CDKN2C, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2C.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_CDKN2C, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2C.rds"))
         } else {
             print(paste0("No data for CDKN2C, skipping..."))
@@ -350,21 +275,6 @@ for (lib in libs){
         
         ### save results
         if (!is.null(bm_BTG2)){
-            p_BTG2 <- ggplot(bm_BTG2, aes(x = Algorithm, y = est, fill = Status)) +
-                geom_bar(stat = "identity", position=position_dodge()) +
-                geom_hline(yintercept = 0.5, linetype = "dashed") +
-                labs(x = "Method", y = "P(intra-arm cosine > inter)", title = "BTG2 mutational status") +
-                theme_bw() +
-                theme(
-                    panel.grid.major = element_blank(),
-                    panel.grid.minor = element_blank(),
-                    axis.text = element_text(size = 10, color = 'black'),
-                    axis.title = element_text(size = 12),
-                    plot.title = element_text(size = 14, hjust = 0.5),
-                    plot.subtitle = element_text(size = 12, hjust = 0.5),
-                    axis.text.x = element_text(angle = 45, hjust = 1)) +
-                facet_wrap(~Coord, scales = "free_x")
-            ggsave(p_BTG2, filename = paste0("results/analyses/proximity_bias/", lib, "_bm_BTG2.pdf"), width = 15, height = 15, dpi = 300)
             saveRDS(bm_BTG2, paste0("results/analyses/proximity_bias/", lib, "_bm_BTG2.rds"))
         } else {
             print(paste0("No data for BTG2, skipping..."))
