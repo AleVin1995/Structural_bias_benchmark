@@ -176,9 +176,6 @@ else
 fi
 
 # clean up output and error files/directories
-rm "output/"$JOB".out"
-rm "error/"$JOB".err"
-
 n_jobs=$(squeue -u alessandro.vinceti | grep -w R | wc -l)
 
 if [[ $n_jobs -eq 1 ]]
