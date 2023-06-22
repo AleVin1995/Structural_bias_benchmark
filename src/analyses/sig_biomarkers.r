@@ -52,6 +52,18 @@ oncogenes <- read_tsv("data/biomarkers/cancerGeneList.tsv") %>%
     filter(`Is Oncogene` == "Yes") %>%
     pull(`Hugo Symbol`) %>%
     unique()
+ampl_racs <- biomarkers %>%
+    filter(grepl("gain", CFE)) %>%
+    select(CFE) %>%
+    distinct() %>%
+    separate(CFE, c("CFE", "Gene"), sep = " \\(") %>%
+    select(Gene) %>%
+    separate(Gene, c("Gene", "Else"), sep = "\\)") %>%
+    select(Gene) %>%
+    na.omit() %>%
+    separate_rows(Gene, sep = ",") %>%
+    pull(Gene) %>%
+    unique()
 ssd <- read_csv("data/biomarkers/skewed_tdist.csv") %>%
     ## select strong selective dependencies
     filter(Skewed_tdist > 100) %>%
@@ -86,7 +98,7 @@ for (lib in libs){
             pivot_longer(-1, names_to = "ModelID", values_to = "LFC"))
     
     dfs_onco <- map(dfs, ~select(., colnames(.)[1], all_of(common_cells))) %>% 
-        map(~filter(., Gene %in% oncogenes) %>%
+        map(~filter(., Gene %in% oncogenes | Gene %in% ampl_racs) %>%
             pivot_longer(-1, names_to = "ModelID", values_to = "LFC"))
     
     ## library-specific biomarkers
