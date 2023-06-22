@@ -54,21 +54,6 @@ for (lib in libs){
     ## merge with CN abs data
     dfs <- inner_join(dfs, CN_abs, by = c("ModelID", "Gene"))
 
-
     ## save results
-    p_cn_abs <- ggplot(dfs, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
-        geom_boxplot(outlier.shape = NA) +
-        labs(x = "Absolute CN", y = "LFC", title = paste0("CN correction on ", lib, " dataset")) +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(hjust = 1),
-            aspect.ratio = 0.5) +
-        geom_hline(yintercept = 0, linetype = "dashed", color = "black")
-    ggsave(p_cn_abs, filename = paste0("results/analyses/cn_correction/", lib, "_cn_abs.pdf"), width = 20, height = 10, units = "in", dpi = 300)
     saveRDS(dfs, paste0("results/analyses/cn_correction/", lib, "_cn_abs.rds"))
 }
