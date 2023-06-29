@@ -32,51 +32,101 @@ msigdb_genes <- c(
         ) %>%
     unique()
 
-cn_ampl_genes <- read_csv("data/OmicsCNGene.csv") %>%
+cn_ratio <- read_csv("data/OmicsCNGene.csv") %>%
     rename(ModelID = colnames(.)[1]) %>%
     pivot_longer(-ModelID, names_to = "Gene", values_to = "CN_ratio") %>%
-    group_by(Gene) %>%
-    mutate(mean_CN_ratio = mean(CN_ratio, na.rm = TRUE)) %>%
-    ungroup() %>%
-    arrange(desc(mean_CN_ratio)) %>%
-    select(Gene) %>%
-    distinct() %>%
-    slice(1:round(nrow(.)*0.01)) %>% ## filter top 1% amplified genes
-    separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
-    pull(Gene) %>%
-    unique()
+    na.omit()
+
+cn_ratio_tpm <- cn_ratios %>%
+    inner_join(read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
+        rename(ModelID = colnames(.)[1]) %>%
+        pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
+    na.omit()
+
+cn_ampl_genes <- cn_ratio %>%
+    group_split(ModelID) %>%
+    map(~.x %>%
+        arrange(desc(CN_ratio)) %>%
+        ## filter top 1% amplified genes per cell line
+        slice(1:round(nrow(.)*0.01))) %>%
+    bind_rows()
     
-cn_ampl_noexpr_genes <- read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
-    rename(ModelID = colnames(.)[1]) %>%
-    pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM") %>%
+cn_ampl_noexpr_genes <- cn_ratio_tpm %>%
+    inner_join(cn_ampl_genes) %>%
     group_by(Gene) %>%
     mutate(mean_TPM = mean(TPM, na.rm = TRUE)) %>%
     ungroup() %>%
-    filter(mean_TPM < 1) %>% ## filter genes with no expression
-    select(Gene) %>%
-    distinct() %>%
-    separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
-    pull(Gene) %>%
-    unique() %>%
-    intersect(cn_ampl_genes) ## filter genes with no expression and amplified
+    ## filter genes with no expression
+    filter(mean_TPM < 1)
 
 
 # compute recall
-get_recall <- function(dfs_corr, dfs_sig, gene_set){
-    ## bind dfs
-    dfs_corr <- map(dfs_corr, ~.x %>%
-                    pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                    rename(Gene = colnames(.)[1]) %>%
-                    filter(Gene %in% gene_set)) %>%
-                bind_rows(.id = "Algorithm")
+get_recall <- function(dfs_corr, dfs_sig, gene_info){
+    if (is.vector(gene_info)){
+        gene_set <- gene_info
+
+        ## bind dfs and filter genes
+        dfs_corr <- map(dfs_corr, ~.x %>%
+                        pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                        rename(Gene = colnames(.)[1]) %>%
+                        filter(Gene %in% gene_set)) %>%
+                    bind_rows(.id = "Algorithm")
+    } else {
+        ## bind dfs and filter genes
+        dfs_corr <- map(dfs_corr, ~.x %>%
+                        pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                        rename(Gene = colnames(.)[1]) %>%
+                        inner_join(gene_info, by = "Gene")) %>%
+                    bind_rows(.id = "Algorithm")
+    }
+
+    res <- full_join(dfs_corr, dfs_sig) %>%
+            group_by(Algorithm, ModelID) %>%
+            mutate(tot=n()) %>%
+            mutate(recall = sum(LFC < Sig_Threshold)/tot) %>%
+            select(Algorithm, ModelID, recall) %>%
+            ungroup() %>%
+            distinct()
     
-    res <- full_join(dfs_corr, dfs_sig) %>% 
-        group_by(Algorithm, ModelID) %>% 
-        mutate(tot=n()) %>% 
-        mutate(recall = sum(LFC < Sig_Threshold)/tot) %>% 
-        select(Algorithm, ModelID, recall) %>% 
-        ungroup() %>% 
-        distinct()
+    return(res)
+}
+
+
+# run ROC curve
+run_Curve <- function(
+    FCsprofile,
+    positives,
+    negatives,
+    display = TRUE,
+    FDRth = NULL,
+    expName = NULL,
+    type = NULL,
+) {
+    ## turn positive genes into a vector if it is a dataframe
+    if (!is.vector(positives)){
+        positives <- positives %>% 
+            inner_join(FCsprofile, by = "Gene") %>% 
+            pull(Gene) %>%
+            unique()
+    }
+
+    FCsprofile <- pull(.data = FCsprofile, var = LFC, name = "Gene")
+
+    if (is.null(type) | type == "ROC"){
+        res <- ccr.ROC_Curve(FCsprofile, 
+            positives, 
+            negatives, 
+            display = display, 
+            FDRth = FDRth, 
+            expName = expName)
+    } else if (type == "PR"){
+        res <- ccr.PrRc_Curve(FCsprofile, 
+            positives, 
+            negatives, 
+            display = display, 
+            FDRth = FDRth, 
+            expName = expName)
+    }
     
     return(res)
 }
@@ -98,12 +148,10 @@ for (lib in libs){
             dplyr::rename(Gene = colnames(.)[1])) %>% ## fill na with 0
         set_names(dfs_names)
     
-    ## common cell lines
+    ## common cell lines/genes
     common_cells <- Reduce(intersect, map(dfs, ~colnames(.)[2:length(colnames(.))]))
 
     common_genes <- Reduce(intersect, map(dfs, ~.$Gene))
-
-    no_ampl_genes <- setdiff(common_genes, cn_ampl_genes)
 
     ## select only common cell lines and first columns
     dfs <- map(dfs, ~select(., colnames(.)[1], all_of(common_cells))) %>%
@@ -113,10 +161,13 @@ for (lib in libs){
     sigthreshold <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
+                group_split(ModelID) %>%
                 map(~.x %>% 
-                    pull(LFC, name = "Gene") %>% 
-                    ccr.ROC_Curve(., ess_genes, noness_genes, display = FALSE, FDRth = 0.05) %>% 
+                    run_Curve(., 
+                        ess_genes, 
+                        noness_genes, 
+                        display = FALSE, 
+                        FDRth = 0.05) %>% 
                     .$sigthreshold %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
@@ -142,14 +193,16 @@ for (lib in libs){
         select(-Sig_Threshold) %>%
         pivot_longer(-c(Algorithm, ModelID), names_to = "Gene_Set", values_to = "Recall")
 
-    ## compute AUROC for each algorithm across cell lines (ess/noness genes)
+    ## compute AUROC for each algorithm across cell lines (ess vs noness genes)
     aurocs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
-                map(~.x %>% 
-                    pull(LFC, name = "Gene") %>% 
-                    ccr.ROC_Curve(., ess_genes, noness_genes, display = FALSE) %>% 
+                group_split(ModelID) %>%
+                map(~.x %>%
+                    run_Curve(.,
+                        ess_genes, 
+                        noness_genes, 
+                        display = FALSE) %>% 
                     .$AUC %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
@@ -160,14 +213,16 @@ for (lib in libs){
         mutate(AUROC = replace_na(AUROC, 0)) %>%
         mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
     
-    ## compute AUROC for each algorithm across cell lines (ampl/non ampl genes)
+    ## compute AUROC for each algorithm across cell lines (ampl vs noness genes)
     aurocs_ampl <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
-                map(~.x %>% 
-                    pull(LFC, name = "Gene") %>% 
-                    ccr.ROC_Curve(., cn_ampl_genes, no_ampl_genes, display = FALSE) %>% 
+                group_split(ModelID) %>%
+                map(~.x %>%
+                    run_Curve(., 
+                        cn_ampl_genes, 
+                        noness_genes, 
+                        display = FALSE) %>% 
                     .$AUC %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
@@ -178,14 +233,36 @@ for (lib in libs){
         mutate(AUROC = replace_na(AUROC, 0)) %>%
         mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
     
-    ## compute AUPRC for each algorithm across cell lines (ess/noness genes)
+    ## compute AUROC for each algorithm across cell lines (ampl noexpr vs noness genes)
+    aurocs_ampl_noexpr <- map(dfs, ~.x %>%
+                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                rename(Gene = colnames(.)[1]) %>%
+                group_split(ModelID) %>%
+                map(~.x %>%
+                    run_Curve(., 
+                        cn_ampl_noexpr_genes, 
+                        noness_genes, 
+                        display = FALSE) %>% 
+                    .$AUC %>% 
+                    as.numeric()) %>%
+                bind_rows() %>%
+                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUROC")) %>%
+        set_names(dfs_names) %>%
+        bind_rows(.id = "Algorithm") %>%
+        ### replace NA or Inf with 0
+        mutate(AUROC = replace_na(AUROC, 0)) %>%
+        mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
+    
+    ## compute AUPRC for each algorithm across cell lines (ess vs noness genes)
     auprcs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
+                group_split(ModelID) %>%
                 map(~.x %>% 
-                    pull(LFC, name = "Gene") %>% 
-                    ccr.PrRc_Curve(., ess_genes, noness_genes, display = FALSE) %>%
+                    run_Curve(., 
+                        ess_genes, 
+                        noness_genes, 
+                        display = FALSE) %>%
                     .$AUC %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
@@ -196,18 +273,40 @@ for (lib in libs){
         mutate(AUPRC = replace_na(AUPRC, 0)) %>%
         mutate(AUPRC = replace(AUPRC, is.infinite(AUPRC), 0))
     
-    ## compute AUPRC for each algorithm across cell lines (ampl/non ampl genes)
+    ## compute AUPRC for each algorithm across cell lines (ampl vs noness genes)
     auprcs_ampl <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
+                group_split(ModelID) %>%
                 map(~.x %>% 
-                    pull(LFC, name = "Gene") %>% 
-                    ccr.PrRc_Curve(., cn_ampl_genes, no_ampl_genes, display = FALSE) %>%
+                    run_Curve(., 
+                        cn_ampl_genes,
+                        noness_genes, 
+                        display = FALSE) %>%
                     .$AUC %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
                 pivot_longer(everything(.), names_to = "ModelID", values_to = "AUPRC")) %>%
+        set_names(dfs_names) %>%
+        bind_rows(.id = "Algorithm") %>%
+        ### replace NA or Inf with 0
+        mutate(AUPRC = replace_na(AUPRC, 0)) %>%
+        mutate(AUPRC = replace(AUPRC, is.infinite(AUPRC), 0))
+    
+    ## compute AUROC for each algorithm across cell lines (ampl noexpr vs noness genes)
+    auprcs_ampl_noexpr <- map(dfs, ~.x %>%
+                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                rename(Gene = colnames(.)[1]) %>%
+                group_split(ModelID) %>%
+                map(~.x %>%
+                    run_Curve(., 
+                        cn_ampl_noexpr_genes, 
+                        noness_genes, 
+                        display = FALSE) %>% 
+                    .$AUC %>% 
+                    as.numeric()) %>%
+                bind_rows() %>%
+                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUROC")) %>%
         set_names(dfs_names) %>%
         bind_rows(.id = "Algorithm") %>%
         ### replace NA or Inf with 0
@@ -219,6 +318,8 @@ for (lib in libs){
     saveRDS(recall_gene_sets, paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds"))
     saveRDS(aurocs, paste0("results/analyses/impact_data_quality/", lib, "_AUROC.rds"))
     saveRDS(aurocs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.rds"))
+    saveRDS(aurocs_ampl_noexpr, paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl_noexpr.rds"))
     saveRDS(auprcs, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
     saveRDS(auprcs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.rds"))
+    saveRDS(auprcs_ampl_noexpr, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl_noexpr.rds"))
 }
