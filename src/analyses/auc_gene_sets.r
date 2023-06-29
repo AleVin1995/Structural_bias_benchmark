@@ -110,20 +110,14 @@ get_recall_curve <- function(
     FCsprofile <- pull(.data = FCsprofile, var = LFC, name = "Gene")
     FCsprofile <- sort(FCsprofile)
 
-    AUCs <- vector()
+    geneSet <- intersect(geneSet, names(FCsprofile))
 
-    for (i in seq_along(FCsprofile)) {
-        predictions <- names(FCsprofile[1:i])
-        currentSet <- intersect(geneSet, predictions)
+    predictions <- rep(0, length(FCsprofile))
+    predictions[which(names(FCsprofile) %in% geneSet)] <- 1
+    recall <- cumsum(predictions) / length(geneSet)
 
-        rec <- cumsum(
-            is.element(predictions, currentSet)
-            ) / length(currentSet)
+    AUC <- trapz(seq_along(predictions) / length(predictions), recall)
 
-        AUCs[i] <- trapz(seq_along(predictions) / length(predictions), rec)
-    }
-
-    AUC <- sum(AUCs) / length(AUCs)
     return(AUC)
 }
 

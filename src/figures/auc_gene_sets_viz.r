@@ -44,23 +44,6 @@ for (lib in libs){
     ggsave(p_aurocs, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUROC.pdf"), width = 10, height = 10, dpi = 300)
 
 
-    aurocs_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.rds"))
-
-    p_aurocs_ampl <- ggplot(aurocs_ampl, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
-        geom_boxplot() +
-        labs(x = "Method", y = "AUROC", title = "AUROC ampl vs non-ampl genes") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1)
-    ggsave(p_aurocs_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.pdf"), width = 10, height = 10, dpi = 300)
-
-
     auprcs <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
 
     p_auprcs <- ggplot(auprcs, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
@@ -78,11 +61,11 @@ for (lib in libs){
     ggsave(p_auprcs, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.pdf"), width = 10, height = 10, dpi = 300)
 
 
-    auprcs_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.rds"))
-    
-    p_auprcs_ampl <- ggplot(auprcs_ampl, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
+    rec_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
+
+    p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
-        labs(x = "Method", y = "AUPRC", title = "AUPRC ampl vs non-ampl genes") +
+        labs(x = "Method", y = "Recall curve", title = "Recall curve amplified genes") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
@@ -92,5 +75,22 @@ for (lib in libs){
             plot.title = element_text(size = 14, hjust = 0.5),
             axis.text.x = element_text(angle = 45, hjust = 1),
             aspect.ratio = 1)
-    ggsave(p_auprcs_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.pdf"), width = 10, height = 10, dpi = 300)
+    ggsave(p_rec_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.pdf"), width = 10, height = 10, dpi = 300)
+
+
+    rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
+    
+    p_rec_ampl_noexpr <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+        geom_boxplot() +
+        labs(x = "Method", y = "Recall", title = "Amplified (unexpressed) genes") +
+        theme_bw() +
+        theme(
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 10, color = 'black'),
+            axis.title = element_text(size = 12),
+            plot.title = element_text(size = 14, hjust = 0.5),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            aspect.ratio = 1)
+    ggsave(p_rec_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.pdf"), width = 10, height = 10, dpi = 300)
 }
