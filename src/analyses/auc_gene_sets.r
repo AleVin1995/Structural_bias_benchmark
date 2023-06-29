@@ -34,17 +34,19 @@ msigdb_genes <- c(
 
 cn_ratio <- read_csv("data/OmicsCNGene.csv") %>%
     dplyr::rename(ModelID = colnames(.)[1]) %>%
+    rename_with(~sub(" \\(.*$", "", .x)) %>%
     pivot_longer(-ModelID, names_to = "Gene", values_to = "CN_ratio") %>%
     drop_na()
 
 cn_ratio_tpm <- cn_ratio %>%
     inner_join(read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
         dplyr::rename(ModelID = colnames(.)[1]) %>%
+        rename_with(~sub(" \\(.*$", "", .x)) %>%
         pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
     drop_na()
 
 cn_ampl_genes <- cn_ratio %>%
-    group_split(ModelID) %>%
+    split(.$ModelID) %>%
     map(~.x %>%
         arrange(desc(CN_ratio)) %>%
         ## filter top 1% amplified genes per cell line
@@ -112,7 +114,7 @@ run_Curve <- function(
 
     FCsprofile <- pull(.data = FCsprofile, var = LFC, name = "Gene")
 
-    if (is.null(type) | type == "ROC"){
+    if (is.null(type) || type == "ROC"){
         res <- ccr.ROC_Curve(FCsprofile, 
             positives, 
             negatives, 
@@ -145,12 +147,11 @@ for (lib in libs){
         map(~.x %>%
             read_csv %>%
             mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
-            dplyr::dplyr::rename(Gene = colnames(.)[1])) %>% ## fill na with 0
+            dplyr::rename(Gene = colnames(.)[1])) %>% ## fill na with 0
         set_names(dfs_names)
     
     ## common cell lines/genes
     common_cells <- Reduce(intersect, map(dfs, ~colnames(.)[2:length(colnames(.))]))
-
     common_genes <- Reduce(intersect, map(dfs, ~.$Gene))
 
     ## select only common cell lines and first columns
@@ -161,7 +162,7 @@ for (lib in libs){
     sigthreshold <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
-                group_split(ModelID) %>%
+                split(.$ModelID) %>%
                 map(~.x %>% 
                     run_Curve(., 
                         ess_genes, 
@@ -197,7 +198,7 @@ for (lib in libs){
     aurocs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
-                group_split(ModelID) %>%
+                split(.$ModelID) %>%
                 map(~.x %>%
                     run_Curve(.,
                         ess_genes, 
@@ -217,7 +218,7 @@ for (lib in libs){
     aurocs_ampl <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
-                group_split(ModelID) %>%
+                split(.$ModelID) %>%
                 map(~.x %>%
                     run_Curve(., 
                         cn_ampl_genes, 
@@ -237,7 +238,7 @@ for (lib in libs){
     aurocs_ampl_noexpr <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
-                group_split(ModelID) %>%
+                split(.$ModelID) %>%
                 map(~.x %>%
                     run_Curve(., 
                         cn_ampl_noexpr_genes, 
@@ -257,7 +258,7 @@ for (lib in libs){
     auprcs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
-                group_split(ModelID) %>%
+                split(.$ModelID) %>%
                 map(~.x %>% 
                     run_Curve(., 
                         ess_genes, 
@@ -277,7 +278,7 @@ for (lib in libs){
     auprcs_ampl <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
-                group_split(ModelID) %>%
+                split(.$ModelID) %>%
                 map(~.x %>% 
                     run_Curve(., 
                         cn_ampl_genes,
@@ -297,7 +298,7 @@ for (lib in libs){
     auprcs_ampl_noexpr <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
-                group_split(ModelID) %>%
+                split(.$ModelID) %>%
                 map(~.x %>%
                     run_Curve(., 
                         cn_ampl_noexpr_genes, 
