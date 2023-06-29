@@ -62,7 +62,7 @@ cn_ampl_noexpr_genes <- cn_ratio_tpm %>%
     filter(mean_TPM < 1)
 
 
-# compute recall
+# compute recall at significant threshold
 get_recall <- function(dfs_corr, dfs_sig, gene_info){
     if (is.vector(gene_info)){
         gene_set <- gene_info
@@ -77,9 +77,9 @@ get_recall <- function(dfs_corr, dfs_sig, gene_info){
         ## bind dfs and filter genes
         dfs_corr <- map(dfs_corr, ~.x %>%
                         pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                        dplyr::rename(Gene = colnames(.)[1]) %>%
-                        inner_join(gene_info, by = "Gene")) %>%
-                    bind_rows(.id = "Algorithm")
+                        dplyr::rename(Gene = colnames(.)[1])) %>%
+                    bind_rows(.id = "Algorithm") %>%
+                    inner_join(gene_info, by = c("Gene", "ModelID"))
     }
 
     res <- full_join(dfs_corr, dfs_sig) %>%
@@ -91,6 +91,40 @@ get_recall <- function(dfs_corr, dfs_sig, gene_info){
             distinct()
     
     return(res)
+}
+
+
+# compute recall curve for a given gene set
+get_recall_curve <- function(
+    FCsprofile,
+    geneSet
+) {
+    ## turn positive genes into a vector if it is a dataframe
+    if (!is.vector(geneSet)){
+        geneSet <- geneSet %>% 
+            inner_join(FCsprofile, by = "Gene") %>% 
+            pull(Gene) %>%
+            unique()
+    }
+    
+    FCsprofile <- pull(.data = FCsprofile, var = LFC, name = "Gene")
+    FCsprofile <- sort(FCsprofile)
+
+    AUCs <- vector()
+
+    for (i in seq_along(FCsprofile)) {
+        predictions <- names(FCsprofile[1:i])
+        currentSet <- intersect(geneSet, predictions)
+
+        rec <- cumsum(
+            is.element(predictions, currentSet)
+            ) / length(currentSet)
+
+        AUCs[i] <- trapz(seq_along(predictions) / length(predictions), rec)
+    }
+
+    AUC <- sum(AUCs) / length(AUCs)
+    return(AUC)
 }
 
 
@@ -214,46 +248,6 @@ for (lib in libs){
         mutate(AUROC = replace_na(AUROC, 0)) %>%
         mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
     
-    ## compute AUROC for each algorithm across cell lines (ampl vs noness genes)
-    aurocs_ampl <- map(dfs, ~.x %>%
-                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                dplyr::rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
-                map(~.x %>%
-                    run_Curve(., 
-                        cn_ampl_genes, 
-                        noness_genes, 
-                        display = FALSE) %>% 
-                    .$AUC %>% 
-                    as.numeric()) %>%
-                bind_rows() %>%
-                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUROC")) %>%
-        set_names(dfs_names) %>%
-        bind_rows(.id = "Algorithm") %>%
-        ### replace NA or Inf with 0
-        mutate(AUROC = replace_na(AUROC, 0)) %>%
-        mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
-    
-    ## compute AUROC for each algorithm across cell lines (ampl noexpr vs noness genes)
-    aurocs_ampl_noexpr <- map(dfs, ~.x %>%
-                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                dplyr::rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
-                map(~.x %>%
-                    run_Curve(., 
-                        cn_ampl_noexpr_genes, 
-                        noness_genes, 
-                        display = FALSE) %>% 
-                    .$AUC %>% 
-                    as.numeric()) %>%
-                bind_rows() %>%
-                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUROC")) %>%
-        set_names(dfs_names) %>%
-        bind_rows(.id = "Algorithm") %>%
-        ### replace NA or Inf with 0
-        mutate(AUROC = replace_na(AUROC, 0)) %>%
-        mutate(AUROC = replace(AUROC, is.infinite(AUROC), 0))
-    
     ## compute AUPRC for each algorithm across cell lines (ess vs noness genes)
     auprcs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
@@ -274,53 +268,45 @@ for (lib in libs){
         mutate(AUPRC = replace_na(AUPRC, 0)) %>%
         mutate(AUPRC = replace(AUPRC, is.infinite(AUPRC), 0))
     
-    ## compute AUPRC for each algorithm across cell lines (ampl vs noness genes)
-    auprcs_ampl <- map(dfs, ~.x %>%
-                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                dplyr::rename(Gene = colnames(.)[1]) %>%
-                split(.$ModelID) %>%
-                map(~.x %>% 
-                    run_Curve(., 
-                        cn_ampl_genes,
-                        noness_genes, 
-                        display = FALSE) %>%
-                    .$AUC %>% 
-                    as.numeric()) %>%
-                bind_rows() %>%
-                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUPRC")) %>%
-        set_names(dfs_names) %>%
-        bind_rows(.id = "Algorithm") %>%
-        ### replace NA or Inf with 0
-        mutate(AUPRC = replace_na(AUPRC, 0)) %>%
-        mutate(AUPRC = replace(AUPRC, is.infinite(AUPRC), 0))
-    
-    ## compute AUROC for each algorithm across cell lines (ampl noexpr vs noness genes)
-    auprcs_ampl_noexpr <- map(dfs, ~.x %>%
+    ## compute recall curve for each algorithm across cell lines (ampl genes)
+    rec_ampl <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
                 dplyr::rename(Gene = colnames(.)[1]) %>%
                 split(.$ModelID) %>%
                 map(~.x %>%
-                    run_Curve(., 
-                        cn_ampl_noexpr_genes, 
-                        noness_genes, 
-                        display = FALSE) %>% 
-                    .$AUC %>% 
+                    get_recall_curve(., 
+                        cn_ampl_genes) %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
-                pivot_longer(everything(.), names_to = "ModelID", values_to = "AUROC")) %>%
+                pivot_longer(everything(.), names_to = "ModelID", values_to = "Recall")) %>%
         set_names(dfs_names) %>%
         bind_rows(.id = "Algorithm") %>%
         ### replace NA or Inf with 0
-        mutate(AUPRC = replace_na(AUPRC, 0)) %>%
-        mutate(AUPRC = replace(AUPRC, is.infinite(AUPRC), 0))
+        mutate(Recall = replace_na(Recall, 0)) %>%
+        mutate(Recall = replace(Recall, is.infinite(Recall), 0))
+    
+    ## compute recall curve for each algorithm across cell lines (ampl noexpr genes)
+    rec_ampl_noexpr <- map(dfs, ~.x %>%
+                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
+                split(.$ModelID) %>%
+                map(~.x %>%
+                    get_recall_curve(.,
+                        cn_ampl_noexpr_genes) %>%
+                    as.numeric()) %>%
+                bind_rows() %>%
+                pivot_longer(everything(.), names_to = "ModelID", values_to = "Recall")) %>%
+        set_names(dfs_names) %>%
+        bind_rows(.id = "Algorithm") %>%
+        ### replace NA or Inf with 0
+        mutate(Recall = replace_na(Recall, 0)) %>%
+        mutate(Recall = replace(Recall, is.infinite(Recall), 0))
     
 
     ## save results
     saveRDS(recall_gene_sets, paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds"))
     saveRDS(aurocs, paste0("results/analyses/impact_data_quality/", lib, "_AUROC.rds"))
-    saveRDS(aurocs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.rds"))
-    saveRDS(aurocs_ampl_noexpr, paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl_noexpr.rds"))
     saveRDS(auprcs, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
-    saveRDS(auprcs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.rds"))
-    saveRDS(auprcs_ampl_noexpr, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl_noexpr.rds"))
+    saveRDS(rec_ampl, paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
+    saveRDS(rec_ampl_noexpr, paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
 }
