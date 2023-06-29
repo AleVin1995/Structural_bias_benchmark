@@ -216,81 +216,9 @@ for (lib in libs){
     
 
     ## save results
-    p_gene_sets <- ggplot(recall_gene_sets, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
-        geom_boxplot() +
-        labs(x = "Method", y = "Recall at 5% FDR", title = "Recall of gene sets") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1) +
-        facet_wrap(~Gene_Set, scales = "free_y") +
-        theme(strip.background = element_blank(),
-            strip.text = element_text(size = 10, face = "bold"))
-    ggsave(p_gene_sets, filename = paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(recall_gene_sets, paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds"))
-
-    p_aurocs <- ggplot(aurocs, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
-        geom_boxplot() +
-        labs(x = "Method", y = "AUROC", title = "AUROC ess vs noness genes") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1)
-    ggsave(p_aurocs, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUROC.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(aurocs, paste0("results/analyses/impact_data_quality/", lib, "_AUROC.rds"))
-
-    p_aurocs_ampl <- ggplot(aurocs_ampl, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
-        geom_boxplot() +
-        labs(x = "Method", y = "AUROC", title = "AUROC ampl vs non-ampl genes") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1)
-    ggsave(p_aurocs_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(aurocs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUROC_ampl.rds"))
-    
-    p_auprcs <- ggplot(auprcs, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
-        geom_boxplot() +
-        labs(x = "Method", y = "AUPRC", title = "AUPRC ess vs noness genes") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1)
-    ggsave(p_auprcs, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(auprcs, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
-
-    p_auprcs_ampl <- ggplot(auprcs_ampl, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
-        geom_boxplot() +
-        labs(x = "Method", y = "AUPRC", title = "AUPRC ampl vs non-ampl genes") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1)
-    ggsave(p_auprcs_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(auprcs_ampl, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC_ampl.rds"))
 }
