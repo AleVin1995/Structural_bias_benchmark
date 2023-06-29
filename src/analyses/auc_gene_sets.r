@@ -83,7 +83,7 @@ get_recall <- function(dfs_corr, dfs_sig, gene_set){
 
 
 # Define list of algorithms and libraries
-algos <- c("CCR", "CERES", "Chronos", "Crispy", "GAM", "Geometric", "LDO")
+algos <- c("CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
 libs <- c("Avana", "KY")
 
 # iterate over algorithms and libraries

@@ -70,7 +70,7 @@ ssd <- read_csv("data/biomarkers/skewed_tdist.csv") %>%
     pull(HUGO)
 
 # Define list of algorithms and libraries
-algos <- c("CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO")
+algos <- c("CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
 libs <- c("Avana", "KY")
 
 # iterate over algorithms and libraries

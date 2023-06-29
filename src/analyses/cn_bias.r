@@ -23,7 +23,7 @@ CN_abs <- read_csv('data/cnv_abs_copy_number_picnic_20191101.csv') %>%
 
 
 # Define list of algorithms and libraries
-algos <- c("CCR", "CERES", "Chronos", "Crispy", "GAM", "Geometric", "LDO")
+algos <- c("CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
 libs <- c("Avana", "KY")
 
 # iterate over algorithms and libraries
