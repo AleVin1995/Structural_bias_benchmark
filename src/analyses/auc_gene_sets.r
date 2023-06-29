@@ -33,22 +33,22 @@ msigdb_genes <- c(
     unique()
 
 cn_ratio <- read_csv("data/OmicsCNGene.csv") %>%
-    rename(ModelID = colnames(.)[1]) %>%
+    dplyr::rename(ModelID = colnames(.)[1]) %>%
     pivot_longer(-ModelID, names_to = "Gene", values_to = "CN_ratio") %>%
-    na.omit()
+    drop_na()
 
-cn_ratio_tpm <- cn_ratios %>%
+cn_ratio_tpm <- cn_ratio %>%
     inner_join(read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
-        rename(ModelID = colnames(.)[1]) %>%
+        dplyr::rename(ModelID = colnames(.)[1]) %>%
         pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
-    na.omit()
+    drop_na()
 
 cn_ampl_genes <- cn_ratio %>%
     group_split(ModelID) %>%
     map(~.x %>%
         arrange(desc(CN_ratio)) %>%
         ## filter top 1% amplified genes per cell line
-        slice(1:round(nrow(.)*0.01))) %>%
+        dplyr::slice(1:round(nrow(.)*0.01))) %>%
     bind_rows()
     
 cn_ampl_noexpr_genes <- cn_ratio_tpm %>%
@@ -68,14 +68,14 @@ get_recall <- function(dfs_corr, dfs_sig, gene_info){
         ## bind dfs and filter genes
         dfs_corr <- map(dfs_corr, ~.x %>%
                         pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                        rename(Gene = colnames(.)[1]) %>%
+                        dplyr::rename(Gene = colnames(.)[1]) %>%
                         filter(Gene %in% gene_set)) %>%
                     bind_rows(.id = "Algorithm")
     } else {
         ## bind dfs and filter genes
         dfs_corr <- map(dfs_corr, ~.x %>%
                         pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                        rename(Gene = colnames(.)[1]) %>%
+                        dplyr::rename(Gene = colnames(.)[1]) %>%
                         inner_join(gene_info, by = "Gene")) %>%
                     bind_rows(.id = "Algorithm")
     }
@@ -100,7 +100,7 @@ run_Curve <- function(
     display = TRUE,
     FDRth = NULL,
     expName = NULL,
-    type = NULL,
+    type = NULL
 ) {
     ## turn positive genes into a vector if it is a dataframe
     if (!is.vector(positives)){
@@ -145,7 +145,7 @@ for (lib in libs){
         map(~.x %>%
             read_csv %>%
             mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
-            dplyr::rename(Gene = colnames(.)[1])) %>% ## fill na with 0
+            dplyr::dplyr::rename(Gene = colnames(.)[1])) %>% ## fill na with 0
         set_names(dfs_names)
     
     ## common cell lines/genes
@@ -160,7 +160,7 @@ for (lib in libs){
     ## compute significant threshold at 5% FDR for each algorithm across cell lines
     sigthreshold <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 group_split(ModelID) %>%
                 map(~.x %>% 
                     run_Curve(., 
@@ -196,7 +196,7 @@ for (lib in libs){
     ## compute AUROC for each algorithm across cell lines (ess vs noness genes)
     aurocs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 group_split(ModelID) %>%
                 map(~.x %>%
                     run_Curve(.,
@@ -216,7 +216,7 @@ for (lib in libs){
     ## compute AUROC for each algorithm across cell lines (ampl vs noness genes)
     aurocs_ampl <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 group_split(ModelID) %>%
                 map(~.x %>%
                     run_Curve(., 
@@ -236,7 +236,7 @@ for (lib in libs){
     ## compute AUROC for each algorithm across cell lines (ampl noexpr vs noness genes)
     aurocs_ampl_noexpr <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 group_split(ModelID) %>%
                 map(~.x %>%
                     run_Curve(., 
@@ -256,7 +256,7 @@ for (lib in libs){
     ## compute AUPRC for each algorithm across cell lines (ess vs noness genes)
     auprcs <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 group_split(ModelID) %>%
                 map(~.x %>% 
                     run_Curve(., 
@@ -276,7 +276,7 @@ for (lib in libs){
     ## compute AUPRC for each algorithm across cell lines (ampl vs noness genes)
     auprcs_ampl <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 group_split(ModelID) %>%
                 map(~.x %>% 
                     run_Curve(., 
@@ -296,7 +296,7 @@ for (lib in libs){
     ## compute AUROC for each algorithm across cell lines (ampl noexpr vs noness genes)
     auprcs_ampl_noexpr <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 group_split(ModelID) %>%
                 map(~.x %>%
                     run_Curve(., 
