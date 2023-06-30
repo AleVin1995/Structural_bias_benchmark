@@ -135,7 +135,7 @@ run_Curve <- function(
     ## turn positive genes into a vector if it is a dataframe
     if (!is.vector(positives)){
         positives <- positives %>% 
-            inner_join(FCsprofile, by = "Gene") %>% 
+            inner_join(FCsprofile) %>% 
             pull(Gene) %>%
             unique()
     }
