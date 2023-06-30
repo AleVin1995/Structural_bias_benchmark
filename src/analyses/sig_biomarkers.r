@@ -1,6 +1,8 @@
 library(tidyverse)
 
-get_sig_biomarkers <- function(biomarkers, dfs){    
+get_sig_biomarkers <- function(biomarkers, dfs, modality = "all"){
+    common_cells <- Reduce(intersect, map(dfs, ~.$ModelID))
+
     ## library-specific biomarkers
     biomarkers_lib <- biomarkers %>%
         filter(ModelID %in% common_cells) %>% 
@@ -15,11 +17,33 @@ get_sig_biomarkers <- function(biomarkers, dfs){
         select(-sample_size, -Occurrence)
 
     ## join biomarkers with gene LFC
-    biomarkers_lib <- map(dfs, ~.x %>%
-            inner_join(biomarkers_lib, by = "ModelID", relationship = "many-to-many")) %>%
-        bind_rows(.id = "Algorithm") %>%
-        ## split by factor levels
-        group_split(Algorithm, Gene, CFE, DepmapModelType) 
+    if (modality == "all"){
+        biomarkers_lib <- map(dfs, ~.x %>%
+                inner_join(biomarkers_lib, by = "ModelID", relationship = "many-to-many")) %>%
+            bind_rows(.id = "Algorithm") %>%
+            ## split by factor levels
+            group_split(Algorithm, Gene, CFE, DepmapModelType) 
+    } else if (modality == "auto"){
+        biomarkers_lib <- biomarkers_lib %>%
+            ## focus on gain-of-function CFEs
+            filter(CFE_type == "mut" | grepl("gain", CFE)) %>%
+            ## remove gain-of-function CFEs with no gene
+            mutate(Gene = ifelse(CFE_type == "mut", CFE_stripped, CFE)) %>%
+            mutate(Gene = sub("gain.*\\(", "", Gene)) %>%
+            mutate(Gene = sub("\\)", "", Gene)) %>%
+            filter(!grepl("gain", Gene)) %>%
+            ## split CFEs with multiple genes
+            separate_rows(Gene, sep = ",")
+
+        biomarkers_lib <- map(dfs, ~.x %>%
+                inner_join(biomarkers_lib, by = c("ModelID", "Gene"))) %>%
+            bind_rows(.id = "Algorithm") %>%
+            ## split by factor levels
+            group_split(Algorithm, Gene, CFE, DepmapModelType) 
+    } else {
+        stop("modality must be 'all' or 'gene'")
+    }
+    
     
     n_associations <- length(biomarkers_lib)
     res_lib_sig <- list()
@@ -103,7 +127,7 @@ for (lib in libs){
     
     ## library-specific biomarkers
     sig_biomarkers_ssd <- get_sig_biomarkers(biomarkers, dfs_ssd)
-    sig_biomarkers_onco <- get_sig_biomarkers(biomarkers, dfs_onco)
+    sig_biomarkers_onco <- get_sig_biomarkers(biomarkers, dfs_onco, modality = "auto")
 
     ## save results
     saveRDS(sig_biomarkers_ssd, paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_ssd.rds"))
