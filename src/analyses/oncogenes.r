@@ -9,17 +9,13 @@ oncogenes <- read_tsv('data/biomarkers/cancerGeneList.tsv') %>%
 
 # get list of mutated genes from somatic and fusion data
 onco_mut_stat <- read_csv('data/OmicsSomaticMutationsMatrixDamaging.csv') %>%
-    rename(ModelID = colnames(.)[1]) %>%
-    column_to_rownames("ModelID") %>%
-    t() %>%
-    as_tibble(rownames = "Gene") %>%
-    separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
-    select(-code) %>%
+    dplyr::rename(ModelID = colnames(.)[1]) %>%
+    rename_with(~sub(" \\(.*$", "", .x)) %>%
     ## filter oncogenes
+    pivot_longer(-ModelID, names_to = "Gene", values_to = "Mutation") %>%
     filter(Gene %in% oncogenes) %>%
-    pivot_longer(-Gene, names_to = "ModelID", values_to = "Mutation") %>%
     ## merge with fusion data
-    full_join(., read_csv('data/OmicsFusionFiltered.csv') %>%
+    full_join(read_csv('data/OmicsFusionFiltered.csv') %>%
         select(ModelID, FusionName) %>%
         separate(FusionName, into = c("Gene1", "Gene2"), sep = "--") %>%
         ## collapse Gene1 and Gene2 into one column
@@ -113,18 +109,5 @@ for (lib in libs){
     
 
     ## save results
-    p_oncogenes <- ggplot(onco_auc, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
-        geom_bar(stat = "identity") +
-        labs(x = "Method", y = "AUROC", title = "AUROC oncogenes") +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1)
-    ggsave(p_oncogenes, filename = paste0("results/analyses/impact_data_quality/", lib, "_onco_auc.pdf"), width = 10, height = 10, dpi = 300)
     saveRDS(onco_auc, paste0("results/analyses/impact_data_quality/", lib, "_onco_auc.rds"))
 }
