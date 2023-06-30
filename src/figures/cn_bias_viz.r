@@ -52,16 +52,7 @@ for (lib in libs){
 
 
     ## Consider only unexpressed genes (TPM < 1)
-    dfs_unexpr <- dfs %>%
-        inner_join(read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
-            rename(ModelID = colnames(.)[1]) %>%
-            pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM") %>%
-            separate(Gene, into = c("Gene", "Code"), sep = " \\(") %>%
-            group_by(Gene) %>%
-            mutate(mean_TPM = mean(TPM, na.rm = TRUE)) %>%
-            ungroup() %>%
-            filter(mean_TPM < 1) %>%
-            select(-c(Code, mean_TPM)))
+    dfs_unexpr <- readRDS(paste0("results/analyses/cn_correction/", lib, "_cn_abs_tpm.rds"))
     
     p_cn_abs_unexpr <- ggplot(dfs_unexpr, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
