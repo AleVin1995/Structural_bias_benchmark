@@ -50,8 +50,13 @@ for (lib in libs){
         set_names(dfs_names)
 
     ## merge with CN abs data
+    common_cells <- Reduce(intersect, map(dfs, ~colnames(.)[2:length(colnames(.))]))
+    common_genes <- Reduce(intersect, map(dfs, ~.$Gene))
+
     dfs <- map(dfs, ~.x %>%
-            pivot_longer(-1, names_to = "ModelID", values_to = "LFC")) %>%
+            pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+            filter(ModelID %in% common_cells) %>%
+            filter(Gene %in% common_genes)) %>%
         bind_rows(.id = "Algorithm") %>%
         inner_join(CN_abs, by = c("ModelID", "Gene"))
     
