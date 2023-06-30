@@ -102,7 +102,7 @@ get_recall_curve <- function(
     ## turn positive genes into a vector if it is a dataframe
     if (!is.vector(geneSet)){
         geneSet <- geneSet %>% 
-            inner_join(FCsprofile, by = "Gene") %>% 
+            inner_join(FCsprofile) %>% 
             pull(Gene) %>%
             unique()
     }

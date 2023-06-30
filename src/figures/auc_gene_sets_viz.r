@@ -79,7 +79,7 @@ for (lib in libs){
 
     rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
     
-    p_rec_ampl_noexpr <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+    p_rec_ampl_noexpr <- ggplot(rec_ampl_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
         labs(x = "Method", y = "Recall", title = "Amplified (unexpressed) genes") +
         theme_bw() +
@@ -91,5 +91,5 @@ for (lib in libs){
             plot.title = element_text(size = 14, hjust = 0.5),
             axis.text.x = element_text(angle = 45, hjust = 1),
             aspect.ratio = 1)
-    ggsave(p_rec_ampl, filename = paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.pdf"), width = 10, height = 10, dpi = 300)
+    ggsave(p_rec_ampl_noexpr, filename = paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.pdf"), width = 10, height = 10, dpi = 300)
 }
