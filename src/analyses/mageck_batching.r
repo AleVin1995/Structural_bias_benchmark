@@ -49,6 +49,6 @@ for (lib in libs){
             axis.ticks.x = element_blank(),
             plot.title = element_text(size = 14, hjust = 0.5),
             aspect.ratio = 1)
-    ggsave(p_sd, filename = paste0("results/analyses/", lib, "_MAGeCK_sd.pdf"), width = 20, height = 10, units = "in", dpi = 300)
-    saveRDS(MAGeCK_sd, paste0("results/analyses/", lib, "_MAGeCK_sd.rds"))
+    ggsave(p_sd, filename = paste0("results/analyses/mageck_batching/", lib, "_MAGeCK_sd.pdf"), width = 20, height = 10, units = "in", dpi = 300)
+    saveRDS(MAGeCK_sd, paste0("results/analyses/mageck_batching/", lib, "_MAGeCK_sd.rds"))
 }
