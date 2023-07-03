@@ -28,6 +28,17 @@ onco_mut_stat <- read_csv('data/OmicsSomaticMutationsMatrixDamaging.csv') %>%
     mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
     mutate(Status = ifelse(Mutation >= 1, 1, ifelse(Fusion == 1, 1, 0))) %>%
     select(-Mutation, -Fusion) %>%
+    distinct() %>%
+    ## expression data
+    inner_join(read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
+        dplyr::rename(ModelID = colnames(.)[1]) %>%
+        rename_with(~sub(" \\(.*$", "", .x)) %>%
+        pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
+    drop_na() %>%
+    ## compute average expression
+    group_by(Gene) %>%
+    mutate(mean_TPM = mean(TPM, na.rm = TRUE)) %>%
+    ungroup() %>%
     distinct()
 
 
@@ -41,7 +52,7 @@ get_recall <- function(x, FDRth = 0.05){
         pull(Gene_ModelID)
     
     neg <- x %>%
-        filter(Status == 0) %>%
+        filter(Status == 0 & mean_TPM < 1) %>%
         pull(Gene_ModelID)
 
     vec <- x %>%
