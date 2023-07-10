@@ -1,6 +1,6 @@
-library(cowplot)
 library(extrafont)
 library(forcats)
+library(patchwork)
 library(RColorBrewer)
 library(tidyverse)
 
@@ -9,7 +9,7 @@ font_import(paths = "/group/iorio/Alessandro/CN_benchmark/arial", prompt = FALSE
 source("src/figures/utils.r")
 
 libs <- c("Avana", "KY")
-cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Paired"))
+cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))
 
 # iterate over algorithms and libraries
 for (lib in libs){
@@ -33,7 +33,7 @@ for (lib in libs){
             panel.background = element_blank(),
             legend.position = "none",
             text = element_text(family = "Arial"),
-            plot.margin = grid::unit(c(5,5,5,5), "mm")) +
+            plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
         scale_fill_manual(values = cols)
@@ -63,7 +63,13 @@ for (lib in libs){
             panel.grid.minor = element_blank(),
             axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
             text = element_text(family = "Arial"),
-            plot.margin = grid::unit(c(5,5,5,5), "mm")) +
+            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            legend.box.margin = margin(0,0,0,0),
+            legend.key.size = unit(2, 'cm'),
+            legend.key.height = unit(2, 'cm'),
+            legend.key.width = unit(2, 'cm'),
+            legend.title = element_text(size=24),
+            legend.text = element_text(size=22)) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         scale_color_manual(values = cols)
 
@@ -87,7 +93,7 @@ for (lib in libs){
             panel.grid.minor = element_blank(),
             legend.position = "none",
             text = element_text(family = "Arial"),
-            plot.margin = grid::unit(c(5,5,5,5), "mm")) +
+            plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
         scale_fill_manual(values = cols)
@@ -117,33 +123,29 @@ for (lib in libs){
             panel.grid.minor = element_blank(),
             axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
             text = element_text(family = "Arial"),
-            plot.margin = grid::unit(c(5,5,5,5), "mm")) +
+            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            legend.box.margin = margin(0,0,0,0),
+            legend.key.size = unit(2, 'cm'),
+            legend.key.height = unit(2, 'cm'),
+            legend.key.width = unit(2, 'cm'),
+            legend.title = element_text(size=24),
+            legend.text = element_text(size=22)) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         scale_fill_manual(values = cols)
     
 
     # Create panel
-    legend <- get_legend(p_es +
-        theme(legend.box.margin = margin(0,0,0,0),
-            legend.key.size = unit(2, 'cm'),
-            legend.key.height = unit(2, 'cm'),
-            legend.key.width = unit(2, 'cm'),
-            legend.title = element_text(size=24),
-            legend.text = element_text(size=22)))
-
-    panel_all <- plot_grid(p_cn_abs, 
-        p_es + theme(legend.position="none"), 
-        nrow = 1, ncol = 2, align = 'h', axis = 'bt', 
-        rel_widths = c(2, 1), rel_heights = c(1, 1),
-        labels = "AUTO", label_size = 40, family = "Arial")
-    panel_all <- plot_grid(panel_all, legend, rel_widths = c(4, .5))
-    ggsave(panel_all, filename = paste0("results/panels/cn_bias_all_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
+    panel_all <- p_cn_abs + p_es +
+        plot_layout(widths = c(2, 1)) +
+        plot_annotation(tag_levels = 'A') &
+        theme(plot.tag.position = c(0, 1.05),
+            plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
+    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
     
-    panel_unexpr <- plot_grid(p_cn_abs_unexpr, 
-        p_es_unexpr + theme(legend.position="none"), 
-        nrow = 1, ncol = 2, align = 'h', axis = 'bt', 
-        rel_widths = c(2, 1), rel_heights = c(1, 1),
-        labels = "AUTO", label_size = 40, family = "Arial")
-    panel_unexpr <- plot_grid(panel_unexpr, legend, rel_widths = c(4, .5))
-    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
+    panel_unexpr <- p_cn_abs + p_es +
+        plot_layout(widths = c(2, 1)) +
+        plot_annotation(tag_levels = 'A') &
+        theme(plot.tag.position = c(0, 1.05),
+            plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
+    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
 }
