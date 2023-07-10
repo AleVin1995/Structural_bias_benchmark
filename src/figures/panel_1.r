@@ -26,7 +26,8 @@ for (lib in libs){
             axis.text.x = element_text(hjust = 0.5),
             axis.title = element_text(size = 30, color = 'black'),
             strip.background = element_blank(), 
-            strip.text.x = element_blank(),
+            strip.placement = "outside",
+            strip.text = element_text(size = 28, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             panel.background = element_blank(),
@@ -34,7 +35,7 @@ for (lib in libs){
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(5,5,5,5), "mm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free", ncol = 4) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
         scale_fill_manual(values = cols)
 
     ## LFC vs CN effect size (all genes)
@@ -80,14 +81,15 @@ for (lib in libs){
             axis.text.x = element_text(hjust = 1),
             axis.title = element_text(size = 30, color = 'black', hjust = 0.5),
             strip.background = element_blank(), 
-            strip.text.x = element_blank(),
+            strip.placement = "outside",
+            strip.text = element_text(size = 28, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             legend.position = "none",
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(5,5,5,5), "mm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free", ncol = 4) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
         scale_fill_manual(values = cols)
 
     ## LFC vs CN effect size (unexpressed genes)
