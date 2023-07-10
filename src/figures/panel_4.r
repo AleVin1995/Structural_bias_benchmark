@@ -18,13 +18,14 @@ for (lib in libs){
     p_aurocs <- ggplot(aurocs, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
         geom_violin() +
         geom_boxplot(width=0.1, color="black", outlier.shape = NA) +
-        labs(x = "", y = "") +
+        labs(x = "", y = "AUROC") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_blank(),
+            axis.title = element_text(size = 30, color = 'black'),
             aspect.ratio = 1,
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
@@ -37,13 +38,14 @@ for (lib in libs){
     p_auprcs <- ggplot(auprcs, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
         geom_violin() +
         geom_boxplot(width=0.1, color="black", outlier.shape = NA) +
-        labs(x = "", y = "") +
+        labs(x = "", y = "AUPRC") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_blank(),
+            axis.title = element_text(size = 30, color = 'black'),
             aspect.ratio = 1,
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
@@ -55,13 +57,14 @@ for (lib in libs){
 
     p_gene_sep <- ggplot(gene_sep, aes(x = Algorithm, y = Separation, fill = Algorithm)) +
         geom_boxplot() +
-        labs(x = "", y = "") +
+        labs(x = "", y = expression(Delta*"LFC")) +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_text(angle = 45, hjust = 1),
+            axis.title = element_text(size = 30, color = 'black'),
             aspect.ratio = 1,
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
@@ -73,13 +76,14 @@ for (lib in libs){
 
     p_oncogenes <- ggplot(onco_auc, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
         geom_bar(stat = "identity") +
-        labs(x = "", y = "") +
+        labs(x = "", y = "AUROC") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_text(angle = 45, hjust = 1),
+            axis.title = element_text(size = 30, color = 'black'),
             aspect.ratio = 1,
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
