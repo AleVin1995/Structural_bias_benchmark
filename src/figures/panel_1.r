@@ -138,14 +138,14 @@ for (lib in libs){
     panel_all <- p_cn_abs + p_es +
         plot_layout(widths = c(2, 1)) +
         plot_annotation(tag_levels = 'A') &
-        theme(plot.tag.position = c(0, 1.05),
+        theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
     ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
     
     panel_unexpr <- p_cn_abs + p_es +
         plot_layout(widths = c(2, 1)) +
         plot_annotation(tag_levels = 'A') &
-        theme(plot.tag.position = c(0, 1.05),
+        theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
     ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
 }
