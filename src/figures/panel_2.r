@@ -6,203 +6,146 @@ library(tidyverse)
 
 font_import(paths = "/group/iorio/Alessandro/CN_benchmark/arial", prompt = FALSE)
 
+source("src/figures/utils.r")
+
 libs <- c("Avana", "KY")
 cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))
 
 # iterate over algorithms and libraries
 for (lib in libs){
-    ## pooled results
-    bm_pool <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
-    bm_pool$Algorithm <- factor(bm_pool$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    bm_pool$Coord <- factor(bm_pool$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
+    ## All genes
+    dfs <- readRDS(paste0("results/analyses/cn_correction/", lib, "_cn_abs.rds"))
+    dfs$Algorithm <- factor(dfs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
-    p_pool <- ggplot(bm_pool, aes(x = Algorithm, y = est, fill = Algorithm)) +
-        geom_bar(stat = "identity") +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
+    p_cn_abs <- ggplot(dfs, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
+        stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
+        labs(x = "Absolute CN", y = "LFC") +
         theme_bw() +
         theme(
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.text.x = element_text(hjust = 0.5),
+            axis.title = element_text(size = 30, color = 'black'),
             strip.background = element_blank(), 
             strip.placement = "outside",
-            strip.text = element_text(size = 12, color = 'black'),
+            strip.text = element_text(size = 28, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1,
-            panel.spacing.y = unit(4, "lines")) +
-        facet_wrap(~Coord, ncol = 8) +
+            panel.background = element_blank(),
+            legend.position = "none",
+            text = element_text(family = "Arial"),
+            plot.margin = grid::unit(c(2,2,2,2), "cm")) +
+        geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
         scale_fill_manual(values = cols)
-    ggsave(p_pool, filename = paste0("results/panels/proximity_bias/proximity_bias_", lib, "_bm_pool.pdf"), width = 15, height = 15, dpi = 300)
 
-    p_pool_sum <- ggplot(bm_pool, aes(x = Algorithm, y = est, fill = Algorithm)) +
-        geom_boxplot() +
-        geom_jitter(width = 0.1, size = 2) +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
+    ## LFC vs CN effect size (all genes)
+    dfs_es <- dfs %>%
+        group_by(Algorithm, CN_abs) %>%
+        mutate(es = mean(LFC)/sd(LFC)) %>%
+        ungroup() %>%
+        select(Algorithm, es) %>%
+        distinct()
+    
+    p_es <- ggplot(dfs_es, aes(x = Algorithm, y = es, color = Algorithm)) +
+        geom_jitter(width = 0.15, size = 3) +
+        geom_point(aes(x = Algorithm, y = es), 
+            data = dfs_es %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
+            size = 5,
+            shape = 23,
+            fill = "black",
+            color = "black") +
+        labs(x = "", y = "Effect size") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_blank(),
             axis.title = element_text(size = 30, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
-            aspect.ratio = 1,
+            axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
             text = element_text(family = "Arial"),
-            plot.margin = unit(c(2, 2, 2, 2), "cm"),
-            legend.position = "none") +
+            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            legend.box.margin = margin(0,0,0,0),
+            legend.key.size = unit(2, 'cm'),
+            legend.key.height = unit(2, 'cm'),
+            legend.key.width = unit(2, 'cm'),
+            legend.title = element_text(size=24),
+            legend.text = element_text(size=22)) +
+        geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+        scale_color_manual(values = cols)
+
+
+    ## Consider only unexpressed genes (TPM < 1)
+    dfs_unexpr <- readRDS(paste0("results/analyses/cn_correction/", lib, "_cn_abs_tpm.rds"))
+    dfs_unexpr$Algorithm <- factor(dfs_unexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    
+    p_cn_abs_unexpr <- ggplot(dfs_unexpr, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
+        stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
+        labs(x = "Absolute CN (TPM < 1)", y = "LFC") +
+        theme_bw() +
+        theme(
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.text.x = element_text(hjust = 1),
+            axis.title = element_text(size = 30, color = 'black', hjust = 0.5),
+            strip.background = element_blank(), 
+            strip.placement = "outside",
+            strip.text = element_text(size = 28, color = 'black'),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            legend.position = "none",
+            text = element_text(family = "Arial"),
+            plot.margin = grid::unit(c(2,2,2,2), "cm")) +
+        geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
         scale_fill_manual(values = cols)
-        
-    ## TP53 results
-    bm_TP53 <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.rds"))
-    bm_TP53$Algorithm <- factor(bm_TP53$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    bm_TP53$Coord <- factor(bm_TP53$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
 
-    p_TP53 <- ggplot(bm_TP53, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_bar(stat = "identity", position=position_dodge()) +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
-        theme_bw() +
-        theme(
-            strip.background = element_blank(), 
-            strip.placement = "outside",
-            strip.text = element_text(size = 12, color = 'black'),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1,
-            panel.spacing.y = unit(4, "lines")) +
-        facet_wrap(~Coord) +
-        scale_fill_manual(labels = c("TP53 mut", "TP53 wt"), 
-            values = c("#1F78B4", "#A6CEE3"), name = "")
-    ggsave(p_TP53, filename = paste0("results/panels/proximity_bias/proximity_bias_", lib, "_bm_TP53.pdf"), width = 15, height = 15, dpi = 300)
-
-    p_TP53_sum <- ggplot(bm_TP53, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_boxplot() +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "") +
-        theme_bw() +
-        theme(
-            axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_blank(),
-            axis.title = element_text(size = 30, color = 'black'),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            aspect.ratio = 1,
-            text = element_text(family = "Arial"),
-            plot.margin = unit(c(2, 2, 2, 2), "cm"),
-            legend.key.size = unit(1.5, 'cm'),
-            legend.text = element_text(size = 14),
-            legend.position = c(0.15, 0.9),
-            legend.background = element_rect(fill = "white", color = "black")) +
-        scale_fill_manual(labels = c("TP53 mut", "TP53 wt"), 
-            values = c("#1F78B4", "#A6CEE3"), name = "")
+    ## LFC vs CN effect size (unexpressed genes)
+    dfs_es_unexpr <- dfs_unexpr %>%
+        group_by(Algorithm, CN_abs) %>%
+        mutate(es = mean(LFC)/sd(LFC)) %>%
+        ungroup() %>%
+        select(Algorithm, es) %>%
+        distinct()
     
-    ## CDKN2A results
-    bm_CDKN2A <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2A.rds"))
-    bm_CDKN2A$Algorithm <- factor(bm_CDKN2A$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    bm_CDKN2A$Coord <- factor(bm_CDKN2A$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
-
-    p_CDKN2A <- ggplot(bm_CDKN2A, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_bar(stat = "identity", position=position_dodge()) +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
-        theme_bw() +
-        theme(
-            strip.background = element_blank(), 
-            strip.placement = "outside",
-            strip.text = element_text(size = 12, color = 'black'),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1,
-            panel.spacing.y = unit(4, "lines")) +
-        facet_wrap(~Coord) +
-        scale_fill_manual(labels = c("CDKN2A mut", "CDKN2A wt"), 
-            values = c("#33A02C", "#B2DF8A"), name = "")
-    ggsave(p_CDKN2A, filename = paste0("results/panels/proximity_bias/proximity_bias_", lib, "_bm_CDKN2A.pdf"), width = 15, height = 15, dpi = 300)
-
-    p_CDKN2A_sum <- ggplot(bm_CDKN2A, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_boxplot() +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
+    p_es_unexpr <- ggplot(dfs_es_unexpr, aes(x = Algorithm, y = es, color = Algorithm)) +
+        geom_jitter(width = 0.15, size = 3) +
+        geom_point(aes(x = Algorithm, y = es), 
+            data = dfs_es %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
+            size = 5,
+            shape = 23,
+            fill = "black",
+            color = "black") +
+        labs(x = "", y = "Effect size") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
             axis.title = element_text(size = 30, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
-            aspect.ratio = 1,
-            text = element_text(family = "Arial"),
-            plot.margin = unit(c(2, 2, 2, 2), "cm"),
-            legend.key.size = unit(1.5, 'cm'),
-            legend.text = element_text(size = 14),
-            legend.position = c(0.15, 0.9),
-            legend.background = element_rect(fill = "white", color = "black")) +
-        scale_fill_manual(labels = c("CDKN2A mut", "CDKN2A wt"), 
-            values = c("#33A02C", "#B2DF8A"), name = "")
-        
-    ## CDKN2B results
-    bm_CDKN2B <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2B.rds"))
-    bm_CDKN2B$Algorithm <- factor(bm_CDKN2B$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    bm_CDKN2B$Coord <- factor(bm_CDKN2B$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
-
-    p_CDKN2B <- ggplot(bm_CDKN2B, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_bar(stat = "identity", position=position_dodge()) +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
-        theme_bw() +
-        theme(
-            strip.background = element_blank(), 
-            strip.placement = "outside",
-            strip.text = element_text(size = 12, color = 'black'),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            axis.text.x = element_text(angle = 45, hjust = 1),
-            aspect.ratio = 1,
-            panel.spacing.y = unit(4, "lines")) +
-        facet_wrap(~Coord) +
-        scale_fill_manual(labels = c("CDKN2B mut", "CDKN2B wt"), 
-            values = c("#FF7F00", "#FDBF6F"), name = "")
-    ggsave(p_CDKN2B, filename = paste0("results/panels/proximity_bias/proximity_bias_", lib, "_bm_CDKN2B.pdf"), width = 15, height = 15, dpi = 300)
-
-    p_CDKN2B_sum <- ggplot(bm_CDKN2B, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_boxplot() +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "") +
-        theme_bw() +
-        theme(
-            axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
-            axis.title = element_text(size = 30, color = 'black'),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            aspect.ratio = 1,
             text = element_text(family = "Arial"),
-            plot.margin = unit(c(2, 2, 2, 2), "cm"),
-            legend.key.size = unit(1.5, 'cm'),
-            legend.text = element_text(size = 14),
-            legend.position = c(0.15, 0.9),
-            legend.background = element_rect(fill = "white", color = "black")) +
-        scale_fill_manual(labels = c("CDKN2B mut", "CDKN2B wt"), 
-            values = c("#FF7F00", "#FDBF6F"), name = "")
+            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            legend.box.margin = margin(0,0,0,0),
+            legend.key.size = unit(2, 'cm'),
+            legend.key.height = unit(2, 'cm'),
+            legend.key.width = unit(2, 'cm'),
+            legend.title = element_text(size=24),
+            legend.text = element_text(size=22)) +
+        geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+        scale_fill_manual(values = cols)
     
-    ## Assemble panel
-    panel <- p_pool_sum + p_TP53_sum + p_CDKN2A_sum + p_CDKN2B_sum +
+
+    # Create panel
+    panel_all <- p_cn_abs + p_es +
+        plot_layout(widths = c(2, 1)) +
         plot_annotation(tag_levels = 'A') &
-        theme(plot.tag.position = c(0, 1.05),
+        theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel, filename = paste0("results/panels/proximity_bias/proximity_bias_", lib, "_bm_all.pdf"), width = 25, height = 25, dpi = 300)
+    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
+    
+    panel_unexpr <- p_cn_abs + p_es +
+        plot_layout(widths = c(2, 1)) +
+        plot_annotation(tag_levels = 'A') &
+        theme(plot.tag.position = c(0, 1),
+            plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
+    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
 }
