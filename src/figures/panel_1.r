@@ -137,7 +137,7 @@ for (lib in libs){
         rel_widths = c(2, 1), rel_heights = c(1, 1),
         labels = "AUTO", label_size = 40, family = "Arial")
     panel_all <- plot_grid(panel_all, legend, rel_widths = c(4, .5))
-    ggsave(panel_all, filename = paste0("results/panels/panel_cn_bias_all_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
+    ggsave(panel_all, filename = paste0("results/panels/cn_bias_all_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
     
     panel_unexpr <- plot_grid(p_cn_abs_unexpr, 
         p_es_unexpr + theme(legend.position="none"), 
@@ -145,5 +145,5 @@ for (lib in libs){
         rel_widths = c(2, 1), rel_heights = c(1, 1),
         labels = "AUTO", label_size = 40, family = "Arial")
     panel_unexpr <- plot_grid(panel_unexpr, legend, rel_widths = c(4, .5))
-    ggsave(panel_unexpr, filename = paste0("results/panels/panel_cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
+    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
 }
