@@ -175,11 +175,7 @@ for (lib in libs){
                     filter(Gene == "TP53"), 
                     cytoband)) %>%
             bind_rows(.id = "Algorithm") %>%
-            {
-                if ("Coord" %in% colnames(.)) {
-                    unite("Coord", c("Chromosome", "Arm"), sep = "")
-                }
-            }
+            unite("Coord", c("Chromosome", "Arm"), sep = "")
         
         ### save results
         if (!is.null(bm_TP53)){
@@ -198,11 +194,7 @@ for (lib in libs){
                     filter(Gene == "CDKN2A"), 
                     cytoband)) %>%
             bind_rows(.id = "Algorithm")%>%
-            {
-                if ("Coord" %in% colnames(.)) {
-                    unite("Coord", c("Chromosome", "Arm"), sep = "")
-                }
-            }
+            unite("Coord", c("Chromosome", "Arm"), sep = "")
         
         ### save results
         if (!is.null(bm_CDKN2A)){
@@ -221,11 +213,7 @@ for (lib in libs){
                     filter(Gene == "CDKN2B"), 
                     cytoband)) %>%
             bind_rows(.id = "Algorithm") %>%
-            {
-                if ("Coord" %in% colnames(.)) {
-                    unite("Coord", c("Chromosome", "Arm"), sep = "")
-                }
-            }
+            unite("Coord", c("Chromosome", "Arm"), sep = "")
         
         ### save results
         if (!is.null(bm_CDKN2B)){
@@ -244,11 +232,7 @@ for (lib in libs){
                     filter(Gene == "CDKN2C"), 
                     cytoband)) %>%
             bind_rows(.id = "Algorithm") %>%
-            {
-                if ("Coord" %in% colnames(.)) {
-                    unite("Coord", c("Chromosome", "Arm"), sep = "")
-                }
-            }
+            unite("Coord", c("Chromosome", "Arm"), sep = "")
         
         ### save results
         if (!is.null(bm_CDKN2C)){
@@ -267,11 +251,7 @@ for (lib in libs){
                     filter(Gene == "BTG2"), 
                     cytoband)) %>%
             bind_rows(.id = "Algorithm") %>%
-            {
-                if ("Coord" %in% colnames(.)) {
-                    unite("Coord", c("Chromosome", "Arm"), sep = "")
-                }
-            }
+            unite("Coord", c("Chromosome", "Arm"), sep = "")
         
         ### save results
         if (!is.null(bm_BTG2)){
