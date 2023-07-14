@@ -168,12 +168,13 @@ plot_CN_bias_CellLine <- function(model_info, CN_df, LFC_df, ModelName = 'HT-29'
       dplyr::rename(CN = model), by = 'Gene') %>%
     dplyr::rename(LFC = model) %>%
     mutate(Class = ifelse(CN == 0, 'CN: 0',
+            ifelse(CN == 1, 'CN: 1',
             ifelse(CN == 2, 'CN: 2', 
             ifelse(CN == 3, 'CN: 3',
             ifelse(CN == 4, 'CN: 4',
             ifelse(CN == 5, 'CN: 5',
             ifelse(CN == 6, 'CN: 6',
-            ifelse(CN == 7, 'CN: 7', 'CN: 8+')))))))) %>%
+            ifelse(CN == 7, 'CN: 7', 'CN: 8+'))))))))) %>%
     mutate(
       Class = ifelse(
         rownames(model_LFC) %in% EssGenes.DNA_REPLICATION_cons, 'DNA replication',
