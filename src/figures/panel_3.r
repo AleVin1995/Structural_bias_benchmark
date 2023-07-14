@@ -133,7 +133,7 @@ for (lib in libs){
     p_CDKN2A_sum <- ggplot(bm_CDKN2A, aes(x = Algorithm, y = est, fill = Status)) +
         geom_boxplot() +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
+        labs(x = "", y = "") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
