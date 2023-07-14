@@ -214,7 +214,7 @@ plot_CN_bias_CellLine <- function(model_info, CN_df, LFC_df, ModelName = 'HT-29'
       geom_hline(yintercept = -1, linetype = 'longdash') +
       labs(
         title = paste0(ModelName, ' cell line'),
-        x = 'Class',
+        x = '',
         y = 'LFC'
       ) +
       scale_fill_manual(values = c(alpha('orange', 0.7), 'light blue'))
@@ -246,4 +246,4 @@ avana_gene <- read_csv('data/raw/Avana_gene_raw_LFC.csv') %>%
 
 # Plot cell line specific CN bias
 p <- plot_CN_bias_CellLine(Model, CN_abs, avana_gene, ModelName = 'HCC1419')
-ggsave('results/panels/EDA/HCC1419_CN_bias.pdf', p, width = 6, height = 10)
+ggsave(p, filename = 'results/panels/EDA/HCC1419_CN_bias.pdf', width = 6, height = 10)
