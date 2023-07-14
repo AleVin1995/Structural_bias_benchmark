@@ -24,10 +24,10 @@ for (lib in libs){
         theme(
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_text(hjust = 0.5),
-            axis.title = element_text(size = 30, color = 'black'),
+            axis.title = element_text(size = 35, color = 'black'),
             strip.background = element_blank(), 
             strip.placement = "outside",
-            strip.text = element_text(size = 28, color = 'black'),
+            strip.text = element_text(size = 35, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             panel.background = element_blank(),
@@ -35,7 +35,7 @@ for (lib in libs){
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 3) +
         scale_fill_manual(values = cols)
 
     ## LFC vs CN effect size (all genes)
@@ -57,19 +57,15 @@ for (lib in libs){
         labs(x = "", y = "Effect size") +
         theme_bw() +
         theme(
-            axis.text = element_text(size = 25, color = 'black'),
-            axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.x = element_blank(),
+            axis.text = element_text(size = 32, color = 'black'),
+            axis.title = element_text(size = 35, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm"),
-            legend.box.margin = margin(0,0,0,0),
-            legend.key.size = unit(2, 'cm'),
-            legend.key.height = unit(2, 'cm'),
-            legend.key.width = unit(2, 'cm'),
-            legend.title = element_text(size=24),
-            legend.text = element_text(size=22)) +
+            legend.position = "none") +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         scale_color_manual(values = cols)
 
@@ -80,22 +76,22 @@ for (lib in libs){
     
     p_cn_abs_unexpr <- ggplot(dfs_unexpr, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
-        labs(x = "Absolute CN (TPM < 1)", y = "LFC") +
+        labs(x = "Absolute CN (mean TPM < 1)", y = "LFC") +
         theme_bw() +
         theme(
-            axis.text = element_text(size = 25, color = 'black'),
+            axis.text = element_text(size = 30, color = 'black'),
             axis.text.x = element_text(hjust = 1),
-            axis.title = element_text(size = 30, color = 'black', hjust = 0.5),
+            axis.title = element_text(size = 35, color = 'black', hjust = 0.5),
             strip.background = element_blank(), 
             strip.placement = "outside",
-            strip.text = element_text(size = 28, color = 'black'),
+            strip.text = element_text(size = 35, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             legend.position = "none",
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free_x", ncol = 4) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 3) +
         scale_fill_manual(values = cols)
 
     ## LFC vs CN effect size (unexpressed genes)
@@ -117,35 +113,31 @@ for (lib in libs){
         labs(x = "", y = "Effect size") +
         theme_bw() +
         theme(
-            axis.text = element_text(size = 25, color = 'black'),
-            axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.x = element_blank(),
+            axis.text = element_text(size = 32, color = 'black'),
+            axis.title = element_text(size = 35, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm"),
-            legend.box.margin = margin(0,0,0,0),
-            legend.key.size = unit(2, 'cm'),
-            legend.key.height = unit(2, 'cm'),
-            legend.key.width = unit(2, 'cm'),
-            legend.title = element_text(size=24),
-            legend.text = element_text(size=22)) +
+            legend.position = "none") +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         scale_fill_manual(values = cols)
     
 
     # Create panel
     panel_all <- p_cn_abs + p_es +
-        plot_layout(widths = c(2, 1)) +
+        plot_layout(widths = c(1.3, 1)) +
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
+    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 45, height = 25, units = "in", dpi = 300)
     
-    panel_unexpr <- p_cn_abs + p_es +
-        plot_layout(widths = c(2, 1)) +
+    panel_unexpr <- p_cn_abs_unexpr + p_es_unexpr +
+        plot_layout(widths = c(1.3, 1)) +
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
-            plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 15, units = "in", dpi = 300)
+            plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
+    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 25, units = "in", dpi = 300)
 }
