@@ -32,6 +32,7 @@ for (lib in libs){
             plot.title = element_text(size = 14, hjust = 0.5),
             axis.text.x = element_text(angle = 45, hjust = 1),
             aspect.ratio = 1,
+            legend.position = "none",
             panel.spacing.y = unit(4, "lines")) +
         facet_wrap(~Coord, ncol = 8) +
         scale_fill_manual(values = cols)
