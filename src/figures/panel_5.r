@@ -43,6 +43,7 @@ for (lib in libs){
 
     p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
+        geom_hline(yintercept = 0.5, linetype = "dashed") +
         labs(x = "", y = "Recall curve") +
         theme_bw() +
         theme(
@@ -61,6 +62,7 @@ for (lib in libs){
     
     p_rec_ampl_noexpr <- ggplot(rec_ampl_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
+        geom_hline(yintercept = 0.5, linetype = "dashed") +
         labs(x = "", y = "") +
         theme_bw() +
         theme(
