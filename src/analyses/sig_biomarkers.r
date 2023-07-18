@@ -122,7 +122,7 @@ for (lib in libs){
             pivot_longer(-1, names_to = "ModelID", values_to = "LFC"))
     
     dfs_onco <- map(dfs, ~select(., colnames(.)[1], all_of(common_cells))) %>% 
-        map(~filter(., Gene %in% oncogenes | Gene %in% ampl_racs) %>%
+        map(~filter(., Gene %in% oncogenes) %>%
             pivot_longer(-1, names_to = "ModelID", values_to = "LFC"))
     
     ## library-specific biomarkers
