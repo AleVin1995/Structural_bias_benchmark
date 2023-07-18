@@ -123,7 +123,7 @@ for (lib in libs){
             plot.margin = grid::unit(c(2,2,2,2), "cm"),
             legend.position = "none") +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        scale_fill_manual(values = cols)
+        scale_color_manual(values = cols)
     
 
     # Create panel
