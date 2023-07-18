@@ -72,9 +72,7 @@ for (lib in libs){
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
-            legend.title = element_text(size = 24),
-            legend.key.size = unit(1, 'cm'),
-            legend.text = element_text(size = 14)) +
+            legend.position = "none") +
         scale_fill_manual(values = cols)
     
     ## Assemble panel
@@ -82,5 +80,5 @@ for (lib in libs){
         plot_annotation(tag_levels = "A") &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel, filename = paste0("results/panels/data_quality/gene_sets_", lib, ".pdf"), width = 25, height = 15, dpi = 300)
+    ggsave(panel, filename = paste0("results/panels/data_quality/gene_sets_", lib, ".pdf"), width = 25, height = 20, dpi = 300)
 }
