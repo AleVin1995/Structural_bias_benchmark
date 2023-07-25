@@ -3,12 +3,12 @@ library(tidyverse)
 
 
 # load essential genes from CRISPRcleanR (MSigDB)
-data(EssGenes.DNA_REPLICATION_cons)
-data(EssGenes.HISTONES) 
-data(EssGenes.KEGG_rna_polymerase)   
-data(EssGenes.PROTEASOME_cons)    
-data(EssGenes.SPLICEOSOME_cons)     
-data(EssGenes.ribosomalProteins)
+load("data/gene_sets/histones.rdata")
+load("data/gene_sets/Kegg.DNArep.rdata")
+load("data/gene_sets/Kegg.Proteasome.rdata")
+load("data/gene_sets/Kegg.Ribosome.rdata") 
+load("data/gene_sets/Kegg.RNApoly.rdata")   
+load("data/gene_sets/Kegg.Spliceosome.rdata")
 
 
 # build predefined sets of genes
@@ -23,12 +23,12 @@ noness_genes <- read_csv("data/AchillesNonessentialControls.csv") %>%
     unique()
 
 msigdb_genes <- c(
-        EssGenes.DNA_REPLICATION_cons,
-        EssGenes.HISTONES,
-        EssGenes.KEGG_rna_polymerase,
-        EssGenes.PROTEASOME_cons,
-        EssGenes.SPLICEOSOME_cons,
-        EssGenes.ribosomalProteins
+        Kegg.DNArep,
+        Kegg.Proteasome,
+        Kegg.Ribosome,
+        Kegg.RNApoly,
+        Kegg.Spliceosome,
+        Histones
         ) %>%
     unique()
 
