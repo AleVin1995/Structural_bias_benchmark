@@ -18,7 +18,7 @@ compute_gene_sets_separation <- function(gene_lfc, ess_genes, noness_genes){
     noness_lfc <- gene_lfc[intersect(names(gene_lfc), noness_genes)]
 
     ## compute separation between essential and non-essential genes
-    separation <- median(ess_lfc, na.rm = TRUE) - median(noness_lfc, na.rm = TRUE)
+    separation <- (median(ess_lfc, na.rm = TRUE) - median(noness_lfc, na.rm = TRUE))/mad(noness_lfc, na.rm = TRUE)
     return(separation)
 }
 

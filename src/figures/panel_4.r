@@ -57,7 +57,7 @@ for (lib in libs){
 
     p_gene_sep <- ggplot(gene_sep, aes(x = Algorithm, y = Separation, fill = Algorithm)) +
         geom_boxplot() +
-        labs(x = "", y = expression(Delta*"LFC")) +
+        labs(x = "", y = "NNMD") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
