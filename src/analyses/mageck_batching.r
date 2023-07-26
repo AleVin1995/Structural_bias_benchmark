@@ -1,10 +1,29 @@
 library(tidyverse)
 
 libs <- c("Avana", "KY")
+nums <- c(5, 10, 20, 50)
 
 # iterate over algorithms and libraries
 for (lib in libs){
+    dfs_names <- paste0("MAGeCK_", nums)
 
+    dfs <- paste0("data/corrected/", lib, "_gene_MAGeCK_", nums, ".csv") %>%
+        map(~.x %>%
+            read_csv %>%
+            ## fill na with 0
+            mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
+            pivot_longer(-1, names_to = "ModelID", values_to = "LFC")) %>%
+        reduce(., full_join, by = c("Gene", "ModelID")) %>%
+        ## set column names
+        set_names(c("Gene", "ModelID", dfs_names))
+    
+    ## compute pointwise difference between each dataset and the next one
+    dfs <- dfs %>%
+        mutate(`10-5` = `MAGeCK_10` - `MAGeCK_5`,
+            `20-10` = `MAGeCK_20` - `MAGeCK_10`,
+            `50-20` = `MAGeCK_50` - `MAGeCK_20`)
+
+    ## compute pointwise mean across iterations
     for (i in seq(1:100)){
         MAGeCK_tmp <- read_csv(paste0("data/corrected/MAGeCK/", lib, "_gene_MAGeCK_", i,".csv")) %>%
             column_to_rownames("Gene")
@@ -19,6 +38,7 @@ for (lib in libs){
 
     MAGeCK_mean <- MAGeCK_mean/100
 
+    ## compute pointwise standard deviation across iterations
     for (i in seq(1:100)){
         MAGeCK_tmp <- read_csv(paste0("data/corrected/MAGeCK/", lib, "_gene_MAGeCK_", i,".csv")) %>%
             column_to_rownames("Gene")
@@ -36,19 +56,6 @@ for (lib in libs){
         pivot_longer(-Gene, names_to = "ModelID", values_to = "sd")
 
     ## save results
-    p_sd <- ggplot(MAGeCK_sd, aes(y = log10(sd), x = factor(0))) +
-        geom_boxplot() +
-        labs(x = "", y = "log10(sd)", title = paste0("MAGeCK point-wise sd ", lib, " dataset")) +
-        theme_bw() +
-        theme(
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            axis.text = element_text(size = 10, color = 'black'),
-            axis.title = element_text(size = 12),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.title = element_text(size = 14, hjust = 0.5),
-            aspect.ratio = 1)
-    ggsave(p_sd, filename = paste0("results/analyses/mageck_batching/", lib, "_MAGeCK_sd.pdf"), width = 20, height = 10, units = "in", dpi = 300)
+    saveRDS(dfs, paste0("results/analyses/mageck_batching/", lib, "_MAGeCK_diff.rds"))
     saveRDS(MAGeCK_sd, paste0("results/analyses/mageck_batching/", lib, "_MAGeCK_sd.rds"))
 }
