@@ -105,7 +105,7 @@ for (lib in libs){
     p_es_unexpr <- ggplot(dfs_es_unexpr, aes(x = Algorithm, y = es, color = Algorithm)) +
         geom_jitter(width = 0.15, size = 3) +
         geom_point(aes(x = Algorithm, y = es), 
-            data = dfs_es %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
+            data = dfs_es_unexpr %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
             size = 5,
             shape = 23,
             fill = "black",
