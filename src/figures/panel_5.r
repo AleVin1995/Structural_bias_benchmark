@@ -14,7 +14,7 @@ for (lib in libs){
     ## Recall at 5% FDR
     recall_gene_sets <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds")) %>%
         filter(Gene_Set %in% c("ess_genes", "noness_genes", "msigdb_genes")) %>%
-        mutate(Gene_Set = ifelse(Gene_Set == "ess_genes", "Essential genes",
+        mutate(Gene_Set = ifelse(Gene_Set == "ess_genes", "Common essential genes",
             ifelse(Gene_Set == "noness_genes", "Nonessential genes", "MsigDB genes")))
     recall_gene_sets$Algorithm <- factor(recall_gene_sets$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
