@@ -231,7 +231,8 @@ for (lib in libs){
                     run_Curve(.,
                         ess_genes, 
                         noness_genes, 
-                        display = FALSE) %>% 
+                        display = FALSE,
+                        type = "ROC") %>% 
                     .$AUC %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
@@ -251,7 +252,8 @@ for (lib in libs){
                     run_Curve(., 
                         ess_genes, 
                         noness_genes, 
-                        display = FALSE) %>%
+                        display = FALSE,
+                        type = "PR") %>%
                     .$AUC %>% 
                     as.numeric()) %>%
                 bind_rows() %>%
