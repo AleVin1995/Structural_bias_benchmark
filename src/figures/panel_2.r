@@ -35,7 +35,7 @@ for (lib in libs){
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free_x", ncol = 3) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
         scale_fill_manual(values = cols)
 
     ## LFC vs CN effect size (all genes)
@@ -47,10 +47,10 @@ for (lib in libs){
         distinct()
     
     p_es <- ggplot(dfs_es, aes(x = Algorithm, y = es, color = Algorithm)) +
-        geom_jitter(width = 0.15, size = 3) +
+        geom_jitter(width = 0.15, size = 5) +
         geom_point(aes(x = Algorithm, y = es), 
             data = dfs_es %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
-            size = 5,
+            size = 7,
             shape = 23,
             fill = "black",
             color = "black") +
@@ -91,7 +91,7 @@ for (lib in libs){
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free_x", ncol = 3) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
         scale_fill_manual(values = cols)
 
     ## LFC vs CN effect size (unexpressed genes)
@@ -103,10 +103,10 @@ for (lib in libs){
         distinct()
     
     p_es_unexpr <- ggplot(dfs_es_unexpr, aes(x = Algorithm, y = es, color = Algorithm)) +
-        geom_jitter(width = 0.15, size = 3) +
+        geom_jitter(width = 0.15, size = 5) +
         geom_point(aes(x = Algorithm, y = es), 
             data = dfs_es_unexpr %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
-            size = 5,
+            size = 7,
             shape = 23,
             fill = "black",
             color = "black") +
@@ -132,12 +132,12 @@ for (lib in libs){
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 45, height = 25, units = "in", dpi = 300)
+    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 35, height = 20, units = "in", dpi = 300)
     
     panel_unexpr <- p_cn_abs_unexpr + p_es_unexpr +
         plot_layout(widths = c(1.3, 1)) +
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
-    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 45, height = 25, units = "in", dpi = 300)
+    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 35, height = 20, units = "in", dpi = 300)
 }
