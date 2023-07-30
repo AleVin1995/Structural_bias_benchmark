@@ -20,7 +20,7 @@ def main():
     args = parser.parse_args()
 
     # Load data
-    gene_effects = pd.read_csv(args.lfc, index_col=0)
+    gene_effects = pd.read_csv(args.lfc, index_col=0).T
 
     cn = pd.read_csv(args.cn, index_col=0)
     cn.columns = cn.columns.str.replace(r'\s\(.*\)', '', regex=True)
