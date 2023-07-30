@@ -44,7 +44,7 @@ run_Chronos(){
 	conda activate CN_bench
 
 	python3 $ROOT/src/method/run_Chronos.py \
-		--lfc $ROOT/data/raw/"$LIB"_gene_raw_LFC.csv \
+		--lfc $ROOT/data/raw/"$LIB"_screen_gene_effect.csv \
 		--cn $ROOT/data/OmicsCNGene.csv \
 		-o $ROOT/data/corrected/"$LIB"_gene_Chronos.csv
 

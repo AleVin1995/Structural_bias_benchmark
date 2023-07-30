@@ -18,15 +18,21 @@ ScreenGeneEffect_Avana <- ScreenGeneEffect[[1]] %>%
     summarise(across(everything(), mean)) %>%
     ungroup() %>%
     column_to_rownames("ModelID") %>%
-    t()
+    t() %>%
+    as_tibble(rownames = "Gene") %>%
+    ## remove rows of NAs
+    drop_na()
 
 ScreenGeneEffect_KY <- ScreenGeneEffect[[2]] %>%
     group_by(ModelID) %>%
     summarise(across(everything(), mean)) %>%
     ungroup() %>%
     column_to_rownames("ModelID") %>%
-    t()
+    t() %>% 
+    as_tibble(rownames = "Gene") %>%
+    ## remove rows of NAs
+    drop_na()
 
 # Save the data
-write_csv(ScreenGeneEffect_Avana %>% as.data.frame(), "data/raw/Avana_screen_gene_effect.csv", col_names = TRUE)
-write_csv(ScreenGeneEffect_KY %>% as.data.frame(), "data/raw/KY_screen_gene_effect.csv", col_names = TRUE)
+write_csv(ScreenGeneEffect_Avana, "data/raw/Avana_screen_gene_effect.csv", col_names = TRUE)
+write_csv(ScreenGeneEffect_KY, "data/raw/KY_screen_gene_effect.csv", col_names = TRUE)
