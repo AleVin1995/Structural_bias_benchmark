@@ -208,41 +208,30 @@ for (lib in libs){
         filter(Algorithm != "Uncorrected")
     
     ## plot
-    plist <- list()
-
-    for (i in 1:7){
-        tmp <- params %>%
-            filter(Algorithm == algos[i])
-        
-        plist[[i]] <- ggradar(tmp,
-            group.point.size = 0,
-            group.line.width = 1,
-            values.radar = c("", "", ""),
-            fill = TRUE,
-            fill.alpha = 0.7,
-            legend.position = "none",
-            gridline.min.colour = "black",
-            gridline.mid.colour = "black",
-            gridline.max.colour = "black",
-            background.circle.colour = "white",
-            font.radar = "Arial",
-            axis.labels = c("AUPRC common\n essential genes", 
-                "AUROC\noncogenes", "Recall\n(amplified\ngenes)", 
-                "Recall (amplified\nunexpressed genes)", 
-                "Nº significant\nbiomarkers\n(all CFEs)", 
-                "Nº significant\nbiomarkers\n(GOF CFEs)"),
-            axis.label.size = 7,
-            grid.label.size = 7) +
-            labs(title = algos[i]) +
-            theme(
-                plot.title = element_text(size = 30, face = "bold", hjust = 0.5)) +
-            scale_fill_manual(values = cols[i]) +
-            scale_color_manual(values = cols[i])
-    }
+    radar <- ggradar(params,
+        group.point.size = 0,
+        group.line.width = 2,
+        values.radar = c("", "", ""),
+        fill = FALSE,
+        fill.alpha = 0.7,
+        gridline.min.colour = "black",
+        gridline.mid.colour = "black",
+        gridline.max.colour = "black",
+        background.circle.colour = "white",
+        legend.position = "right",
+        font.radar = "Arial",
+        axis.labels = c("AUPRC common\n essential genes", 
+            "AUROC\noncogenes", "Recall\n(amplified\ngenes)", 
+            "Recall (amplified\nunexpressed genes)", 
+            "Nº significant\nbiomarkers\n(all CFEs)", 
+            "Nº significant\nbiomarkers\n(GOF CFEs)"),
+        axis.label.size = 12) +
+        scale_color_manual(values = cols) +
+        theme(legend.text = element_text(size = 18))
 
     ## Assemble panel
-    panel <- p_es_unexpr + p_es + plist + 
-        plot_layout(ncol = 3, heights = c(1, 1.5, 1.5)) + plot_annotation(tag_levels = "A") &
+    panel <- (p_es_unexpr | p_es ) / radar +
+        plot_annotation(tag_levels = "A") &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
     ggsave(panel, filename = paste0("results/panels/summary_panel_", lib, ".pdf"), width = 40, height = 40)
