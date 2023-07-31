@@ -79,6 +79,8 @@ for (lib in libs){
     radius_6 <- circleFun(c(0,0.5), 0.6, 0.3)
     radius_7 <- circleFun(c(0,0.5), 0.7, 0.35)
     radius_8 <- circleFun(c(0,0.5), 0.8, 0.4)
+    radius_9 <- circleFun(c(0,0.5), 0.9, 0.45)
+    radius_10 <- circleFun(c(0,0.5), 1, 0.5)
 
     ### all genes
     p_es <- ggplot(res, aes(x = cn_bias_all, y = proximity_bias)) +
@@ -95,10 +97,11 @@ for (lib in libs){
         geom_path(data = radius_3, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_4, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_5, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
+        geom_path(data = radius_6, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         labs(x = "Median correction \nfor CN bias (all genes)", 
             y = "") +
         xlim(c(0, 0.35)) +
-        ylim(c(0.5, 0.7)) +
+        ylim(c(0.5, 0.75)) +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
@@ -131,10 +134,12 @@ for (lib in libs){
         geom_path(data = radius_6, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_7, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_8, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
+        geom_path(data = radius_9, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
+        geom_path(data = radius_10, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         labs(x = "Median correction \nfor CN bias (unexpressed genes)", 
             y = "Median correction \nfor proximity bias") +
-        xlim(c(0, 0.7)) +
-        ylim(c(0.5, 0.7)) +
+        xlim(c(0, 0.9)) +
+        ylim(c(0.5, 0.75)) +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
