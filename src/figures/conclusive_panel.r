@@ -86,11 +86,11 @@ for (lib in libs){
     p_es <- ggplot(res, aes(x = cn_bias_all, y = proximity_bias)) +
         geom_point(aes(x = cn_bias_all, y = proximity_bias,
             shape = Type, color = MoA),
-            size = 7) +
+            size = 9) +
         geom_text(
             label = res$Algorithm, 
-            nudge_x = 0, nudge_y = 0.01, 
-            size = 7,
+            nudge_x = 0, nudge_y = 0.012, 
+            size = 8,
             check_overlap = FALSE) +
         geom_path(data = radius_1, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_2, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
@@ -120,11 +120,11 @@ for (lib in libs){
     p_es_unexpr <- ggplot(res, aes(x = cn_bias_unexpr, y = proximity_bias)) +
         geom_point(aes(x = cn_bias_unexpr, y = proximity_bias,
             shape = Type, color = MoA),
-            size = 7) +
+            size = 9) +
         geom_text(
             label = res$Algorithm, 
-            nudge_x = 0, nudge_y = 0.01, 
-            size = 7,
+            nudge_x = 0, nudge_y = 0.012, 
+            size = 9,
             check_overlap = FALSE) +
         geom_path(data = radius_1, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_2, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
@@ -162,6 +162,15 @@ for (lib in libs){
         summarise(AUPRC = median(AUPRC)) %>%
         ungroup() %>%
         dplyr::rename(AUPRC_ess = AUPRC)
+    
+    ## Gene sets separation
+    gene_sep <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_gene_sets_separation.rds"))
+    gene_sep$Algorithm <- factor(gene_sep$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    gene_sep <- gene_sep %>%
+        group_by(Algorithm) %>%
+        summarise(Separation = median(Separation)) %>%
+        ungroup() %>%
+        dplyr::rename(NNMD = Separation)
     
     ## Recall of oncogenes
     onco_auc <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_onco_auc.rds"))
@@ -206,10 +215,12 @@ for (lib in libs){
         left_join(rec_ampl_noexpr) %>%
         left_join(sig_biomarkers_ssd) %>%
         left_join(sig_biomarkers_onco) %>%
+        left_join(gene_sep) %>%
         mutate(Recall_ampl = 1 - abs(0.5 - Recall_ampl)*2,
             Recall_ampl_noexpr = 1 - abs(0.5 - Recall_ampl_noexpr)*2,
             n_sig_biomark_ssd = n_sig_biomark_ssd/max(n_sig_biomark_ssd),
-            n_sig_biomark_onco = n_sig_biomark_onco/max(n_sig_biomark_onco)) %>%
+            n_sig_biomark_onco = n_sig_biomark_onco/max(n_sig_biomark_onco),
+            NNMD = NNMD/min(NNMD)) %>%
         filter(Algorithm != "Uncorrected")
     
     ## plot
@@ -229,7 +240,8 @@ for (lib in libs){
             "AUROC\noncogenes", "Recall\n(amplified\ngenes)", 
             "Recall (amplified\nunexpressed genes)", 
             "Nº significant\nbiomarkers\n(all CFEs)", 
-            "Nº significant\nbiomarkers\n(GOF CFEs)"),
+            "Nº significant\nbiomarkers\n(GOF CFEs)",
+            "NNMD"),
         axis.label.size = 12) +
         scale_color_manual(values = cols) +
         theme(legend.text = element_text(size = 18))
