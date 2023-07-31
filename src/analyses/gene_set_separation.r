@@ -47,7 +47,7 @@ for (lib in libs){
     ## compute separation between essential and non-essential genes
     gene_sep <- map(dfs, ~.x %>%
                 pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
-                rename(Gene = colnames(.)[1]) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
                 split(.$ModelID) %>%
                 map(~.x %>% 
                     pull(LFC, name = "Gene") %>% 
