@@ -178,8 +178,8 @@ fi
 # clean up output and error files/directories
 n_jobs=$(squeue -u alessandro.vinceti | grep -w R | wc -l)
 
-# if [[ $n_jobs -eq 1 ]]
-# then
-# 	rm -r output
-# 	rm -r error
-# fi
+if [[ $n_jobs -eq 1 ]]
+then
+	rm -r output
+	rm -r error
+fi
