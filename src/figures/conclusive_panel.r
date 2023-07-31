@@ -34,7 +34,7 @@ for (lib in libs){
         group_by(Algorithm) %>%
         summarise(es = median(abs(es))) %>%
         ungroup() %>%
-        rename(cn_bias_all = es)
+        dplyr::rename(cn_bias_all = es)
 
     ## Consider only unexpressed genes (TPM < 1)
     dfs_unexpr <- readRDS(paste0("results/analyses/cn_correction/", lib, "_cn_abs_tpm.rds"))
@@ -49,7 +49,7 @@ for (lib in libs){
         group_by(Algorithm) %>%
         summarise(es = median(abs(es))) %>%
         ungroup() %>%
-        rename(cn_bias_unexpr = es)
+        dplyr::rename(cn_bias_unexpr = es)
     
     ## pooled results
     bm_pool <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
@@ -58,7 +58,7 @@ for (lib in libs){
         group_by(Algorithm) %>%
         summarise(est = median(est)) %>%
         ungroup() %>%
-        rename(proximity_bias = est)
+        dplyr::rename(proximity_bias = est)
     
     ## merge results
     res <- dfs_es %>%
@@ -156,13 +156,13 @@ for (lib in libs){
         group_by(Algorithm) %>%
         summarise(AUPRC = median(AUPRC)) %>%
         ungroup() %>%
-        rename(AUPRC_ess = AUPRC)
+        dplyr::rename(AUPRC_ess = AUPRC)
     
     ## Recall of oncogenes
     onco_auc <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_onco_auc.rds"))
     onco_auc$Algorithm <- factor(onco_auc$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     onco_auc <- onco_auc %>%
-        rename(AUROC_onco = AUROC)
+        dplyr::rename(AUROC_onco = AUROC)
 
     ## Recall curve amplified genes
     rec_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
@@ -171,7 +171,7 @@ for (lib in libs){
         group_by(Algorithm) %>%
         summarise(Recall = median(Recall)) %>%
         ungroup() %>%
-        rename(Recall_ampl = Recall)
+        dplyr::rename(Recall_ampl = Recall)
     
     ## Recall curve amplified genes (unexpressed)
     rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
@@ -180,19 +180,19 @@ for (lib in libs){
         group_by(Algorithm) %>%
         summarise(Recall = median(Recall)) %>%
         ungroup() %>%
-        rename(Recall_ampl_noexpr = Recall)
+        dplyr::rename(Recall_ampl_noexpr = Recall)
 
     ## Nº significant biomarkers (all CFEs on strongly selective dependencies)
     sig_biomarkers_ssd <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_ssd.rds"))
     sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     sig_biomarkers_ssd <- sig_biomarkers_ssd %>%
-        rename(n_sig_biomark_ssd = n_sig_biomark)
+        dplyr::rename(n_sig_biomark_ssd = n_sig_biomark)
 
     ## Nº significant biomarkers (gain-of-function CFEs within oncogene)
     sig_biomarkers_onco <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_onco.rds"))
     sig_biomarkers_onco$Algorithm <- factor(sig_biomarkers_onco$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     sig_biomarkers_onco <- sig_biomarkers_onco %>%
-        rename(n_sig_biomark_onco = n_sig_biomark)
+        dplyr::rename(n_sig_biomark_onco = n_sig_biomark)
 
     ## merge results
     params <- auprcs %>%
