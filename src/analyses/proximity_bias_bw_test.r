@@ -1,8 +1,6 @@
 library(brunnermunzel)
 library(tidyverse)
 
-# genes involved in DNA repair
-repair_genes <- c("TP53", "CDKN2A", "CDKN2B", "CDKN2C", "BTG2")
 
 # load cytoband information
 cytoband <- read_csv('data/cytoband_mapping.csv') %>%
@@ -22,7 +20,7 @@ mut_stat <- read_csv('data/OmicsSomaticMutationsMatrixDamaging.csv') %>%
     separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
     select(-code) %>%
     ## filter repair genes
-    filter(Gene %in% repair_genes) %>%
+    filter(Gene %in% "TP53") %>%
     pivot_longer(-Gene, names_to = "ModelID", values_to = "Mutation") %>%
     ## fill na with 0
     mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
@@ -182,82 +180,6 @@ for (lib in libs){
             saveRDS(bm_TP53, paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.rds"))
         } else {
             print(paste0("No data for TP53, skipping..."))
-        }
-    }
-    
-    if ("CDKN2A" %in% common_genes){
-        print(paste0("Performing brunner-munzel test for ", lib, " on CDKN2A..."))
-        bm_CDKN2A <- dfs %>%
-            map(~.x %>%
-                mut_stat_split(., 
-                    mut_stat %>%
-                    filter(Gene == "CDKN2A"), 
-                    cytoband)) %>%
-            bind_rows(.id = "Algorithm")%>%
-            unite("Coord", c("Chromosome", "Arm"), sep = "")
-        
-        ### save results
-        if (!is.null(bm_CDKN2A)){
-            saveRDS(bm_CDKN2A, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2A.rds"))
-        } else {
-            print(paste0("No data for CDKN2A, skipping..."))
-        }
-    }
-    
-    if ("CDKN2B" %in% common_genes){
-        print(paste0("Performing brunner-munzel test for ", lib, " on CDKN2B..."))
-        bm_CDKN2B <- dfs %>%
-            map(~.x %>%
-                mut_stat_split(., 
-                    mut_stat %>%
-                    filter(Gene == "CDKN2B"), 
-                    cytoband)) %>%
-            bind_rows(.id = "Algorithm") %>%
-            unite("Coord", c("Chromosome", "Arm"), sep = "")
-        
-        ### save results
-        if (!is.null(bm_CDKN2B)){
-            saveRDS(bm_CDKN2B, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2B.rds"))
-        } else {
-            print(paste0("No data for CDKN2B, skipping..."))
-        }
-    }
-    
-    if ("CDKN2C" %in% common_genes){
-        print(paste0("Performing brunner-munzel test for ", lib, " on CDKN2C..."))
-        bm_CDKN2C <- dfs %>%
-            map(~.x %>%
-                mut_stat_split(., 
-                    mut_stat %>%
-                    filter(Gene == "CDKN2C"), 
-                    cytoband)) %>%
-            bind_rows(.id = "Algorithm") %>%
-            unite("Coord", c("Chromosome", "Arm"), sep = "")
-        
-        ### save results
-        if (!is.null(bm_CDKN2C)){
-            saveRDS(bm_CDKN2C, paste0("results/analyses/proximity_bias/", lib, "_bm_CDKN2C.rds"))
-        } else {
-            print(paste0("No data for CDKN2C, skipping..."))
-        }
-    }
-    
-    if ("BTG2" %in% common_genes){
-        print(paste0("Performing brunner-munzel test for ", lib, " on BTG2..."))
-        bm_BTG2 <- dfs %>%
-            map(~.x %>%
-                mut_stat_split(., 
-                    mut_stat %>%
-                    filter(Gene == "BTG2"), 
-                    cytoband)) %>%
-            bind_rows(.id = "Algorithm") %>%
-            unite("Coord", c("Chromosome", "Arm"), sep = "")
-        
-        ### save results
-        if (!is.null(bm_BTG2)){
-            saveRDS(bm_BTG2, paste0("results/analyses/proximity_bias/", lib, "_bm_BTG2.rds"))
-        } else {
-            print(paste0("No data for BTG2, skipping..."))
         }
     }
 }
