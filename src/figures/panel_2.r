@@ -54,7 +54,7 @@ for (lib in libs){
             shape = 23,
             fill = "black",
             color = "black") +
-        labs(x = "", y = "Effect size") +
+        labs(x = "", y = "Inverse coefficient of variation") +
         theme_bw() +
         theme(
             axis.ticks.x = element_blank(),
@@ -110,7 +110,7 @@ for (lib in libs){
             shape = 23,
             fill = "black",
             color = "black") +
-        labs(x = "", y = "Effect size") +
+        labs(x = "", y = "Inverse coefficient of variation") +
         theme_bw() +
         theme(
             axis.ticks.x = element_blank(),
