@@ -44,7 +44,7 @@ for (lib in libs){
     p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "Recall curve") +
+        labs(x = "", y = "AURC", title = "Amplified genes") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
@@ -52,6 +52,7 @@ for (lib in libs){
             axis.text = element_text(size = 25, color = 'black'),
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
+            plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),   
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)

@@ -99,7 +99,8 @@ for (lib in libs){
         geom_path(data = radius_5, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_6, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         labs(x = "Median correction \nfor CN bias (all genes)", 
-            y = "") +
+            y = "",
+            title = "All genes") +
         xlim(c(0, 0.35)) +
         ylim(c(0.5, 0.75)) +
         theme_bw() +
@@ -113,6 +114,7 @@ for (lib in libs){
             legend.text = element_text(size = 18),
             text = element_text(family = "Arial"),
             aspect.ratio = 1,
+            plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),
             plot.margin = grid::unit(c(1,1,1,1), "cm")) +
         scale_color_manual(values = c("red", "blue"))
 
@@ -137,7 +139,8 @@ for (lib in libs){
         geom_path(data = radius_9, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_10, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         labs(x = "Median correction \nfor CN bias (unexpressed genes)", 
-            y = "Median correction \nfor proximity bias") +
+            y = "Median correction \nfor proximity bias",
+            title = "Unexpressed genes") +
         xlim(c(0, 0.9)) +
         ylim(c(0.5, 0.75)) +
         theme_bw() +
@@ -150,6 +153,7 @@ for (lib in libs){
             legend.position = "none",
             text = element_text(family = "Arial"),
             aspect.ratio = 1,
+            plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),
             plot.margin = grid::unit(c(1,1,1,1), "cm")) +
         scale_color_manual(values = c("red", "blue"))
     
