@@ -1,8 +1,6 @@
 .Rprofile
 .vscode/
 arial/
-bowtie/
 data/
 renv/
 results/
-samtools/
