@@ -4,7 +4,7 @@ library(patchwork)
 library(RColorBrewer)
 library(tidyverse)
 
-font_import(paths = "/group/iorio/Alessandro/CN_benchmark/arial", prompt = FALSE)
+font_import(paths = "/group/iorio/Alessandro/Structural_bias_benchmark/arial", prompt = FALSE)
 
 libs <- c("Avana", "KY")
 cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))

@@ -10,7 +10,7 @@ library(preprocessCore)
 library(RColorBrewer)
 library(tidyverse)
 
-font_import(paths = "/group/iorio/Alessandro/CN_benchmark/arial", prompt = FALSE)
+font_import(paths = "/group/iorio/Alessandro/Structural_bias_benchmark/arial", prompt = FALSE)
 
 # reduce matrix size, using a summarising function (default, mean)
 redim_matrix <- function(

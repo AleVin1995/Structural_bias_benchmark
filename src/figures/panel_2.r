@@ -4,7 +4,7 @@ library(patchwork)
 library(RColorBrewer)
 library(tidyverse)
 
-font_import(paths = "/group/iorio/Alessandro/CN_benchmark/arial", prompt = FALSE)
+font_import(paths = "/group/iorio/Alessandro/Structural_bias_benchmark/arial", prompt = FALSE)
 
 source("src/figures/utils.r")
 

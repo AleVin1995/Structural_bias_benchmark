@@ -5,9 +5,9 @@
 #SBATCH --time=240:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
-#SBATCH --chdir=/group/iorio/Alessandro/CN_benchmark
-#SBATCH --output=/group/iorio/Alessandro/CN_benchmark/output/%j.out
-#SBATCH --error=/group/iorio/Alessandro/CN_benchmark/error/%j.err
+#SBATCH --chdir=/group/iorio/Alessandro/Structural_bias_benchmark
+#SBATCH --output=/group/iorio/Alessandro/Structural_bias_benchmark/output/%j.out
+#SBATCH --error=/group/iorio/Alessandro/Structural_bias_benchmark/error/%j.err
 
 source ~/.bashrc
 

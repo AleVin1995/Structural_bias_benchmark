@@ -13,7 +13,7 @@ circleFun <- function(center = c(0,0), rx = 1, ry = 1, npoints = 1000){
     return(data.frame(x = xx, y = yy))
 }
 
-font_import(paths = "/group/iorio/Alessandro/CN_benchmark/arial", prompt = FALSE)
+font_import(paths = "/group/iorio/Alessandro/Structural_bias_benchmark/arial", prompt = FALSE)
 
 algos <- c("CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
 libs <- c("Avana", "KY")
