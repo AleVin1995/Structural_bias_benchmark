@@ -38,36 +38,24 @@ for (lib in libs){
         facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
         scale_fill_manual(values = cols)
 
-    ## LFC vs CN effect size (all genes)
-    dfs_es <- dfs %>%
-        group_by(Algorithm, CN_abs) %>%
-        mutate(es = mean(LFC)/sd(LFC)) %>%
-        ungroup() %>%
-        select(Algorithm, es) %>%
-        distinct()
+    ## Recall curve amplified genes (unexpressed)
+    rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
+    rec_ampl_noexpr$Algorithm <- factor(rec_ampl_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     
-    p_es <- ggplot(dfs_es, aes(x = Algorithm, y = es, color = Algorithm)) +
-        geom_jitter(width = 0.15, size = 5) +
-        geom_point(aes(x = Algorithm, y = es), 
-            data = dfs_es %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
-            size = 7,
-            shape = 23,
-            fill = "black",
-            color = "black") +
-        labs(x = "", y = "Inverse coefficient of variation") +
+    p_rec_ampl_noexpr <- ggplot(rec_ampl_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+        geom_boxplot() +
+        geom_hline(yintercept = 0.5, linetype = "dashed") +
+        labs(x = "", y = "") +
         theme_bw() +
         theme(
-            axis.ticks.x = element_blank(),
-            axis.text = element_text(size = 32, color = 'black'),
-            axis.title = element_text(size = 35, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
-            axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
-            text = element_text(family = "Arial"),
-            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
-        geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        scale_color_manual(values = cols)
+        scale_fill_manual(values = cols)
 
 
     ## Consider only unexpressed genes (TPM < 1)
@@ -94,47 +82,36 @@ for (lib in libs){
         facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
         scale_fill_manual(values = cols)
 
-    ## LFC vs CN effect size (unexpressed genes)
-    dfs_es_unexpr <- dfs_unexpr %>%
-        group_by(Algorithm, CN_abs) %>%
-        mutate(es = mean(LFC)/sd(LFC)) %>%
-        ungroup() %>%
-        select(Algorithm, es) %>%
-        distinct()
-    
-    p_es_unexpr <- ggplot(dfs_es_unexpr, aes(x = Algorithm, y = es, color = Algorithm)) +
-        geom_jitter(width = 0.15, size = 5) +
-        geom_point(aes(x = Algorithm, y = es), 
-            data = dfs_es_unexpr %>% group_by(Algorithm) %>% summarize(es = mean(es)), 
-            size = 7,
-            shape = 23,
-            fill = "black",
-            color = "black") +
-        labs(x = "", y = "Inverse coefficient of variation") +
+    ## Recall curve amplified genes
+    rec_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
+    rec_ampl$Algorithm <- factor(rec_ampl$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+
+    p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+        geom_boxplot() +
+        geom_hline(yintercept = 0.5, linetype = "dashed") +
+        labs(x = "", y = "AURC") +
         theme_bw() +
         theme(
-            axis.ticks.x = element_blank(),
-            axis.text = element_text(size = 32, color = 'black'),
-            axis.title = element_text(size = 35, color = 'black'),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
-            axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
-            text = element_text(family = "Arial"),
-            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),   
+            plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
-        geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        scale_color_manual(values = cols)
+        scale_fill_manual(values = cols)
     
 
     # Create panel
-    panel_all <- p_cn_abs + p_es +
+    panel_all <- p_cn_abs + p_rec_ampl +
         plot_layout(widths = c(1.3, 1)) +
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
     ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 35, height = 20, units = "in", dpi = 300)
     
-    panel_unexpr <- p_cn_abs_unexpr + p_es_unexpr +
+    panel_unexpr <- p_cn_abs_unexpr + p_rec_ampl_noexpr +
         plot_layout(widths = c(1.3, 1)) +
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
