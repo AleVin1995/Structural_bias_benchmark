@@ -254,7 +254,7 @@ ggsave(p, filename = 'results/panels/EDA/HCC1419_CN_bias.pdf', width = 6, height
 ccr_correction <- function(sgrna_lfc, 
                           guide_map,
                           cell_label,
-                          outdir = 'test/'){
+                          outdir = NULL){
   cell_data <- sgrna_lfc %>%
     select(sgRNA, cell_label) %>%
     left_join(guide_map, by = join_by(sgRNA == CODE)) %>%
@@ -266,7 +266,7 @@ ccr_correction <- function(sgrna_lfc,
   rownames(guide_map) <- guide_map$CODE
 
   gwSortedFCs <- ccr.logFCs2chromPos(cell_data, guide_map)
-  correctedFCs <- ccr.GWclean(gwSortedFCs, display = F, 
+  correctedFCs <- ccr.GWclean(gwSortedFCs, display = F, verbose = -1,
     label = cell_label, saveTO = outdir)
   
   return(list(cell_data = cell_data, correctedFCs = correctedFCs))
@@ -282,8 +282,8 @@ unknown_bias <- function(res,
                         start = NULL,
                         end = NULL,
                         ar = 0.3,
-                        lfc_min = -6,
-                        lfc_max = 3,
+                        min_lfc = -6,
+                        max_lfc = 3,
                         min_cn = 0,
                         max_cn = 4){
   ## get model id
@@ -295,9 +295,7 @@ unknown_bias <- function(res,
     stop('Cell line not found')
   }
 
-  if (cellname %in% colnames(cn_abs)){
-    next
-  } else {
+  if (!(cellname %in% colnames(cn_abs))){
     stop('Cell line not found')
   }
 
@@ -325,7 +323,7 @@ unknown_bias <- function(res,
   ## LFC plot
   p_lfc <- ggplot(point_lfc, aes(y = LFC, x = BP)) +
     geom_point(col = "green") +
-    ylim(lfc_min, lfc_max) +
+    ylim(min_lfc, max_lfc) +
     theme_bw() +
     theme(
         aspect.ratio = ar,
@@ -395,11 +393,7 @@ p_neg <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000585', chr = '3', st
 ggsave(p_neg, filename = 'results/panels/EDA/wt_CN_neg_bias.pdf', width = 20, height = 10)
 
 ## wild-type CN, positive bias
-for (i in colnames(avana_sgrna)){
-  if (i != 'sgRNA'){
-    res <- ccr_correction(avana_sgrna, guide_map, i, outdir = 'test/')
-  }
-}
+res <- ccr_correction(avana_sgrna, guide_map, 'ACH-000098')
 
-p_pos <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-001041', chr = '18', start = 1e7, end = 3e7)
+p_pos <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000098', chr = '18', start = 2.3e7, end = 3.2e7, min_lfc = -2, max_lfc = 2)
 ggsave(p_pos, filename = 'results/panels/EDA/wt_CN_pos_bias.pdf', width = 6, height = 10)
