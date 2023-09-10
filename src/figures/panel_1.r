@@ -332,7 +332,7 @@ unknown_bias <- function(res,
         axis.title = element_text(size = 30, color = 'black')) +
     xlim(as.numeric(start), as.numeric(end)) +
     geom_segment(data = seg_lfc, aes(y = `avg.logFC`, yend = `avg.logFC`, 
-      x = startp, xend = endp), col = "black", linewidth = 1)
+      x = startp, xend = endp), col = "black", linewidth = 0.5)
   
   ## CN plot
   point_cn <- CN_abs %>%
@@ -342,7 +342,7 @@ unknown_bias <- function(res,
     arrange(CHRM, BP)
 
   p_cn <- ggplot(point_cn, aes(y = CN, x = BP)) +
-    geom_point(col = "red") +
+    geom_point(col = "red", size = 3) +
     ylim(min_cn, max_cn) +
     theme_bw() +
     theme(
@@ -353,7 +353,7 @@ unknown_bias <- function(res,
         axis.title = element_text(size = 30, color = 'black')) +
     xlim(start, end) +
     geom_segment(aes(y = CN, yend = CN, x = start, xend = end), 
-      col = "black", linewidth = 1)
+      col = "black", linewidth = 0.5)
 
   ## assemble plot
   p_tot <- p_cn + p_lfc + plot_layout(nrow = 2)
