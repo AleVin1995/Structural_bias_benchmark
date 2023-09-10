@@ -396,4 +396,4 @@ ggsave(p_neg, filename = 'results/panels/EDA/wt_CN_neg_bias.pdf', width = 20, he
 res <- ccr_correction(avana_sgrna, guide_map, 'ACH-000098')
 
 p_pos <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000098', chr = '18', start = 2.3e7, end = 3.2e7, min_lfc = -2, max_lfc = 2)
-ggsave(p_pos, filename = 'results/panels/EDA/wt_CN_pos_bias.pdf', width = 6, height = 10)
+ggsave(p_pos, filename = 'results/panels/EDA/wt_CN_pos_bias.pdf', width = 20, height = 10)
