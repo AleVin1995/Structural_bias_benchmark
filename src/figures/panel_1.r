@@ -387,7 +387,7 @@ CN_abs <- CN_abs %>%
   left_join(guide_map, by = join_by(Gene == GENES))
 
 ## wild-type CN, negative bias
-res <- ccr_correction(avana_sgrna, guide_map, 'ACH-000585', outdir = 'test/')
+res <- ccr_correction(avana_sgrna, guide_map, 'ACH-000585')
 
 p_neg <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000585', chr = '3', start = 0, end = 5e7, ar = 0.3)
 ggsave(p_neg, filename = 'results/panels/EDA/wt_CN_neg_bias.pdf', width = 20, height = 10)
