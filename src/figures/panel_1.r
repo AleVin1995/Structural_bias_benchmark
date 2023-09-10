@@ -295,6 +295,12 @@ unknown_bias <- function(res,
     stop('Cell line not found')
   }
 
+  if (cellname %in% colnames(cn_abs)){
+    next
+  } else {
+    stop('Cell line not found')
+  }
+
   point_lfc <- res$cell_data %>%
     left_join(guide_map, by = join_by(sgRNA == CODE, gene == GENES)) %>%
     select(sgRNA, gene, CHRM, STARTpos, LFC) %>%
@@ -389,7 +395,11 @@ p_neg <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000585', chr = '3', st
 ggsave(p_neg, filename = 'results/panels/EDA/wt_CN_neg_bias.pdf', width = 20, height = 10)
 
 ## wild-type CN, positive bias
-res <- ccr_correction(avana_sgrna, guide_map, 'ACH-000585', outdir = 'test/')
+for (i in colnames(avana_sgrna)){
+  if (i != 'sgRNA'){
+    res <- ccr_correction(avana_sgrna, guide_map, i, outdir = 'test/')
+  }
+}
 
-p_pos <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000585', chr = '3', start = 0, end = 5e7)
+p_pos <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-001041', chr = '18', start = 1e7, end = 3e7)
 ggsave(p_pos, filename = 'results/panels/EDA/wt_CN_pos_bias.pdf', width = 6, height = 10)
