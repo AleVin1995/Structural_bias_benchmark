@@ -247,3 +247,149 @@ avana_gene <- read_csv('data/raw/Avana_gene_raw_LFC.csv') %>%
 # Plot cell line specific CN bias
 p <- plot_CN_bias_CellLine(Model, CN_abs, avana_gene, ModelName = 'HCC1419')
 ggsave(p, filename = 'results/panels/EDA/HCC1419_CN_bias.pdf', width = 6, height = 10)
+
+
+# Unknown source of bias
+## CCR correction pipeline
+ccr_correction <- function(sgrna_lfc, 
+                          guide_map,
+                          cell_label,
+                          outdir = 'test/'){
+  cell_data <- sgrna_lfc %>%
+    select(sgRNA, cell_label) %>%
+    left_join(guide_map, by = join_by(sgRNA == CODE)) %>%
+    select(sgRNA, GENES, cell_label) %>%
+    rename(LFC = cell_label, gene =  GENES) %>%
+    as.data.frame()
+
+  rownames(cell_data) <- cell_data$sgRNA
+  rownames(guide_map) <- guide_map$CODE
+
+  gwSortedFCs <- ccr.logFCs2chromPos(cell_data, guide_map)
+  correctedFCs <- ccr.GWclean(gwSortedFCs, display = F, 
+    label = cell_label, saveTO = outdir)
+  
+  return(list(cell_data = cell_data, correctedFCs = correctedFCs))
+}
+
+## plot of unknown bias
+unknown_bias <- function(res,
+                        cn_abs, 
+                        guide_map,
+                        model_map,
+                        cell_label,
+                        chr = '1',
+                        start = NULL,
+                        end = NULL,
+                        ar = 0.3,
+                        lfc_min = -6,
+                        lfc_max = 3,
+                        min_cn = 0,
+                        max_cn = 4){
+  ## get model id
+  cellname <- model_map %>% 
+    filter(ModelID == cell_label) %>% 
+    pull(CellLineName)
+  
+  if (length(cellname) != 1){
+    stop('Cell line not found')
+  }
+
+  point_lfc <- res$cell_data %>%
+    left_join(guide_map, by = join_by(sgRNA == CODE, gene == GENES)) %>%
+    select(sgRNA, gene, CHRM, STARTpos, LFC) %>%
+    rename(BP = STARTpos)
+  
+  if (is.null(start)){
+    start <- min(point_lfc$BP)
+  }
+
+  if (is.null(end)){
+    end <- max(point_lfc$BP)
+  }
+
+  point_lfc <- point_lfc %>%
+    filter(CHRM == chr & BP > start & BP < end)
+
+  seg_lfc <- res$correctedFCs$segments %>%
+    filter(CHR == chr & startp > start & endp < end)
+  seg_lfc[1, "startp"] <- start
+  seg_lfc[nrow(seg_lfc), "endp"] <- end
+
+  ## LFC plot
+  p_lfc <- ggplot(point_lfc, aes(y = LFC, x = BP)) +
+    geom_point(col = "green") +
+    ylim(lfc_min, lfc_max) +
+    theme_bw() +
+    theme(
+        aspect.ratio = ar,
+        plot.margin = grid::unit(c(1,1,1,1), "cm"),
+        axis.text = element_text(size = 25, color = 'black'),
+        axis.title = element_text(size = 30, color = 'black')) +
+    xlim(as.numeric(start), as.numeric(end)) +
+    geom_segment(data = seg_lfc, aes(y = `avg.logFC`, yend = `avg.logFC`, 
+      x = startp, xend = endp), col = "black", linewidth = 1)
+  
+  ## CN plot
+  point_cn <- CN_abs %>%
+    select(CODE, Gene, CHRM, STARTpos, cellname) %>%
+    rename(CN = cellname, BP = STARTpos) %>%
+    filter(CHRM == chr & BP > start & BP < end) %>%
+    arrange(CHRM, BP)
+
+  p_cn <- ggplot(point_cn, aes(y = CN, x = BP)) +
+    geom_point(col = "red") +
+    ylim(min_cn, max_cn) +
+    theme_bw() +
+    theme(
+        aspect.ratio = ar,
+        plot.margin = grid::unit(c(1,1,1,1), "cm"),
+        axis.text = element_text(size = 25, color = 'black'),
+        axis.title.x = element_blank(),
+        axis.title = element_text(size = 30, color = 'black')) +
+    xlim(start, end) +
+    geom_segment(aes(y = CN, yend = CN, x = start, xend = end), 
+      col = "black", linewidth = 1)
+
+  ## assemble plot
+  p_tot <- p_cn + p_lfc + plot_layout(nrow = 2)
+
+  return(p_tot)
+}
+
+## Load data
+avana_sgrna <- read_csv('data/raw/Avana_sgrna_raw_LFC.csv')
+
+Model <- Model %>%
+  select(CellLineName, ModelID)
+
+guide_map <- read_csv('data/AvanaGuideMap.csv') %>%
+  filter(UsedByChronos == T) %>%
+  select(sgRNA, GenomeAlignment, Gene) %>%
+  separate(col = 'GenomeAlignment', into = c('chr', 'pos', 'strand'), sep = '_') %>%
+  separate(col = 'chr', into = c('null', 'chr'), sep = 'chr') %>%
+  separate(col = 'Gene', into = c('Gene', 'code'), sep = ' \\(') %>%
+  select(-c(null, code)) %>%
+  rename(CODE = sgRNA, GENES = Gene, CHRM = chr, STRAND = strand, STARTpos = pos) %>%
+  mutate(STARTpos = as.numeric(STARTpos)) %>%
+  mutate(ENDpos = STARTpos + 23, seq = CODE) %>%
+  as.data.frame()
+rownames(guide_map) <- guide_map$CODE
+
+CN_abs <- CN_abs %>% 
+  t() %>% 
+  as_tibble(rownames = NA) %>% 
+  rownames_to_column(var = "Gene") %>%
+  left_join(guide_map, by = join_by(Gene == GENES))
+
+## wild-type CN, negative bias
+res <- ccr_correction(avana_sgrna, guide_map, 'ACH-000585', outdir = 'test/')
+
+p_neg <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000585', chr = '3', start = 0, end = 5e7, ar = 0.3)
+ggsave(p_neg, filename = 'results/panels/EDA/wt_CN_neg_bias.pdf', width = 20, height = 10)
+
+## wild-type CN, positive bias
+res <- ccr_correction(avana_sgrna, guide_map, 'ACH-000585', outdir = 'test/')
+
+p_pos <- unknown_bias(res, CN_abs, guide_map, Model, 'ACH-000585', chr = '3', start = 0, end = 5e7)
+ggsave(p_pos, filename = 'results/panels/EDA/wt_CN_pos_bias.pdf', width = 6, height = 10)
