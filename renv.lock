@@ -2059,6 +2059,22 @@
       ],
       "Hash": "c957612b8bb1ee9ab7b2450d26663e7e"
     },
+    "ggradar": {
+      "Package": "ggradar",
+      "Version": "0.2",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "ggradar",
+      "RemoteUsername": "ricardo-bion",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "53404a563e2629e034cc7dd21afda40d213d1c64",
+      "Requirements": [
+        "forcats",
+        "ggplot2"
+      ],
+      "Hash": "674a1662b9c2b13cd34f4443a6fef7c0"
+    },
     "ggrepel": {
       "Package": "ggrepel",
       "Version": "0.9.3",
@@ -2739,6 +2755,22 @@
         "plyr"
       ],
       "Hash": "417fd0d40479932c19faf2747817c473"
+    },
+    "patchwork": {
+      "Package": "patchwork",
+      "Version": "1.1.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "ggplot2",
+        "grDevices",
+        "graphics",
+        "grid",
+        "gtable",
+        "stats",
+        "utils"
+      ],
+      "Hash": "63b611e9d909a9ed057639d9c3b77152"
     },
     "pbkrtest": {
       "Package": "pbkrtest",
@@ -3727,6 +3759,18 @@
         "stats"
       ],
       "Hash": "c0e49a9760983e81e55cdd9be92e7182"
+    },
+    "writexl": {
+      "Package": "writexl",
+      "Version": "1.4.2",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "writexl",
+      "RemoteUsername": "ropensci",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "b138c2209fa4c0e07bc93b112c2aded3d9b25810",
+      "Hash": "0cdca6cbcfe11af2e72625032675aa97"
     },
     "xfun": {
       "Package": "xfun",
