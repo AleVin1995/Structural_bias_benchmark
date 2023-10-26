@@ -7,9 +7,9 @@
 #SBATCH --time=100:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
-#SBATCH --chdir=/group/iorio/Alessandro/Structural_bias_benchmark
-#SBATCH --output=/group/iorio/Alessandro/Structural_bias_benchmark/%j.out
-#SBATCH --error=/group/iorio/Alessandro/Structural_bias_benchmark/%j.err
+#SBATCH --chdir=/group/iorio/Alessandro_Vinceti/Structural_bias_benchmark
+#SBATCH --output=/group/iorio/Alessandro_Vinceti/Structural_bias_benchmark/%j.out
+#SBATCH --error=/group/iorio/Alessandro_Vinceti/Structural_bias_benchmark/%j.err
 
 source ~/.bashrc
 conda activate CN_bench_r

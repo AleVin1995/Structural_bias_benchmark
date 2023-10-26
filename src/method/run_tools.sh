@@ -5,9 +5,9 @@
 #SBATCH --time=240:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
-#SBATCH --chdir=/group/iorio/Alessandro/Structural_bias_benchmark
-#SBATCH --output=/group/iorio/Alessandro/Structural_bias_benchmark/output/%j.out
-#SBATCH --error=/group/iorio/Alessandro/Structural_bias_benchmark/error/%j.err
+#SBATCH --chdir=/group/iorio/Alessandro_Vinceti/Structural_bias_benchmark
+#SBATCH --output=/group/iorio/Alessandro_Vinceti/Structural_bias_benchmark/output/%j.out
+#SBATCH --error=/group/iorio/Alessandro_Vinceti/Structural_bias_benchmark/error/%j.err
 
 source ~/.bashrc
 
@@ -176,7 +176,7 @@ else
 fi
 
 # clean up output and error files/directories
-n_jobs=$(squeue -u alessandro.vinceti | grep -w R | wc -l)
+n_jobs=$(squeue -u Alessandro_Vinceti.vinceti | grep -w R | wc -l)
 
 if [[ $n_jobs -eq 1 ]]
 then
