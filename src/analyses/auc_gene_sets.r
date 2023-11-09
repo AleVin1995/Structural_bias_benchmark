@@ -55,11 +55,8 @@ cn_ampl_genes <- cn_ratio %>%
     
 cn_ampl_noexpr_genes <- cn_ratio_tpm %>%
     inner_join(cn_ampl_genes) %>%
-    group_by(Gene) %>%
-    mutate(mean_TPM = mean(TPM, na.rm = TRUE)) %>%
-    ungroup() %>%
     ## filter genes with no expression
-    filter(mean_TPM < 1)
+    filter(TPM < 1)
 
 
 # compute recall at significant threshold
