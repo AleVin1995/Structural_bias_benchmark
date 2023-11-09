@@ -64,7 +64,7 @@ for (lib in libs){
     
     p_cn_abs_unexpr <- ggplot(dfs_unexpr, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
-        labs(x = "Absolute CN (mean TPM < 1)", y = "LFC") +
+        labs(x = "Absolute CN (TPM < 1)", y = "LFC") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 30, color = 'black'),
