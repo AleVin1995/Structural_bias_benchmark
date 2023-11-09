@@ -26,11 +26,7 @@ CN_abs_tpm <- CN_abs %>%
         rename_with(~sub(" \\(.*$", "", .x)) %>%
         pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
     drop_na() %>%
-    group_by(Gene) %>%
-    mutate(mean_TPM = mean(TPM, na.rm = TRUE)) %>%
-    ungroup() %>%
-    filter(mean_TPM < 1) %>%
-    select(-mean_TPM)
+    filter(TPM < 1)
 
 
 # Define list of algorithms and libraries
