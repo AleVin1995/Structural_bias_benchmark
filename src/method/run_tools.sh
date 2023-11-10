@@ -109,22 +109,6 @@ run_geometric(){
 }
 
 
-# run CERES
-run_CERES(){
-	conda activate CN_bench_r
-
-	Rscript $ROOT/src/method/run_CERES.r \
-		$ROOT/data/raw/"$LIB"_sgrna_raw_LFC.csv \
-		$ROOT/data/"$LIB"GuideMap.csv \
-		$ROOT/data/OmicsCNSegmentsProfile.csv \
-		$ROOT/data/OmicsProfiles.csv \
-		$ROOT/data/corrected/ \
-		"$LIB"
-
-	conda deactivate
-}
-
-
 # run MAGeCK
 run_MAGeCK(){
 	conda activate CN_bench
