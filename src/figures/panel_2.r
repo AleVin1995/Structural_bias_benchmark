@@ -19,7 +19,7 @@ for (lib in libs){
 
     p_cn_abs <- ggplot(dfs, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
-        labs(x = "Absolute copy number", y = "Log fold change") +
+        labs(x = "Absolute copy number", y = "LFC") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
@@ -45,7 +45,7 @@ for (lib in libs){
     p_rec_ampl_noexpr <- ggplot(rec_ampl_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "Area under the recall curve") +
+        labs(x = "", y = "AURC") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
@@ -64,7 +64,7 @@ for (lib in libs){
     
     p_cn_abs_unexpr <- ggplot(dfs_unexpr, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
-        labs(x = "Absolute copy number (TPM < 1)", y = "Log fold change") +
+        labs(x = "Absolute copy number (TPM < 1)", y = "LFC") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 30, color = 'black'),
@@ -89,7 +89,7 @@ for (lib in libs){
     p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "Area under the recall curve") +
+        labs(x = "", y = "AURC") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
