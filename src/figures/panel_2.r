@@ -38,11 +38,11 @@ for (lib in libs){
         facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
         scale_fill_manual(values = cols)
 
-    ## Recall curve amplified genes (unexpressed)
-    rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
-    rec_ampl_noexpr$Algorithm <- factor(rec_ampl_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    
-    p_rec_ampl_noexpr <- ggplot(rec_ampl_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+    ## Recall curve amplified genes
+    rec_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
+    rec_ampl$Algorithm <- factor(rec_ampl$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+
+    p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
         labs(x = "", y = "AURC") +
@@ -53,6 +53,7 @@ for (lib in libs){
             axis.text = element_text(size = 25, color = 'black'),
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
+            plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),   
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)
@@ -82,11 +83,11 @@ for (lib in libs){
         facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
         scale_fill_manual(values = cols)
 
-    ## Recall curve amplified genes
-    rec_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
-    rec_ampl$Algorithm <- factor(rec_ampl$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-
-    p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+    ## Recall curve amplified genes (unexpressed)
+    rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
+    rec_ampl_noexpr$Algorithm <- factor(rec_ampl_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    
+    p_rec_ampl_noexpr <- ggplot(rec_ampl_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
         labs(x = "", y = "AURC") +
@@ -97,11 +98,9 @@ for (lib in libs){
             axis.text = element_text(size = 25, color = 'black'),
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
-            plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),   
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)
-    
 
     # Create panel
     panel_all <- p_cn_abs + p_rec_ampl +

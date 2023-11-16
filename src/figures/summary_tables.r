@@ -14,7 +14,7 @@ for (lib in libs){
     ## LFC vs CN effect size (all genes)
     dfs_es <- dfs %>%
         group_by(Algorithm, CN_abs) %>%
-        mutate(es = mean(LFC)/sd(LFC)) %>%
+        mutate(es = abs(median(LFC)/sd(LFC))) %>%
         ungroup() %>%
         select(Algorithm, es) %>%
         distinct() %>%
@@ -32,7 +32,7 @@ for (lib in libs){
     ## LFC vs CN effect size (unexpressed genes)
     dfs_es_unexpr <- dfs_unexpr %>%
         group_by(Algorithm, CN_abs) %>%
-        mutate(es = mean(LFC)/sd(LFC)) %>%
+        mutate(es = abs(median(LFC)/sd(LFC))) %>%
         ungroup() %>%
         select(Algorithm, es) %>%
         distinct() %>%
