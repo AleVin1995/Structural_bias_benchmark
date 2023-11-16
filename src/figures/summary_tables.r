@@ -46,7 +46,7 @@ for (lib in libs){
     ## merge results
     cn_bias <- dfs_es %>%
         left_join(dfs_es_unexpr)
-    write_xlsx(cn_bias, paste0("results/tables/table_3_", lib, ".xlsx"))
+    write_xlsx(cn_bias, paste0("results/tables/table_1_", lib, ".xlsx"))
     
 
 
@@ -77,7 +77,7 @@ for (lib in libs){
     ## merge results
     prox_bias <- bm_pool %>%
         left_join(bm_TP53)
-    write_xlsx(prox_bias, paste0("results/tables/table_4_", lib, ".xlsx"))
+    write_xlsx(prox_bias, paste0("results/tables/table_2_", lib, ".xlsx"))
 
 
 
@@ -125,7 +125,7 @@ for (lib in libs){
         left_join(auprcs) %>%
         left_join(gene_sep) %>%
         left_join(onco_auc)
-    write_xlsx(ess_sum, paste0("results/tables/table_5_", lib, ".xlsx"))
+    write_xlsx(ess_sum, paste0("results/tables/table_3_", lib, ".xlsx"))
 
 
 
@@ -170,7 +170,7 @@ for (lib in libs){
     recall_sum <- recall_gene_sets %>%
         left_join(rec_ampl) %>%
         left_join(rec_ampl_noexpr)
-    write_xlsx(recall_sum, paste0("results/tables/table_6_", lib, ".xlsx"))
+    write_xlsx(recall_sum, paste0("results/tables/table_4_", lib, ".xlsx"))
 
 
 
@@ -189,5 +189,5 @@ for (lib in libs){
     ## merge results
     biomarkers_res <- sig_biomarkers_ssd %>%
         left_join(sig_biomarkers_onco)
-    write_xlsx(biomarkers_res, paste0("results/tables/table_7_", lib, ".xlsx"))
+    write_xlsx(biomarkers_res, paste0("results/tables/table_5_", lib, ".xlsx"))
 }
