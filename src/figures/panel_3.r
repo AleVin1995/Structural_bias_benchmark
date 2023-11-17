@@ -16,6 +16,16 @@ for (lib in libs){
     bm_pool$Algorithm <- factor(bm_pool$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     bm_pool$Coord <- factor(bm_pool$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
 
+    ## perform a systematic t-test between Uncorrected vs other algorithms
+    # bm_pool %>%
+    #     filter(Algorithm != "Uncorrected") %>%
+    #     inner_join(bm_pool %>% 
+    #         filter(Algorithm == "Uncorrected") %>%
+    #         select(-Algorithm), by = c("Coord")) %>%
+    #     group_by(Algorithm) %>%
+    #     summarise(p = t.test(est.x, est.y)$p.value)
+
+
     p_pool_sum <- ggplot(bm_pool, aes(x = Algorithm, y = est, fill = Algorithm)) +
         geom_boxplot() +
         geom_jitter(width = 0.1, size = 2) +
