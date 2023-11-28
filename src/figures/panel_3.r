@@ -50,7 +50,8 @@ for (lib in libs){
     bm_TP53$Coord <- factor(bm_TP53$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
 
     p_TP53_sum <- ggplot(bm_TP53, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_boxplot() +
+        geom_boxplot(outlier.shape=NA) +
+        geom_point(position=position_jitterdodge(jitter.width = 0.1)) +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
         labs(x = "", y = "") +
         theme_bw() +
