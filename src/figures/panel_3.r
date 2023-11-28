@@ -49,6 +49,23 @@ for (lib in libs){
     bm_TP53$Algorithm <- factor(bm_TP53$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     bm_TP53$Coord <- factor(bm_TP53$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
 
+    ## perform a systematic t-test between Uncorrected vs other algorithms
+    # bm_TP53 %>%
+    #     filter(Algorithm != "Uncorrected" & Status == "WT") %>%
+    #     inner_join(bm_TP53 %>% 
+    #         filter(Algorithm == "Uncorrected" & Status == "WT") %>%
+    #         select(-Algorithm), by = c("Coord")) %>%
+    #     group_by(Algorithm) %>%
+    #     summarise(p = t.test(est.x, est.y)$p.value)
+    
+    # bm_TP53 %>%
+    #     filter(Algorithm != "Uncorrected" & Status == "Mut") %>%
+    #     inner_join(bm_TP53 %>% 
+    #         filter(Algorithm == "Uncorrected" & Status == "Mut") %>%
+    #         select(-Algorithm), by = c("Coord")) %>%
+    #     group_by(Algorithm) %>%
+    #     summarise(p = t.test(est.x, est.y)$p.value)
+
     p_TP53_sum <- ggplot(bm_TP53, aes(x = Algorithm, y = est, fill = Status)) +
         geom_boxplot(outlier.shape=NA) +
         geom_point(position=position_jitterdodge(jitter.width = 0.1)) +
