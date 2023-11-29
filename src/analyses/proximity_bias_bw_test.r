@@ -31,7 +31,8 @@ mut_stat <- read_csv('data/OmicsSomaticMutationsMatrixDamaging.csv') %>%
 
 # perform brunner-munzel test
 perform_brunnermunzel <- function(df, cytoband_info){
-    df_corr <- df %>% pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+    df_corr <- df %>% 
+            pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
             group_by(ModelID) %>%
             mutate(LFC = LFC - mean(LFC, na.rm = TRUE)) %>%
             ungroup() %>%
