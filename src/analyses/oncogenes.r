@@ -148,14 +148,7 @@ for (lib in libs){
         mutate(mean_LFC = mean(LFC)) %>%
         ungroup() %>%
         ## filter genes with mean LFC >= -0.5
-        filter(mean_LFC >= -0.5) %>%
-        group_by(Algorithm, Gene) %>%
-        ## occurrence of mutated/non-mutated genes
-        mutate(wt_occ = sum(Status == 0),
-               mut_occ = sum(Status == 1)) %>%
-        ungroup() %>%
-        ## filter genes with at least 3 mutated and 3 non-mutated cell lines
-        filter(wt_occ >= 3 & mut_occ >= 3)
+        filter(mean_LFC >= -0.5)
     
     ## compute AUROC oncogenes
     onco_auc <- dfs %>%
