@@ -25,7 +25,7 @@ for (lib in libs){
     sig_biomarkers_ssd <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_ssd.rds"))
     sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
-    p_sig_biomark_ssd <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark, fill = Algorithm)) +
+    p_sig_biomark_ssd <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark_ssd, fill = Algorithm)) +
         geom_bar(stat = "identity") +
         labs(x = "", y = "Nº significant associations") +
         theme_bw() +
@@ -38,8 +38,8 @@ for (lib in libs){
             aspect.ratio = 1,
             plot.margin = grid::unit(c(2,2,2,2), "cm"),
             legend.position = "none") +
-        scale_fill_manual(values = cols)
-        
+        scale_fill_manual(values = c("#B3B3B3", cols))
+
     ## pooled results
     bm_pool <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
     bm_pool$Algorithm <- factor(bm_pool$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
@@ -48,15 +48,6 @@ for (lib in libs){
         summarise(est = median(est)) %>%
         ungroup() %>%
         dplyr::rename(proximity_bias = est)
-    
-    ## Recall curve amplified genes
-    rec_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
-    rec_ampl$Algorithm <- factor(rec_ampl$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    rec_ampl <- rec_ampl %>%
-        group_by(Algorithm) %>%
-        summarise(Recall = median(Recall)) %>%
-        ungroup() %>%
-        dplyr::rename(Recall_ampl = Recall)
     
     ## Recall curve amplified genes (unexpressed)
     rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
@@ -68,15 +59,14 @@ for (lib in libs){
         dplyr::rename(Recall_ampl_noexpr = Recall)
     
     ## merge results
-    res <- rec_ampl %>%
-        left_join(rec_ampl_noexpr) %>%
+    res <- rec_ampl_noexpr %>%
         left_join(bm_pool) %>%
         filter(Algorithm != "Uncorrected") %>%
         mutate(Type = c("Unsupervised", "Supervised", "Supervised", 
             "Supervised", "Unsupervised", "Unsupervised", "Supervised")) %>%
         mutate(MoA = c("Single-screen", "Multi-screen", "Single-screen", 
             "Single-screen", "Single-screen", "Single-screen", "Multi-screen"))
-    colnames(res)[2:3] <- c("cn_bias_all", "cn_bias_unexpr")
+    colnames(res)[2] <- "cn_bias_unexpr"
     
     ## plot
     radius_1 <- circleFun(c(0.5,0.5), 0.1, 0.05)
@@ -89,43 +79,6 @@ for (lib in libs){
     radius_8 <- circleFun(c(0.5,0.5), 0.8, 0.4)
     radius_9 <- circleFun(c(0.5,0.5), 0.9, 0.45)
     radius_10 <- circleFun(c(0.5,0.5), 1, 0.5)
-
-    ### all genes
-    p_es <- ggplot(res, aes(x = cn_bias_all, y = proximity_bias)) +
-        geom_point(aes(x = cn_bias_all, y = proximity_bias,
-            shape = Type, color = MoA),
-            size = 9) +
-        geom_text(
-            label = res$Algorithm, 
-            nudge_x = 0, nudge_y = 0.012, 
-            size = 8,
-            check_overlap = FALSE) +
-        geom_vline(xintercept = 0.5, linetype = 'longdash') +
-        geom_path(data = radius_1, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
-        geom_path(data = radius_2, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
-        geom_path(data = radius_3, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
-        geom_path(data = radius_4, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
-        geom_path(data = radius_5, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
-        geom_path(data = radius_6, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
-        labs(x = "Median correction \nfor CN bias (all genes)", 
-            y = "",
-            title = "All genes") +
-        xlim(c(0.4, 0.75)) +
-        ylim(c(0.5, 0.75)) +
-        theme_bw() +
-        theme(
-            axis.text = element_text(size = 25, color = 'black'),
-            axis.title = element_text(size = 35, color = 'black'),
-            panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank(),
-            panel.background = element_blank(),
-            legend.title = element_text(size = 20),
-            legend.text = element_text(size = 18),
-            text = element_text(family = "Arial"),
-            aspect.ratio = 1,
-            plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),
-            plot.margin = grid::unit(c(1,1,1,1), "cm")) +
-        scale_color_manual(values = c("red", "blue"))
 
     ### unexpressed genes
     p_es_unexpr <- ggplot(res, aes(x = cn_bias_unexpr, y = proximity_bias)) +
@@ -149,8 +102,7 @@ for (lib in libs){
         geom_path(data = radius_9, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         geom_path(data = radius_10, aes(x = x, y = y), linetype = "dashed", color = alpha("black", 0.5)) +
         labs(x = "Median correction \nfor CN bias (unexpressed genes)", 
-            y = "Median correction \nfor proximity bias",
-            title = "Unexpressed genes") +
+            y = "Median correction \nfor proximity bias") +
         xlim(c(0.35, 0.65)) +
         ylim(c(0.5, 0.75)) +
         theme_bw() +
@@ -198,22 +150,18 @@ for (lib in libs){
     sig_biomarkers_ssd <- sig_biomarkers_ssd %>%
         dplyr::rename(n_sig_biomark_ssd = n_sig_biomark)
 
-    ## Nº significant biomarkers (gain-of-function CFEs within oncogene)
-    sig_biomarkers_onco <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_onco.rds"))
-    sig_biomarkers_onco$Algorithm <- factor(sig_biomarkers_onco$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    sig_biomarkers_onco <- sig_biomarkers_onco %>%
-        dplyr::rename(n_sig_biomark_onco = n_sig_biomark)
-
     ## merge results
     params <- auprcs %>%
         left_join(onco_auc) %>%
         left_join(sig_biomarkers_ssd) %>%
-        left_join(sig_biomarkers_onco) %>%
         left_join(gene_sep) %>%
         mutate(n_sig_biomark_ssd = n_sig_biomark_ssd/max(n_sig_biomark_ssd),
-            n_sig_biomark_onco = n_sig_biomark_onco/max(n_sig_biomark_onco),
             NNMD = NNMD/min(NNMD)) %>%
-        filter(Algorithm != "Uncorrected")
+        filter(Algorithm != "Uncorrected") %>%
+        mutate(Area = 0.5**2 * (AUPRC_ess * AUROC_onco + 
+            AUROC_onco * n_sig_biomark_ssd + 
+            n_sig_biomark_ssd * NNMD +
+            NNMD * AUPRC_ess))
     
     ## plot
     radar <- ggradar(params,
@@ -230,15 +178,30 @@ for (lib in libs){
         font.radar = "Arial",
         axis.labels = c("AUPRC common\n essential genes", 
             "AUROC\noncogenes", 
-            "Nº significant\nbiomarkers\n(all CFEs)", 
-            "Nº significant\nbiomarkers\n(GOF CFEs)",
+            "Nº significant\nbiomarkers\n(all CFEs)",
             "NNMD"),
         axis.label.size = 12) +
         scale_color_manual(values = cols) +
         theme(legend.text = element_text(size = 18))
+    
+    area <- ggplot(params, aes(x = Algorithm, y = Area, fill = Algorithm)) +
+        geom_bar(stat = "identity") +
+        labs(x = "", y = "Area (radar plot)") +
+        theme_bw() +
+        theme(
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            aspect.ratio = 1,
+            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            legend.position = "none") +
+        scale_fill_manual(values = cols) +
+        coord_cartesian(ylim = c(0.5, 0.8))
 
     ## Assemble panel
-    panel <- (p_es_unexpr | p_es ) / radar +
+    panel <- (p_sig_biomark_ssd | p_es_unexpr) / (radar | area) +
         plot_annotation(tag_levels = "A") &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
