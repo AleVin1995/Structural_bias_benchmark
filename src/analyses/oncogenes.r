@@ -1,5 +1,17 @@
 library(CRISPRcleanR)
+library(magrittr)
 library(tidyverse)
+
+# load predefined sets of genes
+ess_genes <- read_csv("data/AchillesCommonEssentialControls.csv") %>%
+    separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
+    pull(Gene) %>%
+    unique()
+
+noness_genes <- read_csv("data/AchillesNonessentialControls.csv") %>%
+    separate(Gene, into = c("Gene", "code"), sep = " \\(") %>%
+    pull(Gene) %>%
+    unique()
 
 # OncoKB list of oncogenes
 oncogenes <- read_tsv('data/biomarkers/cancerGeneList.tsv') %>%
@@ -35,11 +47,46 @@ onco_mut_stat <- read_csv('data/OmicsSomaticMutationsMatrixDamaging.csv') %>%
         rename_with(~sub(" \\(.*$", "", .x)) %>%
         pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
     drop_na() %>%
-    ## compute average expression
-    group_by(Gene) %>%
-    mutate(mean_TPM = mean(TPM, na.rm = TRUE)) %>%
-    ungroup() %>%
+    ## copy number data
+    inner_join(read_csv("data/OmicsCNGene.csv") %>%
+        dplyr::rename(ModelID = colnames(.)[1]) %>%
+        rename_with(~sub(" \\(.*$", "", .x)) %>%
+        pivot_longer(-ModelID, names_to = "Gene", values_to = "CN") %>%
+        ### for each cell line, identify the top 1% of genes with highest CN
+        group_by(ModelID) %>%
+        drop_na() %>%
+        mutate(CN_99th = quantile(CN, 0.99)) %>%
+        ungroup()) %>%
+    ## consider high CN genes as mutated
+    mutate(Status = ifelse(CN >= CN_99th, 1, Status)) %>%
     distinct()
+
+
+# scale essentiality profiles
+scale_to_essentials <- function(lfc, ess, noness, rowidx = TRUE){
+
+    if (rowidx){
+        lfc <- lfc %>%
+            column_to_rownames("Gene")
+    }
+
+    ess_idx <- which(rownames(lfc) %in% ess)
+    noness_idx <- which(rownames(lfc) %in% noness)
+
+    scaled_lfc <- lfc %>%
+        apply(2, function(x){
+            (x - median(x[noness_idx], na.rm=T)) %>%
+            divide_by(median(x[noness_idx], na.rm=T) - median(x[ess_idx], na.rm=T))
+        })
+    
+    if (rowidx){
+        scaled_lfc <- scaled_lfc %>%
+            as_tibble(rownames = NA) %>%
+            rownames_to_column("Gene")
+    }
+
+    return(scaled_lfc)
+}
 
 
 # compute recall
@@ -52,7 +99,7 @@ get_recall <- function(x, FDRth = 0.05){
         pull(Gene_ModelID)
     
     neg <- x %>%
-        filter(Status == 0 & mean_TPM < 1) %>%
+        filter(Status == 0 & TPM < 1) %>%
         pull(Gene_ModelID)
 
     vec <- x %>%
@@ -78,7 +125,8 @@ for (lib in libs){
         map(~.x %>%
             read_csv %>%
             mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
-            dplyr::rename(Gene = colnames(.)[1])) %>% ## fill na with 0
+            dplyr::rename(Gene = colnames(.)[1]) %>%
+            scale_to_essentials(., ess_genes, noness_genes)) %>% ## fill na with 0
         set_names(dfs_names)
     
     ## common cell lines/genes
