@@ -21,6 +21,25 @@ cols <- brewer.pal(n = 7, name = "Dark2")
 
 # iterate over algorithms and libraries
 for (lib in libs){    
+    ## Nº significant biomarkers (all CFEs on strongly selective dependencies)
+    sig_biomarkers_ssd <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_ssd.rds"))
+    sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+
+    p_sig_biomark_ssd <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark, fill = Algorithm)) +
+        geom_bar(stat = "identity") +
+        labs(x = "", y = "Nº significant associations") +
+        theme_bw() +
+        theme(
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            aspect.ratio = 1,
+            plot.margin = grid::unit(c(2,2,2,2), "cm"),
+            legend.position = "none") +
+        scale_fill_manual(values = cols)
+        
     ## pooled results
     bm_pool <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
     bm_pool$Algorithm <- factor(bm_pool$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
