@@ -101,7 +101,7 @@ get_recall <- function(x, FDRth = 0.05){
     neg <- x %>%
         filter(Status == 0 & TPM < 1) %>%
         pull(Gene_ModelID)
-    print(c(length(pos), length(neg)))
+    
     vec <- x %>%
         pull(LFC, name = "Gene_ModelID")
     
