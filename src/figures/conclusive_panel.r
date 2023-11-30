@@ -25,13 +25,14 @@ for (lib in libs){
     sig_biomarkers_ssd <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_ssd.rds"))
     sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
-    p_sig_biomark_ssd <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark_ssd, fill = Algorithm)) +
+    p_sig_biomark_ssd <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark, fill = Algorithm)) +
         geom_bar(stat = "identity") +
         labs(x = "", y = "Nº significant associations") +
         theme_bw() +
         theme(
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.text = element_text(size = 25, color = 'black'),
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
@@ -109,6 +110,7 @@ for (lib in libs){
         theme(
             axis.text = element_text(size = 25, color = 'black'),
             axis.title = element_text(size = 35, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             panel.background = element_blank(),
@@ -174,9 +176,9 @@ for (lib in libs){
         font.radar = "Arial",
         axis.labels = c("AUPRC common\n essential genes", 
             "AUROC\noncogenes", 
-            "Nº significant\nbiomarkers\n(all CFEs)",
+            "Nº significant\nbiomarkers",
             "NNMD"),
-        axis.label.size = 12) +
+        axis.label.size = 10) +
         scale_color_manual(values = cols) +
         theme(legend.text = element_text(size = 18))
     
@@ -194,6 +196,7 @@ for (lib in libs){
         theme(
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.text = element_text(size = 25, color = 'black'),
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
@@ -208,5 +211,5 @@ for (lib in libs){
         plot_annotation(tag_levels = "A") &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel, filename = paste0("results/panels/summary_panel_", lib, ".pdf"), width = 40, height = 40)
+    ggsave(panel, filename = paste0("results/panels/summary_panel_", lib, ".pdf"), width = 28, height = 28)
 }
