@@ -157,11 +157,7 @@ for (lib in libs){
         left_join(gene_sep) %>%
         mutate(n_sig_biomark_ssd = n_sig_biomark_ssd/max(n_sig_biomark_ssd),
             NNMD = NNMD/min(NNMD)) %>%
-        filter(Algorithm != "Uncorrected") %>%
-        mutate(Area = 0.5**2 * (AUPRC_ess * AUROC_onco + 
-            AUROC_onco * n_sig_biomark_ssd + 
-            n_sig_biomark_ssd * NNMD +
-            NNMD * AUPRC_ess))
+        filter(Algorithm != "Uncorrected")
     
     ## plot
     radar <- ggradar(params,
@@ -184,6 +180,13 @@ for (lib in libs){
         scale_color_manual(values = cols) +
         theme(legend.text = element_text(size = 18))
     
+    ## Area
+    params <- params %>% 
+        mutate(Area = 0.5**2 * (AUPRC_ess * AUROC_onco + 
+            AUROC_onco * n_sig_biomark_ssd + 
+            n_sig_biomark_ssd * NNMD +
+            NNMD * AUPRC_ess))
+
     area <- ggplot(params, aes(x = Algorithm, y = Area, fill = Algorithm)) +
         geom_bar(stat = "identity") +
         labs(x = "", y = "Area (radar plot)") +
