@@ -9,7 +9,8 @@ cytoband <- read_csv('data/cytoband_mapping.csv') %>%
     separate(map, into = c("Chromosome", "Band"), sep = "p|q") %>%
     na.omit() %>%
     select(-Band) %>%
-    distinct()
+    distinct() %>%
+    filter(Chromosome %in% c(1:22, "X", "Y"))
 
 # load somatic mutations
 mut_stat <- read_csv('data/OmicsSomaticMutationsMatrixDamaging.csv') %>%
