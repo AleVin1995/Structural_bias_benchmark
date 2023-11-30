@@ -101,7 +101,7 @@ get_recall <- function(x, FDRth = 0.05){
     neg <- x %>%
         filter(Status == 0 & TPM < 1) %>%
         pull(Gene_ModelID)
-
+    print(c(length(pos), length(neg)))
     vec <- x %>%
         pull(LFC, name = "Gene_ModelID")
     
@@ -154,7 +154,7 @@ for (lib in libs){
         mutate(wt_occ = sum(Status == 0),
                mut_occ = sum(Status == 1)) %>%
         ungroup() %>%
-        ## filter genes with at least 1 mutated and 1 wild-type cell lines
+        ## filter genes with at least 1 mutated and 1 wild-type cell line
         filter(wt_occ >= 1 & mut_occ >= 1)
     
     ## compute AUROC oncogenes
