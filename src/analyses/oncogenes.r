@@ -147,8 +147,6 @@ for (lib in libs){
         group_by(Algorithm, Gene) %>%
         mutate(mean_LFC = mean(LFC)) %>%
         ungroup() %>%
-        ## filter genes with mean LFC >= -0.5
-        filter(mean_LFC >= -0.5) %>%
         group_by(Algorithm, Gene) %>%
         ## occurrence of mutated/non-mutated genes
         mutate(wt_occ = sum(Status == 0),
