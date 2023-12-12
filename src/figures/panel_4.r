@@ -88,12 +88,62 @@ for (lib in libs){
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols) +
-        coord_cartesian(ylim = c(0.5, max(onco_auc$AUROC)+0.02))
+        coord_cartesian(ylim = c(0.6, max(onco_auc$AUROC)+0.02))
+
+    ## Recall at 5% FDR
+    recall_gene_sets <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds")) %>%
+        filter(Gene_Set %in% c("ess_genes", "noness_genes", "msigdb_genes")) %>%
+        mutate(Gene_Set = ifelse(Gene_Set == "ess_genes", "Common essential genes",
+            ifelse(Gene_Set == "noness_genes", "Nonessential genes", "MsigDB genes")))
+    recall_gene_sets$Algorithm <- factor(recall_gene_sets$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+
+    p_ess_gene_sets <- ggplot(recall_gene_sets %>%
+        filter(Gene_Set != "Nonessential genes"), 
+        aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+            geom_boxplot() +
+            labs(x = "", y = "Recall at 5% FDR") +
+            theme_bw() +
+            theme(
+                strip.text.x = element_text(size = 25, color = 'black'),
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                axis.text = element_text(size = 25, color = 'black'),
+                axis.title = element_text(size = 30),
+                plot.title = element_text(size = 32, hjust = 0.5),
+                axis.text.x = element_text(angle = 45, hjust = 1),
+                plot.margin = grid::unit(c(2,5,2,5), "cm"),
+                legend.position = "none") +
+            facet_wrap(~Gene_Set, scales = "free_y") +
+            theme(strip.background = element_blank(),
+                strip.text = element_text(size = 10, face = "bold")) +
+            scale_fill_manual(values = cols)
+    
+    p_noness_gene_sets <- ggplot(recall_gene_sets %>%
+        filter(Gene_Set == "Nonessential genes"), 
+        aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+            geom_boxplot() +
+            labs(x = "", y = "Recall at 5% FDR") +
+            theme_bw() +
+            theme(
+                strip.text.x = element_text(size = 25, color = 'black'),
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                axis.text = element_text(size = 25, color = 'black'),
+                axis.title = element_text(size = 30),
+                plot.title = element_text(size = 32, hjust = 0.5),
+                axis.text.x = element_text(angle = 45, hjust = 1),
+                plot.margin = grid::unit(c(2,5,2,5), "cm"),
+                legend.position = "none") +
+            facet_wrap(~Gene_Set, scales = "free_y") +
+            theme(strip.background = element_blank(),
+                strip.text = element_text(size = 10, face = "bold")) +
+            scale_fill_manual(values = cols)
     
     ## Assemble panel
-    panel <- p_aurocs + p_auprcs + p_gene_sep + p_oncogenes + 
+    panel <- p_aurocs + p_auprcs + p_gene_sep + p_ess_gene_sets +
+        p_noness_gene_sets + p_oncogenes + 
         plot_layout(ncol = 2) + plot_annotation(tag_levels = "A") &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel, filename = paste0("results/panels/data_quality/general_", lib, ".pdf"), width = 20, height = 20, dpi = 300)
+    ggsave(panel, filename = paste0("results/panels/data_quality/general_", lib, ".pdf"), width = 20, height = 30, dpi = 300)
 }
