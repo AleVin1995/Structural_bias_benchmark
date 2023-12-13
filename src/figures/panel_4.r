@@ -88,7 +88,7 @@ for (lib in libs){
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols) +
-        coord_cartesian(ylim = c(0.6, max(onco_auc$AUROC)+0.02))
+        coord_cartesian(ylim = c(0.6, max(onco_auc$AUROC)+0.01))
 
     ## Recall at 5% FDR
     recall_gene_sets <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds")) %>%
