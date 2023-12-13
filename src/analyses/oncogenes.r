@@ -46,20 +46,7 @@ onco_mut_stat <- read_csv('data/OmicsSomaticMutationsMatrixDamaging.csv') %>%
         dplyr::rename(ModelID = colnames(.)[1]) %>%
         rename_with(~sub(" \\(.*$", "", .x)) %>%
         pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
-    drop_na() %>%
-    ## copy number data
-    inner_join(read_csv("data/OmicsCNGene.csv") %>%
-        dplyr::rename(ModelID = colnames(.)[1]) %>%
-        rename_with(~sub(" \\(.*$", "", .x)) %>%
-        pivot_longer(-ModelID, names_to = "Gene", values_to = "CN") %>%
-        ### for each cell line, identify the top 1% of genes with highest CN
-        group_by(ModelID) %>%
-        drop_na() %>%
-        mutate(CN_99th = quantile(CN, 0.99)) %>%
-        ungroup()) %>%
-    ## consider high CN genes as mutated
-    mutate(Status = ifelse(CN >= CN_99th, 1, Status)) %>%
-    distinct()
+    drop_na()
 
 
 # scale essentiality profiles
