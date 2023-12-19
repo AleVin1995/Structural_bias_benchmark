@@ -134,7 +134,7 @@ p1 <- ggplot(dt, aes(x = Mean_CNBias, y = Mean_ProximityBias)) +
       plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
       plot.margin = grid::unit(c(2,2,2,2), "cm"),
       legend.position = "none") +
-  labs(x = 'Mean CN bias (%)', y = 'Mean proximity bias (%)', title = 'Bias correction') +
+  labs(x = 'Mean CN bias (%)', y = 'Mean proximity bias (%)', title = 'Average bias correction') +
   scale_color_manual(values = c("red", "blue", "#B3B3B3"))
 
 # Plotting for Average Impact on data quality
@@ -159,7 +159,7 @@ p2 <- ggplot(dt, aes(x = AUROC_EssNonEss, y = NNMD_EssNonEss)) +
       plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
       plot.margin = grid::unit(c(2,2,2,2), "cm"),
       legend.position = "none") +
-  labs(x = 'Mean % of AUROC Ess/nonEss', y = 'Mean % of NNMD Ess/nonEss', title = 'Impact on data quality') +
+  labs(x = 'Mean % of AUROC Ess/nonEss', y = 'Mean % of NNMD Ess/nonEss', title = 'Average impact on data quality') +
   scale_color_manual(values = c("red", "blue", "#B3B3B3"))
 
 # Plotting for Average Impact on data heterogeneity
@@ -183,9 +183,9 @@ p3 <- ggplot(dt, aes(x = AUROC_OncoAddictions, y = Biomarkers)) +
       text = element_text(family = "Arial"),
       plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
       plot.margin = grid::unit(c(2,2,2,2), "cm"),
-      legend.title = element_text(size = 20, color = 'black'),
-      legend.text = element_text(size = 15, color = 'black')) +
-  labs(x = 'Mean % of AUROC OncoAddictions', y = 'Mean % of Biomarkers', title = 'Impact on data heterogeneity') +
+      legend.title = element_text(size = 25, color = 'black'),
+      legend.text = element_text(size = 20, color = 'black')) +
+  labs(x = 'Mean % of AUROC OncoAddictions', y = 'Mean % of Biomarkers', title = 'Average impact on data heterogeneity') +
   scale_color_manual(values = c("red", "blue", "#B3B3B3"))
 
 ## Assemble panel
