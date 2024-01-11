@@ -38,12 +38,13 @@ cn_ratio <- read_csv("data/OmicsCNGene.csv") %>%
     pivot_longer(-ModelID, names_to = "Gene", values_to = "CN_ratio") %>%
     drop_na()
 
-cn_ratio_tpm <- cn_ratio %>%
-    inner_join(read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
-        dplyr::rename(ModelID = colnames(.)[1]) %>%
-        rename_with(~sub(" \\(.*$", "", .x)) %>%
-        pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")) %>%
-    drop_na()
+tpm <- read_csv("data/OmicsExpressionProteinCodingGenesTPMLogp1.csv") %>%
+    dplyr::rename(ModelID = colnames(.)[1]) %>%
+    rename_with(~sub(" \\(.*$", "", .x)) %>%
+    pivot_longer(-ModelID, names_to = "Gene", values_to = "TPM")
+
+tpm_noexpr <- tpm %>%
+    filter(TPM < 1)
 
 cn_ampl_genes <- cn_ratio %>%
     split(.$ModelID) %>%
@@ -53,10 +54,10 @@ cn_ampl_genes <- cn_ratio %>%
         dplyr::slice(1:round(nrow(.)*0.01))) %>%
     bind_rows()
     
-cn_ampl_noexpr_genes <- cn_ratio_tpm %>%
-    inner_join(cn_ampl_genes) %>%
+cn_ampl_noexpr_genes <- cn_ampl_genes %>%
     ## filter genes with no expression
-    filter(TPM < 1)
+    inner_join(tpm_noexpr) %>%
+    drop_na()
 
 
 # compute recall at significant threshold
@@ -295,6 +296,24 @@ for (lib in libs){
         mutate(Recall = replace_na(Recall, 0)) %>%
         mutate(Recall = replace(Recall, is.infinite(Recall), 0))
     
+    ## compute recall curve for each algorithm across cell lines (ampl noexpr genes with noexpr genes as background)
+    rec_ampl_noexpr_bg_noexpr <- map(dfs, ~.x %>%
+                pivot_longer(-1, names_to = "ModelID", values_to = "LFC") %>%
+                inner_join(tpm_noexpr) %>%
+                dplyr::rename(Gene = colnames(.)[1]) %>%
+                split(.$ModelID) %>%
+                map(~.x %>%
+                    get_recall_curve(.,
+                        cn_ampl_noexpr_genes) %>%
+                    as.numeric()) %>%
+                bind_rows() %>%
+                pivot_longer(everything(.), names_to = "ModelID", values_to = "Recall")) %>%
+        set_names(dfs_names) %>%
+        bind_rows(.id = "Algorithm") %>%
+        ### replace NA or Inf with 0
+        mutate(Recall = replace_na(Recall, 0)) %>%
+        mutate(Recall = replace(Recall, is.infinite(Recall), 0))
+    
 
     ## save results
     saveRDS(recall_gene_sets, paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds"))
@@ -302,4 +321,5 @@ for (lib in libs){
     saveRDS(auprcs, paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
     saveRDS(rec_ampl, paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
     saveRDS(rec_ampl_noexpr, paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
+    saveRDS(rec_ampl_noexpr_bg_noexpr, paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr_bg_noexpr.rds"))
 }

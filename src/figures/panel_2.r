@@ -101,6 +101,26 @@ for (lib in libs){
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)
+    
+    ## Recall curve amplified genes (unexpressed + background unexpressed)
+    rec_ampl_noexpr_bg_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr_bg_noexpr.rds"))
+    rec_ampl_noexpr_bg_noexpr$Algorithm <- factor(rec_ampl_noexpr_bg_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    
+    p_rec_ampl_noexpr_bg_noexpr <- ggplot(rec_ampl_noexpr_bg_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+        geom_boxplot() +
+        geom_hline(yintercept = 0.5, linetype = "dashed") +
+        labs(x = "", y = "AURC") +
+        theme_bw() +
+        theme(
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            plot.margin = grid::unit(c(1,1,1,1), "cm"),
+            legend.position = "none") +
+        scale_fill_manual(values = cols)
+    ggsave(p_rec_ampl_noexpr_bg_noexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_bg_noexpr_", lib, ".pdf"), width = 10, height = 10, units = "in", dpi = 300)
 
     # Create panel
     panel_all <- p_cn_abs + p_rec_ampl +
