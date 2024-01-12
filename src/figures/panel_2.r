@@ -136,4 +136,11 @@ for (lib in libs){
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
     ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 35, height = 20, units = "in", dpi = 300)
+
+    panel_unexpr_bg_unexpr <- p_cn_abs_unexpr + p_rec_ampl_noexpr_bg_noexpr +
+        plot_layout(widths = c(1.3, 1)) +
+        plot_annotation(tag_levels = 'A') &
+        theme(plot.tag.position = c(0, 1),
+            plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
+    ggsave(panel_unexpr_bg_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, "_bg_unexpr.pdf"), width = 35, height = 20, units = "in", dpi = 300)
 }
