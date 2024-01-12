@@ -8,14 +8,14 @@ font_import(paths = "arial", prompt = FALSE)
 cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))
 
 # Read the data
-dt <- readRDS("results/analyses/impact_data_quality/Avana_recall_ampl_noexpr.rds") %>%
+dt <- readRDS("results/analyses/impact_data_quality/Avana_recall_ampl_noexpr_bg_noexpr.rds") %>%
   group_by(Algorithm) %>%
   summarise(
     `CN Bias (A)` = mean(Recall)
   ) %>% 
   ungroup() %>%
   inner_join(
-    readRDS("results/analyses/impact_data_quality/KY_recall_ampl.rds") %>%
+    readRDS("results/analyses/impact_data_quality/KY_recall_ampl_noexpr_bg_noexpr.rds") %>%
       group_by(Algorithm) %>%
       summarise(
         `CN Bias (S)` = mean(Recall)
