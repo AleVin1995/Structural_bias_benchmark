@@ -96,14 +96,14 @@ plot <- function(df, savepath = NULL){
 }
 
 # execute entire pipeline
-pipeline <- function(df, GuideMap, transpose = FALSE, savepath = NULL){
+pipeline <- function(df, GuideMap, transpose = FALSE){
     ## gene to chromosome mapping
     gene2chr <- gene2chr_mapping(df, GuideMap, transpose = transpose)
 
     ## Compute pairwise correlation matrix
     df_corr <- pairwise_corr(df, gene2chr, transpose = transpose)
 
-    plot(df_corr, savepath)
+    return(df_corr)
 }
 
 
@@ -119,4 +119,6 @@ AvanaGuideMap <- read_csv('data/AvanaGuideMap.csv') %>%
     filter(UsedByChronos == T)
 
 ## execute pipeline
-pipeline(avana_gene, AvanaGuideMap, savepath = 'results/miscellanea/proximity_bias_EDA_23Q4.pdf')
+df_corr <- pipeline(avana_gene, AvanaGuideMap)
+
+plot(df_corr, savepath = 'results/miscellanea/proximity_bias_EDA_23Q4.pdf')
