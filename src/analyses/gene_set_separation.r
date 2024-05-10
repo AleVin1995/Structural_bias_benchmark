@@ -24,7 +24,7 @@ compute_gene_sets_separation <- function(gene_lfc, ess_genes, noness_genes){
 
 
 # Define list of algorithms and libraries
-algos <- c("CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
+algos <- c("CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
 libs <- c("Avana", "KY")
 
 # iterate over algorithms and libraries
