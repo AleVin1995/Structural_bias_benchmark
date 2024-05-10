@@ -121,7 +121,7 @@ mut_stat_split <- function(df, mut, cytoband_info){
 
 
 # Define list of algorithms and libraries
-algos <- c("CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
+algos <- c("CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
 
 # parse arguments
 args <- commandArgs(trailingOnly = TRUE)
