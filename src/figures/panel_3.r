@@ -8,12 +8,13 @@ font_import(paths = "arial", prompt = FALSE)
 
 libs <- c("Avana", "KY")
 cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))
+cols <- c(cols[1:3], "#EE8208", cols[4:8])
 
 # iterate over algorithms and libraries
 for (lib in libs){
     ## pooled results
     bm_pool <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
-    bm_pool$Algorithm <- factor(bm_pool$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    bm_pool$Algorithm <- factor(bm_pool$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     bm_pool$Coord <- factor(bm_pool$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
 
     ## perform a systematic t-test between Uncorrected vs other algorithms
@@ -46,7 +47,7 @@ for (lib in libs){
         
     ## TP53 results
     bm_TP53 <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.rds"))
-    bm_TP53$Algorithm <- factor(bm_TP53$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    bm_TP53$Algorithm <- factor(bm_TP53$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     bm_TP53$Coord <- factor(bm_TP53$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
 
     ## perform a systematic t-test between Uncorrected vs other algorithms
