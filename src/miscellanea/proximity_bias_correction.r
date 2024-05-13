@@ -17,7 +17,8 @@ norm_chr_arms <- function(gene_effect, chromosome_arms) {
     med_med <- median(gene_meds)
     
     # subtract the difference from the median of median gene effects
-    gene_effect[genes,] <- gene_effect[genes,] - (gene_meds - med_med)
+    arm_effect <- matrix(rep((gene_meds - med_med), length(genes)), nrow = length(genes), byrow = TRUE)
+    gene_effect[genes,] <- gene_effect[genes,] - arm_effect
   }
   
   return(gene_effect)
