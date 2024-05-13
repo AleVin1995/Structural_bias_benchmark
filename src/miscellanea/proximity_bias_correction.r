@@ -35,7 +35,7 @@ libs <- c("Avana", "KY")
 
 # iterate over libraries
 for (lib in libs){
-  chronos_df <- paste0("data/corrected/", lib, "_gene_Chronos_no_prox_bias_corr.csv") %>%
+  chronos_df <- paste0("data/corrected/", lib, "_gene_Chronos.csv") %>%
     read_csv %>%
     mutate(across(where(is.numeric), ~replace_na(., 0))) %>%
     dplyr::rename(Gene = colnames(.)[1]) %>% ## fill na with 0
@@ -43,5 +43,5 @@ for (lib in libs){
   
   chronos_df_norm <- norm_chr_arms(chronos_df, chromosome_arms) %>%
     rownames_to_column("Gene")
-  write_csv(chronos_df_norm, paste0("data/corrected/", lib, "_gene_Chronos.csv"))
+  write_csv(chronos_df_norm, paste0("data/corrected/", lib, "_gene_AC Chronos.csv"))
 }
