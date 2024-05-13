@@ -10,12 +10,13 @@ source("src/figures/utils.r")
 
 libs <- c("Avana", "KY")
 cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))
+cols <- c(cols[1:3], "#EE8208", cols[4:8])
 
 # iterate over algorithms and libraries
 for (lib in libs){
     ## All genes
     dfs <- readRDS(paste0("results/analyses/cn_correction/", lib, "_cn_abs.rds"))
-    dfs$Algorithm <- factor(dfs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    dfs$Algorithm <- factor(dfs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
     p_cn_abs <- ggplot(dfs, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
@@ -35,12 +36,12 @@ for (lib in libs){
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 3) +
         scale_fill_manual(values = cols)
 
     ## Recall curve amplified genes
     rec_ampl <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl.rds"))
-    rec_ampl$Algorithm <- factor(rec_ampl$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    rec_ampl$Algorithm <- factor(rec_ampl$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
     p_rec_ampl <- ggplot(rec_ampl, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
@@ -61,7 +62,7 @@ for (lib in libs){
 
     ## Consider only unexpressed genes (TPM < 1)
     dfs_unexpr <- readRDS(paste0("results/analyses/cn_correction/", lib, "_cn_abs_tpm.rds"))
-    dfs_unexpr$Algorithm <- factor(dfs_unexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    dfs_unexpr$Algorithm <- factor(dfs_unexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     
     p_cn_abs_unexpr <- ggplot(dfs_unexpr, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
@@ -80,12 +81,12 @@ for (lib in libs){
             text = element_text(family = "Arial"),
             plot.margin = grid::unit(c(2,2,2,2), "cm")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
-        facet_wrap(~Algorithm, scales = "free_x", ncol = 2) +
+        facet_wrap(~Algorithm, scales = "free_x", ncol = 3) +
         scale_fill_manual(values = cols)
 
     ## Recall curve amplified genes (unexpressed)
     rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
-    rec_ampl_noexpr$Algorithm <- factor(rec_ampl_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    rec_ampl_noexpr$Algorithm <- factor(rec_ampl_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     
     p_rec_ampl_noexpr <- ggplot(rec_ampl_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
@@ -104,7 +105,7 @@ for (lib in libs){
     
     ## Recall curve amplified genes (unexpressed + background unexpressed)
     rec_ampl_noexpr_bg_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr_bg_noexpr.rds"))
-    rec_ampl_noexpr_bg_noexpr$Algorithm <- factor(rec_ampl_noexpr_bg_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    rec_ampl_noexpr_bg_noexpr$Algorithm <- factor(rec_ampl_noexpr_bg_noexpr$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     
     p_rec_ampl_noexpr_bg_noexpr <- ggplot(rec_ampl_noexpr_bg_noexpr, aes(x = Algorithm, y = Recall, fill = Algorithm)) +
         geom_boxplot() +
