@@ -108,7 +108,8 @@ p1 <- ggplot(dt, aes(x = Mean_CNBias, y = Mean_ProximityBias)) +
       text = element_text(family = "Arial"),
       plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
       plot.margin = grid::unit(c(2,2,2,2), "cm"),
-      legend.position = "none") +
+      legend.title = element_text(size = 25, color = 'black'),
+      legend.text = element_text(size = 20, color = 'black')) +
   labs(x = 'Mean CN bias (%)', y = 'Mean proximity bias (%)', title = 'Average bias correction') +
   scale_color_manual(values = c("red", "blue", "#B3B3B3"))
 
@@ -148,8 +149,7 @@ p3 <- ggplot(dt, aes(x = Algorithm, y = Biomarkers, fill = Algorithm)) +
       text = element_text(family = "Arial"),
       plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
       plot.margin = grid::unit(c(2,2,2,2), "cm"),
-      legend.title = element_text(size = 25, color = 'black'),
-      legend.text = element_text(size = 20, color = 'black')) +
+      legend.position = "none") +
   labs(x = '', y = 'Mean % of Biomarkers', title = 'Average impact on data heterogeneity') +
   scale_fill_manual(values = cols)
 

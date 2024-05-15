@@ -19,16 +19,17 @@ for (lib in libs){
     p_aurocs <- ggplot(aurocs, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
         geom_violin() +
         geom_boxplot(width=0.1, color="black", outlier.shape = NA) +
-        labs(x = "", y = "AUROC") +
+        labs(x = "", y = "AUROC\n(Common essential/nonessential genes)") +
         theme_bw() +
         theme(
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_blank(),
             axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             aspect.ratio = 1,
-            plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)
 
@@ -39,16 +40,17 @@ for (lib in libs){
     p_auprcs <- ggplot(auprcs, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
         geom_violin() +
         geom_boxplot(width=0.1, color="black", outlier.shape = NA) +
-        labs(x = "", y = "AUPRC") +
+        labs(x = "", y = "AUPRC\n(Common essential/nonessential genes)") +
         theme_bw() +
         theme(
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_blank(),
             axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             aspect.ratio = 1,
-            plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)
 
@@ -58,38 +60,39 @@ for (lib in libs){
 
     p_gene_sep <- ggplot(gene_sep, aes(x = Algorithm, y = Separation, fill = Algorithm)) +
         geom_boxplot() +
-        labs(x = "", y = "NNMD") +
+        labs(x = "", y = "NNMD\n(Common essential/nonessential genes)") +
         theme_bw() +
         theme(
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_text(angle = 45, hjust = 1),
+            axis.text.x = element_blank(),
             axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             aspect.ratio = 1,
-            plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)
 
-    ## Recall of oncogenes
-    onco_auc <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_onco_auc.rds"))
-    onco_auc$Algorithm <- factor(onco_auc$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    # Nº significant biomarkers (all CFEs on strongly selective dependencies)
+    sig_biomarkers_ssd <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_ssd.rds"))
+    sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
-    p_oncogenes <- ggplot(onco_auc, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
+    p_sig_biomark_ssd <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark, fill = Algorithm)) +
         geom_bar(stat = "identity") +
-        labs(x = "", y = "AUROC") +
+        labs(x = "", y = "Nº significant associations") +
         theme_bw() +
         theme(
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.text = element_text(size = 25, color = 'black'),
+            axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
-            axis.title = element_text(size = 30, color = 'black'),
             aspect.ratio = 1,
-            plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
-        scale_fill_manual(values = cols) +
-        coord_cartesian(ylim = c(0.6, max(onco_auc$AUROC)+0.01))
+        scale_fill_manual(values = cols)
 
     ## Recall at 5% FDR
     recall_gene_sets <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds")) %>%
@@ -106,13 +109,14 @@ for (lib in libs){
             theme_bw() +
             theme(
                 strip.text.x = element_text(size = 25, color = 'black'),
+                panel.border = element_blank(),
                 panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
                 axis.text = element_text(size = 25, color = 'black'),
                 axis.title = element_text(size = 30),
+                axis.ticks.length = unit(0.5, "cm"),
                 plot.title = element_text(size = 32, hjust = 0.5),
-                axis.text.x = element_text(angle = 45, hjust = 1),
-                plot.margin = grid::unit(c(2,5,2,5), "cm"),
+                axis.text.x = element_blank(),
                 legend.position = "none") +
             facet_wrap(~Gene_Set, scales = "free_y") +
             theme(strip.background = element_blank(),
@@ -127,13 +131,14 @@ for (lib in libs){
             theme_bw() +
             theme(
                 strip.text.x = element_text(size = 25, color = 'black'),
+                panel.border = element_blank(),
                 panel.grid.major = element_blank(),
                 panel.grid.minor = element_blank(),
                 axis.text = element_text(size = 25, color = 'black'),
                 axis.title = element_text(size = 30),
+                axis.ticks.length = unit(0.5, "cm"),
                 plot.title = element_text(size = 32, hjust = 0.5),
                 axis.text.x = element_text(angle = 45, hjust = 1),
-                plot.margin = grid::unit(c(2,5,2,5), "cm"),
                 legend.position = "none") +
             facet_wrap(~Gene_Set, scales = "free_y") +
             theme(strip.background = element_blank(),
@@ -142,7 +147,7 @@ for (lib in libs){
     
     ## Assemble panel
     panel <- p_aurocs + p_auprcs + p_gene_sep + p_ess_gene_sets +
-        p_noness_gene_sets + p_oncogenes + 
+        p_noness_gene_sets + p_sig_biomark_ssd + 
         plot_layout(ncol = 2) + plot_annotation(tag_levels = "A") &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
