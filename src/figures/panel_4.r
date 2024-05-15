@@ -8,12 +8,13 @@ font_import(paths = "arial", prompt = FALSE)
 
 libs <- c("Avana", "KY")
 cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))
+cols <- c(cols[1:3], "#EE8208", cols[4:8])
 
 # iterate over algorithms and libraries
 for (lib in libs){
     ## AUROC ess vs noness genes
     aurocs <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_AUROC.rds"))
-    aurocs$Algorithm <- factor(aurocs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    aurocs$Algorithm <- factor(aurocs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
     
     p_aurocs <- ggplot(aurocs, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
         geom_violin() +
@@ -33,7 +34,7 @@ for (lib in libs){
 
     ## AUPRC ess vs noness genes
     auprcs <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
-    auprcs$Algorithm <- factor(auprcs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    auprcs$Algorithm <- factor(auprcs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
     p_auprcs <- ggplot(auprcs, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
         geom_violin() +
@@ -53,7 +54,7 @@ for (lib in libs){
 
     ## Ess - noness gene sets separation
     gene_sep <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_gene_sets_separation.rds"))
-    gene_sep$Algorithm <- factor(gene_sep$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    gene_sep$Algorithm <- factor(gene_sep$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
     p_gene_sep <- ggplot(gene_sep, aes(x = Algorithm, y = Separation, fill = Algorithm)) +
         geom_boxplot() +
@@ -72,7 +73,7 @@ for (lib in libs){
 
     ## Recall of oncogenes
     onco_auc <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_onco_auc.rds"))
-    onco_auc$Algorithm <- factor(onco_auc$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    onco_auc$Algorithm <- factor(onco_auc$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
     p_oncogenes <- ggplot(onco_auc, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
         geom_bar(stat = "identity") +
@@ -95,7 +96,7 @@ for (lib in libs){
         filter(Gene_Set %in% c("ess_genes", "noness_genes", "msigdb_genes")) %>%
         mutate(Gene_Set = ifelse(Gene_Set == "ess_genes", "Common essential genes",
             ifelse(Gene_Set == "noness_genes", "Nonessential genes", "MsigDB genes")))
-    recall_gene_sets$Algorithm <- factor(recall_gene_sets$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    recall_gene_sets$Algorithm <- factor(recall_gene_sets$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
     p_ess_gene_sets <- ggplot(recall_gene_sets %>%
         filter(Gene_Set != "Nonessential genes"), 
