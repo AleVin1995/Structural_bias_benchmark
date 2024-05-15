@@ -7,11 +7,12 @@ library(tidyverse)
 font_import(paths = "arial", prompt = FALSE)
 
 cols <- c("#B3B3B3", brewer.pal(n = 7, name = "Dark2"))
+cols <- c(cols[1:3], "#EE8208", cols[4:8])
 
 # Nº significant biomarkers (all CFEs on strongly selective dependencies)
 ## Avana
 sig_biomarkers_ssd <- readRDS("results/analyses/impact_data_quality/Avana_sig_biomarkers_ssd.rds")
-sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
 p_sig_biomark_ssd_avana <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark, fill = Algorithm)) +
     geom_bar(stat = "identity") +
@@ -27,11 +28,11 @@ p_sig_biomark_ssd_avana <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_s
         aspect.ratio = 1,
         plot.margin = grid::unit(c(2,2,2,2), "cm"),
         legend.position = "none") +
-    scale_fill_manual(values = c("#B3B3B3", cols))
+    scale_fill_manual(values = cols)
 
 ## KY
 sig_biomarkers_ssd <- readRDS("results/analyses/impact_data_quality/KY_sig_biomarkers_ssd.rds")
-sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
 p_sig_biomark_ssd_ky <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark, fill = Algorithm)) +
     geom_bar(stat = "identity") +
@@ -47,7 +48,7 @@ p_sig_biomark_ssd_ky <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_
         aspect.ratio = 1,
         plot.margin = grid::unit(c(2,2,2,2), "cm"),
         legend.position = "none") +
-    scale_fill_manual(values = c("#B3B3B3", cols))
+    scale_fill_manual(values = cols)
 
 ## Assemble panel
 panel <- p_sig_biomark_ssd_avana + p_sig_biomark_ssd_ky +
