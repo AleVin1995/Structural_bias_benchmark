@@ -24,11 +24,13 @@ for (lib in libs){
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_text(hjust = 0.5),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 35, color = 'black'),
             strip.background = element_blank(), 
             strip.placement = "outside",
             strip.text = element_text(size = 35, color = 'black'),
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             panel.background = element_blank(),
@@ -49,9 +51,11 @@ for (lib in libs){
         labs(x = "", y = "AURC") +
         theme_bw() +
         theme(
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
             plot.title = element_text(size = 32, hjust = 0.5, face = "bold"),   
@@ -69,12 +73,14 @@ for (lib in libs){
         labs(x = "Absolute copy number (TPM < 1)", y = "LFC") +
         theme_bw() +
         theme(
-            axis.text = element_text(size = 30, color = 'black'),
-            axis.text.x = element_text(hjust = 1),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 35, color = 'black', hjust = 0.5),
             strip.background = element_blank(), 
             strip.placement = "outside",
             strip.text = element_text(size = 35, color = 'black'),
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             legend.position = "none",
@@ -94,9 +100,11 @@ for (lib in libs){
         labs(x = "", y = "AURC") +
         theme_bw() +
         theme(
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 30),
             axis.text.x = element_text(angle = 45, hjust = 1),
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
@@ -113,10 +121,12 @@ for (lib in libs){
         labs(x = "", y = "AURC") +
         theme_bw() +
         theme(
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             axis.text = element_text(size = 25, color = 'black'),
             axis.title = element_text(size = 30),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.text.x = element_text(angle = 45, hjust = 1),
             plot.margin = grid::unit(c(1,1,1,1), "cm"),
             legend.position = "none") +
@@ -128,19 +138,19 @@ for (lib in libs){
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 35, height = 20, units = "in", dpi = 300)
+    ggsave(panel_all, filename = paste0("results/panels/cn_bias/cn_bias_all_", lib, ".pdf"), width = 40, height = 20, units = "in", dpi = 300)
     
     panel_unexpr <- p_cn_abs_unexpr + p_rec_ampl_noexpr +
         plot_layout(widths = c(1.3, 1)) +
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
-    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 35, height = 20, units = "in", dpi = 300)
+    ggsave(panel_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, ".pdf"), width = 40, height = 20, units = "in", dpi = 300)
 
     panel_unexpr_bg_unexpr <- p_cn_abs_unexpr + p_rec_ampl_noexpr_bg_noexpr +
         plot_layout(widths = c(1.3, 1)) +
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
-    ggsave(panel_unexpr_bg_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, "_bg_unexpr.pdf"), width = 35, height = 20, units = "in", dpi = 300)
+    ggsave(panel_unexpr_bg_unexpr, filename = paste0("results/panels/cn_bias/cn_bias_unexpr_", lib, "_bg_unexpr.pdf"), width = 40, height = 20, units = "in", dpi = 300)
 }

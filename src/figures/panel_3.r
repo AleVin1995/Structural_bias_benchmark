@@ -36,7 +36,9 @@ for (lib in libs){
         theme(
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 30, color = 'black'),
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             aspect.ratio = 1,
@@ -76,7 +78,9 @@ for (lib in libs){
         theme(
             axis.text = element_text(size = 25, color = 'black'),
             axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
+            axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 30, color = 'black'),
+            panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
             aspect.ratio = 1,
