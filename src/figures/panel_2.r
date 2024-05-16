@@ -68,7 +68,7 @@ for (lib in libs){
     
     p_cn_abs_unexpr <- ggplot(dfs_unexpr, aes(x = as.factor(CN_abs), y = LFC, fill = Algorithm)) +
         stat_summary(fun.data = calc_boxplot_stat, geom="boxplot") + 
-        labs(x = "Absolute copy number (TPM < 1)", y = "LFC") +
+        labs(x = "Absolute copy number (TPM < 1)", y = "Gene depletion log fold-change") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
@@ -145,7 +145,7 @@ for (lib in libs){
         geom_boxplot() +
         geom_jitter(width = 0.1, size = 2) +
         geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
+        labs(x = "", y = "p(intra-arm cosine similarity > inter-arm cosine similarity)") +
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
