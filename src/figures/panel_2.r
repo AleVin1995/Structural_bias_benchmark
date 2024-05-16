@@ -72,7 +72,7 @@ for (lib in libs){
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_text(angle = 45, hjust = 1),
+            axis.text.x = element_text(size = 15, angle = 45, hjust = 1),
             axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 35, color = 'black', hjust = 0.5),
             strip.background = element_blank(), 
@@ -212,5 +212,5 @@ for (lib in libs){
         plot_annotation(tag_levels = 'A') &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
-    ggsave(panel_bias, filename = paste0("results/panels/bias/bias_unexpr_", lib, "_bg_unexpr.pdf"), width = 40, height = 40, units = "in", dpi = 300)
+    ggsave(panel_bias, filename = paste0("results/panels/bias/bias_unexpr_", lib, "_bg_unexpr.pdf"), width = 25, height = 25, units = "in", dpi = 300)
 }

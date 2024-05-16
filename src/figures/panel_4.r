@@ -154,5 +154,5 @@ p3 <- ggplot(dt, aes(x = Algorithm, y = Biomarkers, fill = Algorithm)) +
 panel <- p1 + p2 + p3 +
     plot_annotation(tag_levels = "A") &
     theme(plot.tag.position = c(0, 1),
-        plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
+        plot.tag = element_text(size = 50, face = "bold", family = "Arial"))
 ggsave(panel, filename = "results/panels/summary_panel.pdf", width = 45, height = 15)
