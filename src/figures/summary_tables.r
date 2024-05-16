@@ -2,7 +2,7 @@ library(forcats)
 library(tidyverse)
 library(writexl)
 
-algos <- c("Uncorrected", "CCR", "Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
+algos <- c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK")
 libs <- c("Avana", "KY")
 
 # iterate over algorithms and libraries
@@ -165,6 +165,17 @@ for (lib in libs){
         mutate(mean_rec_ampl_noexpr = signif(mean_rec_ampl_noexpr, 3), 
           sd_rec_ampl_noexpr = signif(sd_rec_ampl_noexpr, 3)) %>%
         unite(Recall_ampl_noexpr, c("mean_rec_ampl_noexpr", "sd_rec_ampl_noexpr"), sep = "±")
+    
+    ## Recall curve amplified genes (unexpressed + unexpressed background)
+    rec_ampl_noexpr_bg_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr_bg_noexpr.rds"))
+    rec_ampl_noexpr_bg_noexpr$Algorithm <- factor(rec_ampl_noexpr_bg_noexpr$Algorithm, levels = algos)
+    rec_ampl_noexpr_bg_noexpr <- rec_ampl_noexpr_bg_noexpr %>%
+        group_by(Algorithm) %>%
+        summarise(mean_rec_ampl_noexpr_bg_noexpr = mean(Recall), sd_rec_ampl_noexpr_bg_noexpr = sd(Recall)) %>%
+        ungroup() %>%
+        mutate(mean_rec_ampl_noexpr_bg_noexpr = signif(mean_rec_ampl_noexpr_bg_noexpr, 3), 
+          sd_rec_ampl_noexpr_bg_noexpr = signif(sd_rec_ampl_noexpr_bg_noexpr, 3)) %>%
+        unite(Recall_ampl_noexpr_bg_noexpr, c("mean_rec_ampl_noexpr_bg_noexpr", "sd_rec_ampl_noexpr_bg_noexpr"), sep = "±")
       
     ## merge results
     recall_sum <- recall_gene_sets %>%
