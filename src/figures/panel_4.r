@@ -102,14 +102,13 @@ p1 <- ggplot(dt, aes(x = Mean_CNBias, y = Mean_ProximityBias)) +
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.ticks.length = unit(0.5, "cm"),
-      axis.text = element_text(size = 25, color = 'black'),
-      axis.title = element_text(size = 30),
+      axis.text = element_text(size = 30, color = 'black'),
+      axis.title = element_text(size = 35),
       aspect.ratio = 1,
       text = element_text(family = "Arial"),
-      plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
-      plot.margin = grid::unit(c(2,2,2,2), "cm"),
-      legend.title = element_text(size = 25, color = 'black'),
-      legend.text = element_text(size = 20, color = 'black')) +
+      plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
+      legend.title = element_text(size = 28, color = 'black'),
+      legend.text = element_text(size = 25, color = 'black')) +
   labs(x = 'Mean CN bias (%)', y = 'Mean proximity bias (%)', title = 'Average bias correction') +
   scale_color_manual(values = c("red", "blue", "#B3B3B3"))
 
@@ -122,13 +121,12 @@ p2 <- ggplot(dt, aes(x = Algorithm, y = NNMD_EssNonEss, fill = Algorithm)) +
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.ticks.length = unit(0.5, "cm"),
-      axis.text = element_text(size = 25, color = 'black'),
+      axis.text = element_text(size = 30, color = 'black'),
       axis.text.x = element_text(angle = 45, hjust = 1),
-      axis.title = element_text(size = 30),
+      axis.title = element_text(size = 35),
       aspect.ratio = 1,
       text = element_text(family = "Arial"),
-      plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
-      plot.margin = grid::unit(c(2,2,2,2), "cm"),
+      plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
       legend.position = "none") +
   labs(x = '', y = 'Mean % of NNMD Ess/nonEss', title = 'Average impact on data quality') +
   scale_fill_manual(values = cols)
@@ -142,13 +140,12 @@ p3 <- ggplot(dt, aes(x = Algorithm, y = Biomarkers, fill = Algorithm)) +
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       axis.ticks.length = unit(0.5, "cm"),
-      axis.text = element_text(size = 25, color = 'black'),
+      axis.text = element_text(size = 30, color = 'black'),
       axis.text.x = element_text(angle = 45, hjust = 1),
-      axis.title = element_text(size = 30),
+      axis.title = element_text(size = 35),
       aspect.ratio = 1,
       text = element_text(family = "Arial"),
-      plot.title = element_text(size = 35, face = "bold", hjust = 0.5),
-      plot.margin = grid::unit(c(2,2,2,2), "cm"),
+      plot.title = element_text(size = 40, face = "bold", hjust = 0.5),
       legend.position = "none") +
   labs(x = '', y = 'Mean % of Biomarkers', title = 'Average impact on data heterogeneity') +
   scale_fill_manual(values = cols)
