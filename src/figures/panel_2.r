@@ -72,7 +72,7 @@ for (lib in libs){
         theme_bw() +
         theme(
             axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_text(size = 15, angle = 45, hjust = 1),
+            axis.text.x = element_text(size = 20, angle = 45, hjust = 1),
             axis.ticks.length = unit(0.5, "cm"),
             axis.title = element_text(size = 35, color = 'black', hjust = 0.5),
             strip.background = element_blank(), 
@@ -85,7 +85,8 @@ for (lib in libs){
             text = element_text(family = "Arial")) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         facet_wrap(~Algorithm, scales = "free_x", ncol = 3) +
-        scale_fill_manual(values = cols)
+        scale_fill_manual(values = cols) +
+        scale_x_discrete(breaks = seq(0, 15, by = 2))
 
     ## Recall curve amplified genes (unexpressed)
     # rec_ampl_noexpr <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_ampl_noexpr.rds"))
