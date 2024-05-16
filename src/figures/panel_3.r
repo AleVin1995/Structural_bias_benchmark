@@ -12,91 +12,144 @@ cols <- c(cols[1:3], "#EE8208", cols[4:8])
 
 # iterate over algorithms and libraries
 for (lib in libs){
-    ## pooled results
-    bm_pool <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_pool.rds"))
-    bm_pool$Algorithm <- factor(bm_pool$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    bm_pool$Coord <- factor(bm_pool$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
-
-    ## perform a systematic t-test between Uncorrected vs other algorithms
-    # bm_pool %>%
-    #     filter(Algorithm != "Uncorrected") %>%
-    #     inner_join(bm_pool %>% 
-    #         filter(Algorithm == "Uncorrected") %>%
-    #         select(-Algorithm), by = c("Coord")) %>%
-    #     group_by(Algorithm) %>%
-    #     summarise(p = t.test(est.x, est.y)$p.value)
-
-
-    p_pool_sum <- ggplot(bm_pool, aes(x = Algorithm, y = est, fill = Algorithm)) +
-        geom_boxplot() +
-        geom_jitter(width = 0.1, size = 2) +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "P(intra-arm cosine > inter)") +
+    ## AUROC ess vs noness genes
+    aurocs <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_AUROC.rds"))
+    aurocs$Algorithm <- factor(aurocs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+    
+    p_aurocs <- ggplot(aurocs, aes(x = Algorithm, y = AUROC, fill = Algorithm)) +
+        geom_violin() +
+        geom_boxplot(width=0.1, color="black", outlier.shape = NA) +
+        labs(x = "", y = "AUROC\n(Common essential/nonessential genes)") +
         theme_bw() +
         theme(
-            axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
-            axis.ticks.length = unit(0.5, "cm"),
-            axis.title = element_text(size = 30, color = 'black'),
             panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.text.x = element_blank(),
+            axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             aspect.ratio = 1,
-            text = element_text(family = "Arial"),
-            plot.margin = unit(c(2,1,1,1), "cm"),
             legend.position = "none") +
         scale_fill_manual(values = cols)
-        
-    ## TP53 results
-    bm_TP53 <- readRDS(paste0("results/analyses/proximity_bias/", lib, "_bm_TP53.rds"))
-    bm_TP53$Algorithm <- factor(bm_TP53$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
-    bm_TP53$Coord <- factor(bm_TP53$Coord, levels = c(paste0(rep(c(1:23, "X", "Y"), each = 2), c("p", "q"))))
 
-    ## perform a systematic t-test between Uncorrected vs other algorithms
-    # bm_TP53 %>%
-    #     filter(Algorithm != "Uncorrected" & Status == "WT") %>%
-    #     inner_join(bm_TP53 %>% 
-    #         filter(Algorithm == "Uncorrected" & Status == "WT") %>%
-    #         select(-Algorithm), by = c("Coord")) %>%
-    #     group_by(Algorithm) %>%
-    #     summarise(p = t.test(est.x, est.y)$p.value)
-    
-    # bm_TP53 %>%
-    #     filter(Algorithm != "Uncorrected" & Status == "Mut") %>%
-    #     inner_join(bm_TP53 %>% 
-    #         filter(Algorithm == "Uncorrected" & Status == "Mut") %>%
-    #         select(-Algorithm), by = c("Coord")) %>%
-    #     group_by(Algorithm) %>%
-    #     summarise(p = t.test(est.x, est.y)$p.value)
+    ## AUPRC ess vs noness genes
+    auprcs <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_AUPRC.rds"))
+    auprcs$Algorithm <- factor(auprcs$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
 
-    p_TP53_sum <- ggplot(bm_TP53, aes(x = Algorithm, y = est, fill = Status)) +
-        geom_boxplot(outlier.shape=NA) +
-        geom_point(position=position_jitterdodge(jitter.width = 0.1)) +
-        geom_hline(yintercept = 0.5, linetype = "dashed") +
-        labs(x = "", y = "") +
+    p_auprcs <- ggplot(auprcs, aes(x = Algorithm, y = AUPRC, fill = Algorithm)) +
+        geom_violin() +
+        geom_boxplot(width=0.1, color="black", outlier.shape = NA) +
+        labs(x = "", y = "AUPRC\n(Common essential/nonessential genes)") +
         theme_bw() +
         theme(
-            axis.text = element_text(size = 25, color = 'black'),
-            axis.text.x = element_text(hjust = 1, angle = 45, vjust = 1),
-            axis.ticks.length = unit(0.5, "cm"),
-            axis.title = element_text(size = 30, color = 'black'),
             panel.border = element_blank(),
             panel.grid.major = element_blank(),
             panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.text.x = element_blank(),
+            axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
             aspect.ratio = 1,
-            text = element_text(family = "Arial"),
-            plot.margin = unit(c(2,1,1,1), "cm"),
-            legend.key.size = unit(1.5, 'cm'),
-            legend.text = element_text(size = 20),
-            legend.position = c(0.15, 0.95),
-            legend.background = element_rect(fill = NA, color = NA)) +
-        scale_fill_manual(labels = c("TP53 mut", "TP53 wt"), 
-            values = c("#1F78B4", "#A6CEE3"), name = "")
+            legend.position = "none") +
+        scale_fill_manual(values = cols)
+
+    ## Ess - noness gene sets separation
+    gene_sep <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_gene_sets_separation.rds"))
+    gene_sep$Algorithm <- factor(gene_sep$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+
+    p_gene_sep <- ggplot(gene_sep, aes(x = Algorithm, y = Separation, fill = Algorithm)) +
+        geom_boxplot() +
+        labs(x = "", y = "NNMD\n(Common essential/nonessential genes)") +
+        theme_bw() +
+        theme(
+            panel.border = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.text.x = element_blank(),
+            axis.title = element_text(size = 30, color = 'black'),
+            axis.ticks.length = unit(0.5, "cm"),
+            aspect.ratio = 1,
+            legend.position = "none") +
+        scale_fill_manual(values = cols)
+
+    # Nº significant biomarkers (all CFEs on strongly selective dependencies)
+    sig_biomarkers_ssd <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_sig_biomarkers_ssd.rds"))
+    sig_biomarkers_ssd$Algorithm <- factor(sig_biomarkers_ssd$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+
+    p_sig_biomark_ssd <- ggplot(sig_biomarkers_ssd, aes(x = Algorithm, y = n_sig_biomark, fill = Algorithm)) +
+        geom_bar(stat = "identity") +
+        labs(x = "", y = "Nº significant associations") +
+        theme_bw() +
+        theme(
+            panel.border = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.ticks.length = unit(0.5, "cm"),
+            axis.text = element_text(size = 25, color = 'black'),
+            axis.title = element_text(size = 30),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            aspect.ratio = 1,
+            legend.position = "none") +
+        scale_fill_manual(values = cols)
+
+    ## Recall at 5% FDR
+    recall_gene_sets <- readRDS(paste0("results/analyses/impact_data_quality/", lib, "_recall_gene_sets.rds")) %>%
+        filter(Gene_Set %in% c("ess_genes", "noness_genes", "msigdb_genes")) %>%
+        mutate(Gene_Set = ifelse(Gene_Set == "ess_genes", "Common essential genes",
+            ifelse(Gene_Set == "noness_genes", "Nonessential genes", "MsigDB genes")))
+    recall_gene_sets$Algorithm <- factor(recall_gene_sets$Algorithm, levels = c("Uncorrected", "CCR", "Chronos", "AC Chronos", "Crispy", "GAM", "Geometric", "LDO", "MAGeCK"))
+
+    p_ess_gene_sets <- ggplot(recall_gene_sets %>%
+        filter(Gene_Set != "Nonessential genes"), 
+        aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+            geom_boxplot() +
+            labs(x = "", y = "Recall at 5% FDR") +
+            theme_bw() +
+            theme(
+                strip.text.x = element_text(size = 25, color = 'black'),
+                panel.border = element_blank(),
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                axis.text = element_text(size = 25, color = 'black'),
+                axis.title = element_text(size = 30),
+                axis.ticks.length = unit(0.5, "cm"),
+                plot.title = element_text(size = 32, hjust = 0.5),
+                axis.text.x = element_blank(),
+                legend.position = "none") +
+            facet_wrap(~Gene_Set, scales = "free_y") +
+            theme(strip.background = element_blank(),
+                strip.text = element_text(size = 10, face = "bold")) +
+            scale_fill_manual(values = cols)
+    
+    p_noness_gene_sets <- ggplot(recall_gene_sets %>%
+        filter(Gene_Set == "Nonessential genes"), 
+        aes(x = Algorithm, y = Recall, fill = Algorithm)) +
+            geom_boxplot() +
+            labs(x = "", y = "Recall at 5% FDR") +
+            theme_bw() +
+            theme(
+                strip.text.x = element_text(size = 25, color = 'black'),
+                panel.border = element_blank(),
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                axis.text = element_text(size = 25, color = 'black'),
+                axis.title = element_text(size = 30),
+                axis.ticks.length = unit(0.5, "cm"),
+                plot.title = element_text(size = 32, hjust = 0.5),
+                axis.text.x = element_text(angle = 45, hjust = 1),
+                legend.position = "none") +
+            facet_wrap(~Gene_Set, scales = "free_y") +
+            theme(strip.background = element_blank(),
+                strip.text = element_text(size = 10, face = "bold")) +
+            scale_fill_manual(values = cols)
     
     ## Assemble panel
-    panel <- p_pool_sum + p_TP53_sum +
-        plot_annotation(tag_levels = 'A') &
+    panel <- p_aurocs + p_auprcs + p_gene_sep + p_ess_gene_sets +
+        p_noness_gene_sets + p_sig_biomark_ssd + 
+        plot_layout(ncol = 2) + plot_annotation(tag_levels = "A") &
         theme(plot.tag.position = c(0, 1),
             plot.tag = element_text(size = 40, face = "bold", family = "Arial"))
-    ggsave(panel, filename = paste0("results/panels/proximity_bias/proximity_bias_", lib, "_bm_all.pdf"), width = 30, height = 15, dpi = 300)
+    ggsave(panel, filename = paste0("results/panels/data_quality/general_", lib, ".pdf"), width = 20, height = 30, dpi = 300)
 }
